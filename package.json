@@ -1,8 +1,25 @@
 {
-  "name": "sysmag",
-  "displayName": "Hello World Status Bar",
-  "description": "A simple VS Code extension that displays Hello World in the status bar",
-  "version": "0.0.1",
+  "name": "aetherion-cpu-monitor",
+  "displayName": "Aetherion CPU Monitor",
+  "description": "Real-time CPU monitoring with per-core usage visualization in VS Code status bar",
+  "version": "1.0.0",
+  "publisher": "gatti",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/davidgatti/Aetherion.git"
+  },
+  "homepage": "https://github.com/davidgatti/Aetherion",
+  "bugs": {
+    "url": "https://github.com/davidgatti/Aetherion/issues"
+  },
+  "keywords": [
+    "cpu",
+    "monitor",
+    "system",
+    "performance",
+    "status-bar",
+    "real-time"
+  ],
   "engines": {
     "vscode": "^1.103.0"
   },
