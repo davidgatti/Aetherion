@@ -42,16 +42,19 @@ function calculateCpuUsage(): number[] {
 function getSquareForUsage(usage: number): string {
 	// Use different braille patterns to represent usage levels
 	if (usage < 10) {
-		return '⠀'; // Empty braille (very low usage)
+		return '⣀'; // Empty braille (very low usage)
 	}
-	if (usage < 25) {
-		return '⣀'; // Bottom dots (low usage)
+	if (usage < 20) {
+		return '⣄'; // Bottom dots (low usage)
 	}
-	if (usage < 50) {
+	if (usage < 40) {
 		return '⣤'; // Bottom half filled (moderate usage)
 	}
-	if (usage < 75) {
+	if (usage < 60) {
 		return '⣶'; // Most filled (high usage)
+	}
+	if (usage < 80) {
+		return '⣷'; // Almost complete (between ⣶ and ⣿)
 	}
 	return '⣿'; // Full braille block (very high usage)
 }

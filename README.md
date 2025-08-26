@@ -1,84 +1,77 @@
-# Hello World Status Bar Extension
+# Aetherion CPU Monitor
 
-A simple VS Code extension that displays "Hello World" in the status bar.
+A real-time CPU monitoring extension for VS Code that displays per-core CPU usage directly in your status bar. Perfect for developers working on remote hosts where traditional system monitors aren't available.
 
-## Features
+## 🎯 Why Aetherion?
 
-This extension adds a "Hello World" message to the VS Code status bar when activated.
+When developing on **remote hosts via SSH or cloud environments**, you lose access to native system monitoring tools like Activity Monitor (Mac) or Task Manager (Windows). Aetherion brings CPU monitoring directly into your VS Code interface, giving you instant awareness of system performance without leaving your development environment.
 
-- Displays "Hello World" text in the left side of the status bar
-- Shows a tooltip with additional information when hovering over the status bar item
-- Includes a sample command that shows an information message
+## ✨ Features
 
-## How to Use
+- **Real-time CPU monitoring** - Updates every 200ms for live performance feedback
+- **Per-core visualization** - Each CPU core gets its own visual representation  
+- **Braille character display** - Compact, elegant visualization using Unicode braille patterns
+- **Always visible** - Integrated into VS Code's status bar (right side, high priority)
+- **Zero configuration** - Works immediately upon installation
+- **Lightweight** - Minimal performance impact on your system
+- **Cross-platform** - Works on Windows, macOS, and Linux
 
-1. Install the extension
-2. The "Hello World" text will automatically appear in the status bar
-3. Use Ctrl+Shift+P (Cmd+Shift+P on Mac) and search for "Hello World" to run the sample command
+## 📊 Visual Representation
 
-## Development
+Aetherion uses progressive braille characters to show CPU usage levels:
 
-To test this extension:
+```text
+⣀ ⣄ ⣤ ⣶ ⣷ ⣿
+│  │  │  │  │  └─ 80-100% (Maximum load)
+│  │  │  │  └──── 60-80%  (Very high)
+│  │  │  └─────── 40-60%  (High)
+│  │  └────────── 20-40%  (Moderate)
+│  └───────────── 10-20%  (Low)
+└──────────────── 0-10%   (Minimal)
+```
 
-1. Open this project in VS Code
-2. Press F5 to launch a new Extension Development Host window
-3. The extension will be active in the new window
-4. Look for "Hello World" in the status bar
+**Example Display:** `⣀⣄⣤⣶⣷⣿⣀⣄` represents an 8-core system with varying load per core.
 
-## Requirements
+## 🚀 Perfect For
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- **Remote development** on servers and cloud instances
+- **Docker development** environments
+- **SSH-based development** workflows
+- **Build process monitoring** - see CPU impact during compilation
+- **Performance-conscious development** - monitor resource usage while coding
+- **System administrators** managing remote hosts through VS Code
 
-## Extension Settings
+## 📦 Installation
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. **From VS Code Marketplace:**
+   - Open VS Code
+   - Go to Extensions (Ctrl+Shift+X)
+   - Search for "Aetherion CPU Monitor"
+   - Click Install
 
-For example:
+2. **From Command Line:**
 
-This extension contributes the following settings:
+   ```bash
+   code --install-extension gatti.aetherion-cpu-monitor
+   ```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## 🔧 Usage
 
-## Known Issues
+1. **Install the extension** - CPU monitoring starts automatically
+2. **Look at the status bar** - You'll see braille characters on the right side representing each CPU core
+3. **Monitor in real-time** - Display updates every 200ms
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+No configuration needed - it just works!
 
-## Release Notes
+## 📋 Requirements
 
-Users appreciate release notes as you update your extension.
+- VS Code 1.103.0 or higher
+- Node.js runtime (for system CPU monitoring)
 
-### 1.0.0
+## 📜 License
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+This project is licensed under the MIT License.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+**Tip:** Aetherion is especially valuable when working on resource-constrained remote hosts where you need to monitor CPU usage during builds, tests, or intensive development tasks.
