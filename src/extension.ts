@@ -39,7 +39,7 @@ function calculateCpuUsage(): number[] {
 }
 
 // Function to get braille character based on CPU usage (0-100%)
-function getSquareForUsage(usage: number): string {
+export function getSquareForUsage(usage: number): string {
 	// Use different braille patterns to represent usage levels
 	if (usage < 10) {
 		return '⣀'; // Empty braille (very low usage)
@@ -60,7 +60,7 @@ function getSquareForUsage(usage: number): string {
 }
 
 // Function to calculate RAM usage percentage and get available memory
-function calculateRamUsage(): { usagePercent: number; availableGB: number; totalGB: number } {
+export function calculateRamUsage(): { usagePercent: number; availableGB: number; totalGB: number } {
 	const totalMem = os.totalmem();
 	const freeMem = os.freemem();
 	const totalGB = totalMem / (1024 * 1024 * 1024);
@@ -115,7 +115,7 @@ function calculateRamUsage(): { usagePercent: number; availableGB: number; total
 }
 
 // Function to get braille character based on RAM usage (0-100%)
-function getRamBlock(usage: number): string {
+export function getRamBlock(usage: number): string {
 	// Use the same braille patterns as CPU for more granular RAM visualization
 	if (usage < 10) {
 		return '⣀'; // Empty braille (very low usage)
