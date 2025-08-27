@@ -59,6 +59,82 @@ function getSquareForUsage(usage: number): string {
 	return '⣿'; // Full braille block (very high usage)
 }
 
+// Function to calculate RAM usage percentage and get available memory
+function calculateRamUsage(): { usagePercent: number; availableGB: number; totalGB: number } {
+	const totalMem = os.totalmem();
+	const freeMem = os.freemem();
+	const totalGB = totalMem / (1024 * 1024 * 1024);
+	const freeGB = freeMem / (1024 * 1024 * 1024);
+	
+	const platform = os.platform();
+	let usagePercent: number;
+	let availableGB: number;
+	
+	switch (platform) {
+		case 'darwin': // macOS
+			// On macOS, os.freemem() only shows immediately free memory, not cached/buffered
+			// macOS aggressively caches memory, so we need a more realistic calculation
+			// Assume up to 50% of "used" memory could be cached and reclaimable
+			const macosUsedMem = totalMem - freeMem;
+			const estimatedCachedMem = Math.min(macosUsedMem * 0.5, totalMem * 0.4);
+			const actualUsedMem = macosUsedMem - estimatedCachedMem;
+			usagePercent = (actualUsedMem / totalMem) * 100;
+			availableGB = (totalMem - actualUsedMem) / (1024 * 1024 * 1024);
+			break;
+			
+		case 'linux':
+			// On Linux, os.freemem() shows available memory including buffers/cache
+			// This is typically more accurate than macOS
+			usagePercent = ((totalMem - freeMem) / totalMem) * 100;
+			availableGB = freeGB;
+			break;
+			
+		case 'win32': // Windows
+			// On Windows, os.freemem() shows available physical memory
+			// Windows memory management is different but generally more accurate
+			usagePercent = ((totalMem - freeMem) / totalMem) * 100;
+			availableGB = freeGB;
+			break;
+			
+		default:
+			// Fallback for other platforms
+			usagePercent = ((totalMem - freeMem) / totalMem) * 100;
+			availableGB = freeGB;
+			break;
+	}
+	
+	// Ensure reasonable bounds
+	usagePercent = Math.max(0, Math.min(100, usagePercent));
+	availableGB = Math.max(0, availableGB);
+	
+	return {
+		usagePercent,
+		availableGB,
+		totalGB
+	};
+}
+
+// Function to get braille character based on RAM usage (0-100%)
+function getRamBlock(usage: number): string {
+	// Use the same braille patterns as CPU for more granular RAM visualization
+	if (usage < 10) {
+		return '⣀'; // Empty braille (very low usage)
+	}
+	if (usage < 20) {
+		return '⣄'; // Bottom dots (low usage)
+	}
+	if (usage < 40) {
+		return '⣤'; // Bottom half filled (moderate usage)
+	}
+	if (usage < 60) {
+		return '⣶'; // Most filled (high usage)
+	}
+	if (usage < 80) {
+		return '⣷'; // Almost complete (between ⣶ and ⣿)
+	}
+	return '⣿'; // Full braille block (very high usage)
+}
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -77,16 +153,28 @@ export function activate(context: vscode.ExtensionContext) {
 	// Function to update CPU display
 	function updateCpuDisplay() {
 		const usagePercentages = calculateCpuUsage();
+		const ramInfo = calculateRamUsage();
 		
-		// Create visual representation with individual colored squares for each core
+		// Create visual representation with individual braille characters for CPU cores
 		let displayText = '';
 		let tooltipText = `CPU Usage per core:\n`;
 		
+		// Add CPU cores
 		for (let i = 0; i < cpuCores; i++) {
 			const usage = usagePercentages[i];
 			displayText += getSquareForUsage(usage);
 			tooltipText += `Core ${i + 1}: ${usage.toFixed(1)}%\n`;
 		}
+		
+		// Add space separator and RAM block
+		displayText += ' ' + getRamBlock(ramInfo.usagePercent);
+		
+		// Add RAM info to tooltip
+		tooltipText += `\nRAM Usage: ${ramInfo.usagePercent.toFixed(1)}%`;
+		if (ramInfo.usagePercent >= 90) {
+			tooltipText += ' (CRITICAL)';
+		}
+		tooltipText += `\nAvailable: ${ramInfo.availableGB.toFixed(1)}GB / ${ramInfo.totalGB.toFixed(1)}GB`;
 		
 		statusBarItem.text = displayText;
 		statusBarItem.tooltip = tooltipText.trim();
@@ -110,7 +198,16 @@ export function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		const cpuInfo = os.cpus();
 		const cpuModel = cpuInfo[0].model;
-		vscode.window.showInformationMessage(`CPU Info: ${cpuCores} cores - ${cpuModel}`);
+		const ramInfo = calculateRamUsage();
+		const platform = os.platform();
+		
+		const message = `System Info (${platform}):\n` +
+			`CPU: ${cpuCores} cores - ${cpuModel}\n` +
+			`RAM: ${ramInfo.availableGB.toFixed(1)}GB available / ${ramInfo.totalGB.toFixed(1)}GB total\n` +
+			`Usage: ${ramInfo.usagePercent.toFixed(1)}% used\n` +
+			`Block shown: "${getRamBlock(ramInfo.usagePercent)}"`;
+		
+		vscode.window.showInformationMessage(message);
 	});
 
 	context.subscriptions.push(disposable);
