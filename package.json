@@ -1,8 +1,8 @@
 {
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
-  "description": "Real-time CPU monitoring with per-core usage visualization in VS Code status bar",
-  "version": "1.0.1",
+  "description": "Real-time CPU and RAM monitoring with per-core usage visualization in VS Code status bar",
+  "version": "1.1.0",
   "publisher": "gatti",
   "repository": {
     "type": "git",
