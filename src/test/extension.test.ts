@@ -14,99 +14,99 @@ suite('Aetherion CPU Monitor Test Suite', () => {
 	});
 
 	suite('CPU Braille Character Mapping', () => {
-		test('should return correct braille for very low usage (0-10%)', () => {
-			assert.strictEqual(getSquareForUsage(0), '⣀');
-			assert.strictEqual(getSquareForUsage(5), '⣀');
-			assert.strictEqual(getSquareForUsage(9), '⣀');
+		test('should return correct braille for very low usage (0-10%)', async () => {
+			assert.strictEqual(await getSquareForUsage(0), '⣀');
+			assert.strictEqual(await getSquareForUsage(5), '⣀');
+			assert.strictEqual(await getSquareForUsage(9), '⣀');
 		});
 
-		test('should return correct braille for low usage (10-20%)', () => {
-			assert.strictEqual(getSquareForUsage(10), '⣄');
-			assert.strictEqual(getSquareForUsage(15), '⣄');
-			assert.strictEqual(getSquareForUsage(19), '⣄');
+		test('should return correct braille for low usage (10-20%)', async () => {
+			assert.strictEqual(await getSquareForUsage(10), '⣄');
+			assert.strictEqual(await getSquareForUsage(15), '⣄');
+			assert.strictEqual(await getSquareForUsage(19), '⣄');
 		});
 
-		test('should return correct braille for moderate usage (20-40%)', () => {
-			assert.strictEqual(getSquareForUsage(20), '⣤');
-			assert.strictEqual(getSquareForUsage(30), '⣤');
-			assert.strictEqual(getSquareForUsage(39), '⣤');
+		test('should return correct braille for moderate usage (20-40%)', async () => {
+			assert.strictEqual(await getSquareForUsage(20), '⣤');
+			assert.strictEqual(await getSquareForUsage(30), '⣤');
+			assert.strictEqual(await getSquareForUsage(39), '⣤');
 		});
 
-		test('should return correct braille for high usage (40-60%)', () => {
-			assert.strictEqual(getSquareForUsage(40), '⣶');
-			assert.strictEqual(getSquareForUsage(50), '⣶');
-			assert.strictEqual(getSquareForUsage(59), '⣶');
+		test('should return correct braille for high usage (40-60%)', async () => {
+			assert.strictEqual(await getSquareForUsage(40), '⣶');
+			assert.strictEqual(await getSquareForUsage(50), '⣶');
+			assert.strictEqual(await getSquareForUsage(59), '⣶');
 		});
 
-		test('should return correct braille for very high usage (60-80%)', () => {
-			assert.strictEqual(getSquareForUsage(60), '⣷');
-			assert.strictEqual(getSquareForUsage(70), '⣷');
-			assert.strictEqual(getSquareForUsage(79), '⣷');
+		test('should return correct braille for very high usage (60-80%)', async () => {
+			assert.strictEqual(await getSquareForUsage(60), '⣷');
+			assert.strictEqual(await getSquareForUsage(70), '⣷');
+			assert.strictEqual(await getSquareForUsage(79), '⣷');
 		});
 
-		test('should return correct braille for maximum usage (80-100%)', () => {
-			assert.strictEqual(getSquareForUsage(80), '⣿');
-			assert.strictEqual(getSquareForUsage(90), '⣿');
-			assert.strictEqual(getSquareForUsage(100), '⣿');
+		test('should return correct braille for maximum usage (80-100%)', async () => {
+			assert.strictEqual(await getSquareForUsage(80), '⣿');
+			assert.strictEqual(await getSquareForUsage(90), '⣿');
+			assert.strictEqual(await getSquareForUsage(100), '⣿');
 		});
 	});
 
 	suite('RAM Braille Character Mapping', () => {
-		test('should use same braille patterns as CPU', () => {
+		test('should use same braille patterns as CPU', async () => {
 			// Test that RAM and CPU use identical braille progression
-			assert.strictEqual(getRamBlock(5), getSquareForUsage(5));
-			assert.strictEqual(getRamBlock(15), getSquareForUsage(15));
-			assert.strictEqual(getRamBlock(30), getSquareForUsage(30));
-			assert.strictEqual(getRamBlock(50), getSquareForUsage(50));
-			assert.strictEqual(getRamBlock(70), getSquareForUsage(70));
-			assert.strictEqual(getRamBlock(90), getSquareForUsage(90));
+			assert.strictEqual(await getRamBlock(5), await getSquareForUsage(5));
+			assert.strictEqual(await getRamBlock(15), await getSquareForUsage(15));
+			assert.strictEqual(await getRamBlock(30), await getSquareForUsage(30));
+			assert.strictEqual(await getRamBlock(50), await getSquareForUsage(50));
+			assert.strictEqual(await getRamBlock(70), await getSquareForUsage(70));
+			assert.strictEqual(await getRamBlock(90), await getSquareForUsage(90));
 		});
 
-		test('should return correct braille for very low RAM usage (0-10%)', () => {
-			assert.strictEqual(getRamBlock(0), '⣀');
-			assert.strictEqual(getRamBlock(5), '⣀');
-			assert.strictEqual(getRamBlock(9), '⣀');
+		test('should return correct braille for very low RAM usage (0-10%)', async () => {
+			assert.strictEqual(await getRamBlock(0), '⣀');
+			assert.strictEqual(await getRamBlock(5), '⣀');
+			assert.strictEqual(await getRamBlock(9), '⣀');
 		});
 
-		test('should return correct braille for low RAM usage (10-20%)', () => {
-			assert.strictEqual(getRamBlock(10), '⣄');
-			assert.strictEqual(getRamBlock(15), '⣄');
-			assert.strictEqual(getRamBlock(19), '⣄');
+		test('should return correct braille for low RAM usage (10-20%)', async () => {
+			assert.strictEqual(await getRamBlock(10), '⣄');
+			assert.strictEqual(await getRamBlock(15), '⣄');
+			assert.strictEqual(await getRamBlock(19), '⣄');
 		});
 
-		test('should return correct braille for moderate RAM usage (20-40%)', () => {
-			assert.strictEqual(getRamBlock(20), '⣤');
-			assert.strictEqual(getRamBlock(30), '⣤');
-			assert.strictEqual(getRamBlock(39), '⣤');
+		test('should return correct braille for moderate RAM usage (20-40%)', async () => {
+			assert.strictEqual(await getRamBlock(20), '⣤');
+			assert.strictEqual(await getRamBlock(30), '⣤');
+			assert.strictEqual(await getRamBlock(39), '⣤');
 		});
 
-		test('should return correct braille for high RAM usage (40-60%)', () => {
-			assert.strictEqual(getRamBlock(40), '⣶');
-			assert.strictEqual(getRamBlock(50), '⣶');
-			assert.strictEqual(getRamBlock(59), '⣶');
+		test('should return correct braille for high RAM usage (40-60%)', async () => {
+			assert.strictEqual(await getRamBlock(40), '⣶');
+			assert.strictEqual(await getRamBlock(50), '⣶');
+			assert.strictEqual(await getRamBlock(59), '⣶');
 		});
 
-		test('should return correct braille for very high RAM usage (60-80%)', () => {
-			assert.strictEqual(getRamBlock(60), '⣷');
-			assert.strictEqual(getRamBlock(70), '⣷');
-			assert.strictEqual(getRamBlock(79), '⣷');
+		test('should return correct braille for very high RAM usage (60-80%)', async () => {
+			assert.strictEqual(await getRamBlock(60), '⣷');
+			assert.strictEqual(await getRamBlock(70), '⣷');
+			assert.strictEqual(await getRamBlock(79), '⣷');
 		});
 
-		test('should return correct braille for maximum RAM usage (80-100%)', () => {
-			assert.strictEqual(getRamBlock(80), '⣿');
-			assert.strictEqual(getRamBlock(90), '⣿');
-			assert.strictEqual(getRamBlock(100), '⣿');
+		test('should return correct braille for maximum RAM usage (80-100%)', async () => {
+			assert.strictEqual(await getRamBlock(80), '⣿');
+			assert.strictEqual(await getRamBlock(90), '⣿');
+			assert.strictEqual(await getRamBlock(100), '⣿');
 		});
 
-		test('should handle edge cases correctly', () => {
-			assert.strictEqual(getRamBlock(0), '⣀');
-			assert.strictEqual(getRamBlock(100), '⣿');
+		test('should handle edge cases correctly', async () => {
+			assert.strictEqual(await getRamBlock(0), '⣀');
+			assert.strictEqual(await getRamBlock(100), '⣿');
 		});
 	});
 
 	suite('RAM Usage Calculation', () => {
-		test('should return valid RAM usage data', () => {
-			const ramInfo = calculateRamUsage();
+		test('should return valid RAM usage data', async () => {
+			const ramInfo = await calculateRamUsage();
 			
 			// Validate structure
 			assert.ok(typeof ramInfo.usagePercent === 'number', 'usagePercent should be a number');
@@ -120,9 +120,9 @@ suite('Aetherion CPU Monitor Test Suite', () => {
 			assert.ok(ramInfo.availableGB <= ramInfo.totalGB, 'availableGB should not exceed totalGB');
 		});
 
-		test('should handle different OS platforms', () => {
+		test('should handle different OS platforms', async () => {
 			const platform = os.platform();
-			const ramInfo = calculateRamUsage();
+			const ramInfo = await calculateRamUsage();
 			
 			// Should work on any platform
 			assert.ok(ramInfo.totalGB > 0, `Should work on ${platform}`);
@@ -136,9 +136,9 @@ suite('Aetherion CPU Monitor Test Suite', () => {
 			}
 		});
 
-		test('should provide consistent total RAM', () => {
-			const ramInfo1 = calculateRamUsage();
-			const ramInfo2 = calculateRamUsage();
+		test('should provide consistent total RAM', async () => {
+			const ramInfo1 = await calculateRamUsage();
+			const ramInfo2 = await calculateRamUsage();
 			
 			// Total RAM should be consistent between calls
 			assert.strictEqual(ramInfo1.totalGB, ramInfo2.totalGB, 'Total RAM should be consistent');
@@ -146,9 +146,9 @@ suite('Aetherion CPU Monitor Test Suite', () => {
 	});
 
 	suite('Integration Tests', () => {
-		test('should provide meaningful system monitoring data', () => {
-			const ramInfo = calculateRamUsage();
-			const ramBlock = getRamBlock(ramInfo.usagePercent);
+		test('should provide meaningful system monitoring data', async () => {
+			const ramInfo = await calculateRamUsage();
+			const ramBlock = await getRamBlock(ramInfo.usagePercent);
 			
 			// Should provide a valid braille character
 			const validBraille = ['⣀', '⣄', '⣤', '⣶', '⣷', '⣿'];
