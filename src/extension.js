@@ -1,42 +1,42 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+let vscode = require('vscode');
 
 //
 //	Import modular functions
 //
-import calculateCpuUsage from './01_calculate_cpu_usage';
-import getCpuBrailleCharacter from './02_get_cpu_braille_character';
-import calculateRamUsageInternal from './03_calculate_ram_usage';
-import getRamBrailleCharacter from './04_get_ram_braille_character';
-import updateStatusBarDisplay from './05_update_status_bar_display';
-import showSystemInfoCommand from './06_show_system_info_command';
+let calculate_cpu_usage = require('./01_calculate_cpu_usage.js');
+let get_cpu_braille_character = require('./02_get_cpu_braille_character.js');
+let calculate_ram_usage_internal = require('./03_calculate_ram_usage.js');
+let get_ram_braille_character = require('./04_get_ram_braille_character.js');
+let update_status_bar_display = require('./05_update_status_bar_display.js');
+let show_system_info_command = require('./06_show_system_info_command.js');
 
 //
 //	Export functions for external access and testing
 //
-export async function getSquareForUsage(usage: number): Promise<string> {
+async function getSquareForUsage(usage) {
 	
 	//
 	//	--> delegate to modular CPU braille function
 	//
-	return await getCpuBrailleCharacter(usage);
+	return await get_cpu_braille_character(usage);
 }
 
-export async function getRamBlock(usage: number): Promise<string> {
+async function getRamBlock(usage) {
 	
 	//
 	//	--> delegate to modular RAM braille function
 	//
-	return await getRamBrailleCharacter(usage);
+	return await get_ram_braille_character(usage);
 }
 
-export async function calculateRamUsage(): Promise<{ usagePercent: number; availableGB: number; totalGB: number }> {
+async function calculateRamUsage() {
 	
 	//
 	//	Get RAM usage information from modular function
 	//
-	let ram_info = await calculateRamUsageInternal();
+	let ram_info = await calculate_ram_usage_internal();
 	
 	//
 	//	--> return formatted response for compatibility
@@ -52,7 +52,7 @@ export async function calculateRamUsage(): Promise<{ usagePercent: number; avail
 //	This method is called when your extension is activated
 //	Your extension is activated the very first time the command is executed
 //
-export function activate(context: vscode.ExtensionContext) {
+function activate(context) {
 
 	//
 	//	Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//	Function to update CPU display using modular approach
 	//
 	async function update_display() {
-		await updateStatusBarDisplay(status_bar_item);
+		await update_status_bar_display(status_bar_item);
 	}
 
 	//
@@ -94,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//	Now provide the implementation of the command with registerCommand
 	//	The commandId parameter must match the command field in package.json
 	//
-	let disposable = vscode.commands.registerCommand('sysmag.helloWorld', showSystemInfoCommand);
+	let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
 
 	context.subscriptions.push(disposable);
 }
@@ -102,4 +102,15 @@ export function activate(context: vscode.ExtensionContext) {
 //
 //	This method is called when your extension is deactivated
 //
-export function deactivate() {}
+function deactivate() {}
+
+//
+//	Export functions for Node.js module system
+//
+module.exports = {
+	activate: activate,
+	deactivate: deactivate,
+	getSquareForUsage: getSquareForUsage,
+	getRamBlock: getRamBlock,
+	calculateRamUsage: calculateRamUsage
+};
