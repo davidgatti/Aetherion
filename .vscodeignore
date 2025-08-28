@@ -1,6 +1,5 @@
 .vscode/**
 .vscode-test/**
-src/**
 .gitignore
 .yarnrc
 vsc-extension-quickstart.md
@@ -9,3 +8,8 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+.editorconfig
+.prettierrc
+.prettierignore
+CONTRIBUTING.md
+test_*.js
