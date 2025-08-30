@@ -58,32 +58,6 @@ No configuration needed - it just works!
 - VS Code 1.103.0 or higher
 - Node.js runtime (for system CPU monitoring)
 
-## �️ Development
-
-### Building Releases
-
-This project uses organized release management with all `.vsix` files stored in the `.releases/` folder:
-
-```bash
-# Create a patch release (1.1.0 → 1.1.1)
-npm run package:patch
-
-# Create a minor release (1.1.0 → 1.2.0)  
-npm run package:minor
-
-# Create a major release (1.1.0 → 2.0.0)
-npm run package:major
-
-# Package current version without bumping
-npm run package
-```
-
-All generated `.vsix` files are automatically placed in the `.releases/` folder and ignored by git.
-
-## �📜 License
-
-This project is licensed under the MIT License.
-
 ---
 
 **Tip:** Aetherion is especially valuable when working on resource-constrained remote hosts where you need to monitor CPU usage during builds, tests, or intensive development tasks.
