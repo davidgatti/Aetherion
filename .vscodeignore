@@ -4,12 +4,10 @@
 .yarnrc
 vsc-extension-quickstart.md
 **/tsconfig.json
-**/eslint.config.mjs
+.config/**
 **/*.map
 **/*.ts
 **/.vscode-test.*
 .editorconfig
-.prettierrc
-.prettierignore
 CONTRIBUTING.md
 test_*.js

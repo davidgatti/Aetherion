@@ -41,10 +41,10 @@
   "scripts": {
     "vscode:prepublish": "npm run lint",
     "build": "npm run lint && npm test",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "format": "prettier --write \"**/*.{js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "lint": "eslint src --config .config/eslint.config.mjs",
+    "lint:fix": "eslint src --fix --config .config/eslint.config.mjs",
+    "format": "prettier --write \"**/*.{js,json,md}\" --config .config/prettier.config.js --ignore-path .config/.prettierignore",
+    "format:check": "prettier --check \"**/*.{js,json,md}\" --config .config/prettier.config.js --ignore-path .config/.prettierignore",
     "test": "vscode-test",
     "package": "vsce package --out .releases/",
     "package:patch": "npm version patch && npm run package",
@@ -62,6 +62,7 @@
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.32.0",
     "mocha": "^11.7.1",
+    "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }
 }

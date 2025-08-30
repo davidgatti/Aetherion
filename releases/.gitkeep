@@ -1,0 +1,2 @@
+# This file ensures the releases/ folder is tracked in git
+# while the folder contents (.vsix files) are ignored

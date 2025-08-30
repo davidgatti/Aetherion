@@ -1,0 +1,33 @@
+// Prettier configuration
+// https://prettier.io/docs/en/configuration.html
+
+module.exports = {
+    printWidth: 100,
+    tabWidth: 4,
+    useTabs: false,
+    semi: true,
+    singleQuote: true,
+    quoteProps: 'as-needed',
+    trailingComma: 'none',
+    bracketSpacing: true,
+    bracketSameLine: false,
+    arrowParens: 'avoid',
+    endOfLine: 'lf',
+    overrides: [
+        {
+            files: ['*.json', '*.jsonc'],
+            options: {
+                tabWidth: 2,
+                singleQuote: false
+            }
+        },
+        {
+            files: ['*.md'],
+            options: {
+                tabWidth: 2,
+                printWidth: 80,
+                proseWrap: 'preserve'
+            }
+        }
+    ]
+};
