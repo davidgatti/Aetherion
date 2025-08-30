@@ -7,7 +7,7 @@ let os = require('os');
 //
 //	Update status bar display with current system usage
 //
-async function update_status_bar_display(status_bar_item) {
+async function update_status_bar_display(status_bar_item, update_tooltip = true) {
 
     //
     //	Validate status bar item parameter
@@ -46,16 +46,22 @@ async function update_status_bar_display(status_bar_item) {
     let display_text = cpu_display_string + ' ' + ram_braille_character;
 
     //
-    //	Build detailed tooltip information
-    //
-    let cpu_core_count = os.cpus().length;
-    let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB)`;
-
-    //
     //	Update status bar item with new information
     //
     status_bar_item.text = display_text;
-    status_bar_item.tooltip = tooltip_text;
+
+    //
+    //	Only update tooltip if requested (to prevent flickering)
+    //
+    if (update_tooltip) {
+        //
+        //	Build detailed tooltip information
+        //
+        let cpu_core_count = os.cpus().length;
+        let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB)`;
+
+        status_bar_item.tooltip = tooltip_text;
+    }
 }
 
 module.exports = update_status_bar_display;

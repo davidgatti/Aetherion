@@ -69,24 +69,37 @@ function activate(context) {
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item);
+        await update_status_bar_display(status_bar_item, false); // false = don't update tooltip
     }
 
     //
-    //	Update display initially
+    //	Function to update both display and tooltip
     //
-    update_display();
+    async function update_display_and_tooltip() {
+        await update_status_bar_display(status_bar_item, true); // true = update tooltip
+    }
 
     //
-    //	Set up timer to update every 200ms
+    //	Update display and tooltip initially
+    //
+    update_display_and_tooltip();
+
+    //
+    //	Set up timer to update display every 200ms (smooth braille animation)
     //
     let update_interval = setInterval(update_display, 200);
 
     //
-    //	Add the status bar item and interval to subscriptions so they get disposed when extension is deactivated
+    //	Set up timer to update tooltip every 3 seconds (prevent flickering)
+    //
+    let tooltip_interval = setInterval(update_display_and_tooltip, 3000);
+
+    //
+    //	Add the status bar item and intervals to subscriptions so they get disposed when extension is deactivated
     //
     context.subscriptions.push(status_bar_item);
     context.subscriptions.push({ dispose: function() { clearInterval(update_interval); } });
+    context.subscriptions.push({ dispose: function() { clearInterval(tooltip_interval); } });
 
     //
     //	The command has been defined in the package.json file
