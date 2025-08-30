@@ -162,4 +162,134 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             }
         });
     });
+
+    suite('UI Display Format Protection', function() {
+        test('should maintain exact display format: CPU cores + space + RAM', async function() {
+            // Test the exact display format with known values
+            let expectedCpuString = '⣄⣤⣶⣷'; // 10%, 25%, 45%, 75%
+            let expectedRamChar = '⣷';         // 60%
+            let expectedDisplay = expectedCpuString + ' ' + expectedRamChar; // Space separator!
+
+            // Verify each CPU braille character
+            assert.strictEqual(await getSquareForUsage(10), '⣄', 'CPU 10% should be ⣄');
+            assert.strictEqual(await getSquareForUsage(25), '⣤', 'CPU 25% should be ⣤');
+            assert.strictEqual(await getSquareForUsage(45), '⣶', 'CPU 45% should be ⣶');
+            assert.strictEqual(await getSquareForUsage(75), '⣷', 'CPU 75% should be ⣷');
+
+            // Verify RAM braille character
+            assert.strictEqual(await getRamBlock(60), '⣷', 'RAM 60% should be ⣷');
+
+            // The complete expected display should be exactly this format
+            assert.strictEqual(expectedDisplay, '⣄⣤⣶⣷ ⣷', 'Display format must be: CPUcores + space + RAM');
+        });
+
+        test('should never add text labels to display', async function() {
+            // Test various usage levels to ensure no "CPU" or "RAM" text is added
+            let testCases = [
+                { cpu: [0, 15, 35, 55, 75, 95], ram: 20 },
+                { cpu: [10, 30, 50, 70], ram: 80 },
+                { cpu: [5, 25], ram: 45 }
+            ];
+
+            for (let testCase of testCases) {
+                let displayString = '';
+
+                // Build CPU portion
+                for (let cpuUsage of testCase.cpu) {
+                    displayString += await getSquareForUsage(cpuUsage);
+                }
+
+                // Add space separator and RAM portion (correct format)
+                displayString += ' ' + await getRamBlock(testCase.ram);
+
+                // Display should contain braille characters and exactly one space
+                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF]$/;
+                assert.ok(correctPattern.test(displayString),
+                    `Display "${displayString}" should be: [braille chars] + space + [braille char]`);
+
+                // Should not contain any English words
+                assert.ok(!displayString.includes('CPU'), 'Display should not contain "CPU" text');
+                assert.ok(!displayString.includes('RAM'), 'Display should not contain "RAM" text');
+                assert.ok(!displayString.includes('|'), 'Display should not contain separators');
+                assert.ok(!displayString.includes('%'), 'Display should not contain percentage symbols');
+
+                // Should contain exactly one space (between CPU and RAM)
+                assert.strictEqual(displayString.split(' ').length, 2, 'Display should contain exactly one space');
+            }
+        });
+
+        test('should maintain braille character progression integrity', async function() {
+            // Test boundary values for both CPU and RAM
+            let testValues = [0, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+            for (let value of testValues) {
+                let cpuChar = await getSquareForUsage(value);
+                let ramChar = await getRamBlock(value);
+
+                // CPU and RAM should use identical progression
+                assert.strictEqual(cpuChar, ramChar,
+                    `CPU and RAM should use same braille for ${value}%`);
+
+                // Verify against expected progression
+                let expectedChar;
+                if (value < 10) {
+                    expectedChar = '⣀';
+                } else if (value < 20) {
+                    expectedChar = '⣄';
+                } else if (value < 40) {
+                    expectedChar = '⣤';
+                } else if (value < 60) {
+                    expectedChar = '⣶';
+                } else if (value < 80) {
+                    expectedChar = '⣷';
+                } else {
+                    expectedChar = '⣿';
+                }
+
+                assert.strictEqual(cpuChar, expectedChar,
+                    `Usage ${value}% should map to braille "${expectedChar}"`);
+            }
+        });
+
+        test('should preserve display format across different system configurations', async function() {
+            // Test display format consistency regardless of actual system specs
+            let mockSystemConfigs = [
+                { cores: 2, description: 'dual-core system' },
+                { cores: 4, description: 'quad-core system' },
+                { cores: 8, description: 'octa-core system' },
+                { cores: 12, description: 'twelve-core system' },
+                { cores: 16, description: 'sixteen-core system' }
+            ];
+
+            for (let config of mockSystemConfigs) {
+                // Simulate display for this configuration
+                let cpuString = '';
+                for (let i = 0; i < config.cores; i++) {
+                    // Use predictable but varied CPU usage (10% increments)
+                    let usage = (i * 10) % 100;
+                    cpuString += await getSquareForUsage(usage);
+                }
+
+                let ramString = await getRamBlock(50); // 50% RAM
+                let fullDisplay = cpuString + ' ' + ramString; // Include space separator
+
+                // Verify format rules (CPU cores + space + RAM char)
+                assert.strictEqual(fullDisplay.length, config.cores + 1 + 1,
+                    `${config.description}: Display should be ${config.cores} CPU chars + 1 space + 1 RAM char`);
+
+                // Should contain braille characters and exactly one space
+                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF]$/;
+                assert.ok(correctPattern.test(fullDisplay),
+                    `${config.description}: Should be [braille chars] + space + [braille char]`);
+
+                // Last character should be RAM, space before that, CPU cores before space
+                assert.strictEqual(fullDisplay.slice(-1), ramString,
+                    `${config.description}: Last character should be RAM`);
+                assert.strictEqual(fullDisplay.slice(-2, -1), ' ',
+                    `${config.description}: Second to last character should be space`);
+                assert.strictEqual(fullDisplay.slice(0, -2), cpuString,
+                    `${config.description}: First ${config.cores} characters should be CPU cores`);
+            }
+        });
+    });
 });

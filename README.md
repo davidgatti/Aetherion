@@ -30,7 +30,7 @@ Aetherion uses progressive braille characters to show CPU usage levels:
 └──────────────── 0-10%   (Minimal)
 ```
 
-**Example Display:** `⣀⣄⣤⣶⣷⣿⣀⣄` represents an 8-core system with varying load per core.
+**Example Display:** `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤` represents an 8-core system with varying load per core, followed by RAM usage.
 
 ## 🚀 Perfect For
 

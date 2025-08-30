@@ -41,9 +41,9 @@ async function update_status_bar_display(status_bar_item) {
     let ram_braille_character = await get_ram_braille_character(ram_usage_info.usage_percent);
 
     //
-    //	Build status bar display text - per-core CPU + RAM
+    //	Build status bar display text - per-core CPU + space + RAM
     //
-    let display_text = cpu_display_string + ram_braille_character;
+    let display_text = cpu_display_string + ' ' + ram_braille_character;
 
     //
     //	Build detailed tooltip information
