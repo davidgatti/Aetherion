@@ -1,0 +1,18 @@
+{
+  "gitignore": true,
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules", ".git", "cypress/videos", "cypress/screenshots", "dist", "storybook-static", ".markdownlintignore"],
+  "config": {
+    "MD013": false,
+    "MD033": {
+      "allowed_elements": ["details", "summary", "img", "br", "kbd", "sub", "sup"]
+    },
+    "MD041": false,
+    "MD025": {
+      "front_matter_title": ""
+    },
+    "MD024": {
+      "siblings_only": true
+    }
+  }
+}

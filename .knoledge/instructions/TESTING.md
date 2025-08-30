@@ -27,7 +27,8 @@ npm run lint:fix   # Fix code style issues
 # - Format should be: ⣀⣄⣤⣶ ⣿ (CPU cores + space + RAM)
 ```
 
-**Note:** 
+**Note:**
+
 - No build needed before F5 (VS Code handles compilation)
 - `npm run build` is for checking lint/tests manually
 - `npm run package` is only for creating distribution files

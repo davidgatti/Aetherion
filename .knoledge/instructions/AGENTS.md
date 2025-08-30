@@ -19,8 +19,8 @@
 - File names use **low dash format**: `03_create_apikey_for_user.js`
 - Execution order is defined by the numeric prefix
 - Each file should:
-    - Export a single unnamed `async` function
-    - Not do too much
+  - Export a single unnamed `async` function
+  - Not do too much
 
 ---
 
@@ -73,9 +73,9 @@ throw new Error('user-exists');
 ## 📌 Naming Things
 
 - Prefer **descriptive variables**:
-    - ✅ `requested_group`
-    - ✅ `group_found`
-    - ❌ `data` / `res` / `new_user_data`
+  - ✅ `requested_group`
+  - ✅ `group_found`
+  - ❌ `data` / `res` / `new_user_data`
 
 ---
 
@@ -98,9 +98,9 @@ No mixing responsibilities.
 
 - Code is written with **AWS infrastructure** in mind
 - Everything should:
-    - Scale
-    - Fail safely
-    - Be readable by another dev in seconds
+  - Scale
+  - Fail safely
+  - Be readable by another dev in seconds
 
 ---
 
