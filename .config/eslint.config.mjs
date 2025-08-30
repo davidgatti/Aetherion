@@ -1,5 +1,8 @@
+import jsonPlugin from "eslint-plugin-json";
+
 export default [{
     files: ["**/*.js"],
+    ignores: ["node_modules/**", ".vscode-test/**", "out/**", ".releases/**"],
     languageOptions: {
         ecmaVersion: 2022,
         sourceType: "commonjs",
@@ -72,5 +75,15 @@ export default [{
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
         "semi": "warn"
+    }
+}, {
+    files: ["**/*.json", "**/*.jsonc"],
+    ignores: ["node_modules/**", ".vscode-test/**", "out/**", ".releases/**", "package-lock.json"],
+    plugins: {
+        json: jsonPlugin
+    },
+    processor: "json/json",
+    rules: {
+        "json/*": ["error", "allowComments"]
     }
 }];

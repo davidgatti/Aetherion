@@ -13,6 +13,9 @@ Thumbs.db
 # IDE files
 .vscode-test/
 
+# VS Code internal files
+**/.vscode-test/**
+
 # Ignore these specific files
 package-lock.json
 CHANGELOG.md

@@ -1,0 +1,19 @@
+# Dependency Check Configuration
+# .depcheckrc
+
+ignores: [
+  # Dev dependencies used in configs
+  "@types/*",
+  # VS Code extension specific - provided by runtime
+  "vscode",
+  "@vscode/*",
+  # Testing dependencies
+  "mocha"
+]
+
+ignore-patterns: [
+  # Ignore generated files
+  "dist",
+  "out",
+  ".releases"
+]
