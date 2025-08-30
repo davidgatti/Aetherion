@@ -9,6 +9,7 @@ This centralized knowledge folder contains all documentation and project history
 - **[AGENTS.md](instructions/AGENTS.md)** - Core development philosophy and clean code patterns
 - **[CONTRIBUTING.md](instructions/CONTRIBUTING.md)** - How to contribute to this project
 - **[TESTING.md](instructions/TESTING.md)** - Comprehensive testing strategy and guidelines
+- **[RELEASE.md](instructions/RELEASE.md)** - Complete release workflow and marketplace publishing
 
 ### `logbook/` - Project History & Changes
 
