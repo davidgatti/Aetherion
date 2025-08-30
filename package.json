@@ -35,8 +35,55 @@
       {
         "command": "sysmag.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "sysmag.showItemDetails",
+        "title": "Show System Item Details"
+      },
+      {
+        "command": "sysmag.refreshSystemMonitor",
+        "title": "Refresh System Monitor",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "sysmag.focusSystemMonitor",
+        "title": "Focus System Monitor Tree View"
       }
-    ]
+    ],
+    "views": {
+      "systemMonitor": [
+        {
+          "id": "systemMonitorView",
+          "name": "System Performance",
+          "when": "true",
+          "icon": "$(pulse)"
+        },
+        {
+          "id": "systemProcessesView", 
+          "name": "Top Processes",
+          "when": "true",
+          "icon": "$(list-unordered)"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "systemMonitor",
+          "title": "System Monitor",
+          "icon": "$(dashboard)"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "sysmag.refreshSystemMonitor",
+          "when": "view == systemMonitorView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run lint",

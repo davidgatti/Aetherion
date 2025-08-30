@@ -10,6 +10,10 @@ let calculate_ram_usage_internal = require('./03_calculate_ram_usage.js');
 let get_ram_braille_character = require('./04_get_ram_braille_character.js');
 let update_status_bar_display = require('./05_update_status_bar_display.js');
 let show_system_info_command = require('./06_show_system_info_command.js');
+let { SystemMonitorTreeProvider } = require('./08_system_monitor_tree_provider.js');
+let show_tree_item_details = require('./09_show_tree_item_details.js');
+let focus_system_monitor_tree_view = require('./11_focus_system_monitor_tree_view.js');
+let { SystemProcessesTreeProvider } = require('./12_system_processes_tree_provider.js');
 
 //
 //	Export functions for external access and testing
@@ -63,6 +67,12 @@ function activate(context) {
     //	Create a status bar item
     //
     let status_bar_item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
+
+    //
+    //	Make status bar item clickable - focus tree view
+    //
+    status_bar_item.command = 'sysmag.focusSystemMonitor';
+
     status_bar_item.show();
 
     //
@@ -108,7 +118,47 @@ function activate(context) {
     //
     let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
 
+    //
+    //	Create and register the tree view providers
+    //
+    let treeProvider = new SystemMonitorTreeProvider();
+    vscode.window.registerTreeDataProvider('systemMonitorView', treeProvider);
+
+    let processesProvider = new SystemProcessesTreeProvider();
+    vscode.window.registerTreeDataProvider('systemProcessesView', processesProvider);
+
+    //
+    //	Register tree item click command
+    //
+    let treeItemDisposable = vscode.commands.registerCommand('sysmag.showItemDetails', show_tree_item_details);
+
+    //
+    //	Register status bar click command - focus tree view
+    //
+    let statusBarDisposable = vscode.commands.registerCommand('sysmag.focusSystemMonitor', focus_system_monitor_tree_view);
+
+    //
+    //	Register refresh command for tree view
+    //
+    let refreshDisposable = vscode.commands.registerCommand('sysmag.refreshSystemMonitor', () => {
+        treeProvider.refresh();
+        processesProvider.refresh();
+        vscode.window.showInformationMessage('System monitor refreshed! 🔄');
+    });
+
+    //
+    //	Set up automatic tree refresh every 5 seconds
+    //
+    let treeRefreshInterval = setInterval(() => {
+        treeProvider.refresh();
+        processesProvider.refresh();
+    }, 5000);
+
     context.subscriptions.push(disposable);
+    context.subscriptions.push(treeItemDisposable);
+    context.subscriptions.push(statusBarDisposable);
+    context.subscriptions.push(refreshDisposable);
+    context.subscriptions.push({ dispose: function() { clearInterval(treeRefreshInterval); } });
 }
 
 //
