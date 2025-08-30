@@ -20,17 +20,7 @@ When developing on **remote hosts via SSH or cloud environments**, you lose acce
 
 Aetherion uses progressive braille characters to show CPU usage levels:
 
-```text
-⣀ ⣄ ⣤ ⣶ ⣷ ⣿
-│  │  │  │  │  └─ 80-100% (Maximum load)
-│  │  │  │  └──── 60-80%  (Very high)
-│  │  │  └─────── 40-60%  (High)
-│  │  └────────── 20-40%  (Moderate)
-│  └───────────── 10-20%  (Low)
-└──────────────── 0-10%   (Minimal)
-```
-
-**Example Display:** `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤` represents an 8-core system with varying load per core, followed by RAM usage.
+**Example Display:** `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤` represents an 8-core system with varying load per core, followed by RAM usage as only one bar.
 
 ## 🚀 Perfect For
 

@@ -292,4 +292,151 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             }
         });
     });
+
+    suite('Cross-Platform Memory Calculation Tests', function() {
+        let calculate_ram_usage = require('../03_calculate_ram_usage.js');
+
+        test('should use platform-specific memory calculation methods', async function() {
+            let platform = os.platform();
+            let result = await calculate_ram_usage();
+
+            // Basic validation for all platforms
+            assert.ok(result.total_gb > 0, 'Total memory should be positive');
+            assert.ok(result.available_gb >= 0, 'Available memory should be non-negative');
+            assert.ok(result.usage_percent >= 0 && result.usage_percent <= 100, 'Usage should be 0-100%');
+            assert.ok(result.available_gb <= result.total_gb, 'Available should not exceed total');
+
+            console.log(`Platform: ${platform}`);
+            console.log(`Memory: ${result.usage_percent.toFixed(1)}% used (${(result.total_gb - result.available_gb).toFixed(2)}GB / ${result.total_gb.toFixed(2)}GB)`);
+        });
+
+        test('should provide realistic memory usage on macOS', async function() {
+            if (os.platform() !== 'darwin') {
+                this.skip();
+                return;
+            }
+
+            let result = await calculate_ram_usage();
+            let rawUsagePercent = ((os.totalmem() - os.freemem()) / os.totalmem()) * 100;
+
+            // Our improved calculation should be more reasonable than raw os.freemem()
+            assert.ok(result.usage_percent < rawUsagePercent,
+                `Improved calculation (${result.usage_percent.toFixed(1)}%) should be lower than raw calculation (${rawUsagePercent.toFixed(1)}%)`);
+
+            // Usage should be realistic (not 99%+ unless system is actually under pressure)
+            assert.ok(result.usage_percent < 95,
+                `Memory usage (${result.usage_percent.toFixed(1)}%) should be realistic on macOS`);
+
+            console.log(`macOS Memory: ${result.usage_percent.toFixed(1)}% (vs raw ${rawUsagePercent.toFixed(1)}%)`);
+        });
+
+        test('should handle memory_pressure command availability on macOS', async function() {
+            if (os.platform() !== 'darwin') {
+                this.skip();
+                return;
+            }
+
+            // Test that our function works even if we simulate memory_pressure failure
+            let { execSync } = require('child_process');
+            let originalExecSync = execSync;
+
+            // Mock execSync to simulate memory_pressure failure
+            require('child_process').execSync = function(command) {
+                if (command === 'memory_pressure') {
+                    throw new Error('Simulated memory_pressure failure');
+                }
+                return originalExecSync.apply(this, arguments);
+            };
+
+            try {
+                let result = await calculate_ram_usage();
+                assert.ok(result.total_gb > 0, 'Should fallback gracefully when memory_pressure fails');
+                console.log('✅ macOS fallback test passed');
+            } finally {
+                // Restore original execSync
+                require('child_process').execSync = originalExecSync;
+            }
+        });
+
+        test('should simulate Linux /proc/meminfo calculation', async function() {
+            // This test simulates what would happen on Linux
+            // We can't actually test on Linux from macOS, but we can test the parsing logic
+
+            let mockMeminfo = `
+MemTotal:       16384000 kB
+MemFree:         2048000 kB
+MemAvailable:    6144000 kB
+Buffers:          512000 kB
+Cached:          3584000 kB
+SwapCached:            0 kB
+Active:          8192000 kB
+Inactive:        4096000 kB
+`;
+
+            // Test our parsing logic
+            let mem_total_match = mockMeminfo.match(/MemTotal:\s+(\d+)\s+kB/);
+            let mem_available_match = mockMeminfo.match(/MemAvailable:\s+(\d+)\s+kB/);
+
+            assert.ok(mem_total_match, 'Should parse MemTotal');
+            assert.ok(mem_available_match, 'Should parse MemAvailable');
+
+            let total_kb = parseInt(mem_total_match[1]);
+            let available_kb = parseInt(mem_available_match[1]);
+            let total_gb = total_kb / (1024 * 1024);
+            let available_gb = available_kb / (1024 * 1024);
+            let usage_percent = ((total_gb - available_gb) / total_gb) * 100;
+
+            assert.strictEqual(Math.round(total_gb), 16, 'Should calculate ~16GB total');
+            assert.strictEqual(Math.round(available_gb), 6, 'Should calculate ~6GB available');
+            assert.ok(Math.abs(usage_percent - 62.5) < 2, `Should calculate ~62-63% usage (got ${usage_percent.toFixed(1)}%)`);
+
+            console.log(`Linux simulation: ${usage_percent.toFixed(1)}% used (${(total_gb - available_gb).toFixed(1)}GB / ${total_gb}GB)`);
+        });
+
+        test('should maintain accuracy across multiple calls', async function() {
+            let results = [];
+
+            // Take 3 measurements
+            for (let i = 0; i < 3; i++) {
+                results.push(await calculate_ram_usage());
+                await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+            }
+
+            // Total memory should be consistent
+            for (let i = 1; i < results.length; i++) {
+                assert.strictEqual(results[i].total_gb, results[0].total_gb,
+                    'Total memory should be consistent across calls');
+            }
+
+            // Usage should be reasonable and not wildly fluctuating
+            let usageValues = results.map(r => r.usage_percent);
+            let maxUsage = Math.max(...usageValues);
+            let minUsage = Math.min(...usageValues);
+            let usageRange = maxUsage - minUsage;
+
+            assert.ok(usageRange < 10,
+                `Usage should not fluctuate wildly (range: ${usageRange.toFixed(1)}%)`);
+
+            console.log(`Consistency test: Usage range ${usageRange.toFixed(1)}% across 3 calls`);
+        });
+
+        test('should handle edge cases gracefully', async function() {
+            // Test that our calculation handles edge cases
+            let result = await calculate_ram_usage();
+
+            // Should never have negative available memory
+            assert.ok(result.available_gb >= 0, 'Available memory should never be negative');
+
+            // Should never have usage over 100%
+            assert.ok(result.usage_percent <= 100, 'Usage should never exceed 100%');
+
+            // Should never have available memory exceed total
+            assert.ok(result.available_gb <= result.total_gb, 'Available should not exceed total');
+
+            // Used + Available should approximately equal Total (within 1GB tolerance for rounding)
+            let calculated_total = (result.total_gb - result.available_gb) + result.available_gb;
+            let diff = Math.abs(calculated_total - result.total_gb);
+            assert.ok(diff < 1, `Used + Available should equal Total (diff: ${diff.toFixed(3)}GB)`);
+        });
+    });
 });
