@@ -46,7 +46,10 @@
     "format": "prettier --write \"**/*.{js,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,json,md}\"",
     "test": "vscode-test",
-    "package": "vsce package",
+    "package": "vsce package --out .releases/",
+    "package:patch": "npm version patch && npm run package",
+    "package:minor": "npm version minor && npm run package",
+    "package:major": "npm version major && npm run package",
     "publish": "vsce publish"
   },
   "devDependencies": {

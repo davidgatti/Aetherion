@@ -3,7 +3,9 @@ node_modules/
 
 # Compiled output
 out/
-*.vsix
+
+# Release packages
+.releases/*.vsix
 
 # VS Code test environment
 .vscode-test/
