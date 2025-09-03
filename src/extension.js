@@ -12,6 +12,9 @@ let update_status_bar_display = require('./05_update_status_bar_display.js');
 let show_system_info_command = require('./06_show_system_info_command.js');
 let calculate_disk_usage_internal = require('./13_calculate_disk_usage.js');
 let get_disk_braille_character = require('./14_get_disk_braille_character.js');
+let calculate_network_usage_internal = require('./15_calculate_network_usage.js');
+let get_network_in_braille_character = require('./16_get_network_in_braille_character.js');
+let get_network_out_braille_character = require('./17_get_network_out_braille_character.js');
 let { SystemMonitorTreeProvider } = require('./08_system_monitor_tree_provider.js');
 let show_tree_item_details = require('./09_show_tree_item_details.js');
 let focus_system_monitor_tree_view = require('./11_focus_system_monitor_tree_view.js');
@@ -75,6 +78,40 @@ async function getDiskBlock(usage) {
     //	--> delegate to modular disk braille function
     //
     return await get_disk_braille_character(usage);
+}
+
+async function calculateNetworkUsage() {
+
+    //
+    //	Get network usage information from modular function
+    //
+    let network_info = await calculate_network_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        networkInPercent: network_info.network_in_percent,
+        networkOutPercent: network_info.network_out_percent,
+        interfaceName: network_info.interface_name,
+        capacityMbps: network_info.capacity_mbps
+    };
+}
+
+async function getNetworkInBlock(usage) {
+
+    //
+    //	--> delegate to modular network in braille function
+    //
+    return await get_network_in_braille_character(usage);
+}
+
+async function getNetworkOutBlock(usage) {
+
+    //
+    //	--> delegate to modular network out braille function
+    //
+    return await get_network_out_braille_character(usage);
 }
 
 //
@@ -197,5 +234,8 @@ module.exports = {
     getRamBlock: getRamBlock,
     calculateRamUsage: calculateRamUsage,
     getDiskBlock: getDiskBlock,
-    calculateDiskUsage: calculateDiskUsage
+    calculateDiskUsage: calculateDiskUsage,
+    getNetworkInBlock: getNetworkInBlock,
+    getNetworkOutBlock: getNetworkOutBlock,
+    calculateNetworkUsage: calculateNetworkUsage
 };

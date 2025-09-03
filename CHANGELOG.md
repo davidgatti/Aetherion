@@ -5,6 +5,29 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2025-09-03
+
+### ✨ New Features
+
+- **Network traffic monitoring**: Added real-time network in/out traffic visualization
+- **Interface detection**: Automatically detects active network interface (e.g., en0, eth0)
+- **Capacity-based percentages**: Network usage calculated based on interface maximum capacity
+- **Enhanced status bar**: Display now shows CPU cores + RAM + Disk + Network In/Out
+- **Cross-platform network support**: Works on macOS and Linux with platform-specific commands
+
+### 🔧 Improvements
+
+- **Expanded test coverage**: Added 12 new tests for network functionality (53 total tests)
+- **Consistent braille progression**: Network traffic uses the same visual patterns as other metrics
+- **Enhanced tooltip**: Now includes network interface and traffic information
+- **Smart interface selection**: Automatically selects the most active non-loopback interface
+
+### 📊 Status Bar Format
+
+The status bar now displays: `[CPU_cores] [RAM] [Disk] [Network_In][Network_Out]`
+
+Example: `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤ ⣀ ⣶⣄` shows 8 CPU cores, moderate RAM usage, low disk usage, and high network in/low network out traffic.
+
 ## [1.3.0] - 2025-09-03
 
 ### ✨ New Features

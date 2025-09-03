@@ -4,6 +4,9 @@ let calculate_ram_usage = require('./03_calculate_ram_usage.js');
 let get_ram_braille_character = require('./04_get_ram_braille_character.js');
 let calculate_disk_usage = require('./13_calculate_disk_usage.js');
 let get_disk_braille_character = require('./14_get_disk_braille_character.js');
+let calculate_network_usage = require('./15_calculate_network_usage.js');
+let get_network_in_braille_character = require('./16_get_network_in_braille_character.js');
+let get_network_out_braille_character = require('./17_get_network_out_braille_character.js');
 let os = require('os');
 
 //
@@ -28,6 +31,7 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     let cpu_usage_percentages = await calculate_cpu_usage();
     let ram_usage_info = await calculate_ram_usage();
     let disk_usage_info = await calculate_disk_usage();
+    let network_usage_info = await calculate_network_usage();
 
     //
     //	Get braille characters for each CPU core
@@ -49,9 +53,15 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     let disk_braille_character = await get_disk_braille_character(disk_usage_info.usage_percent);
 
     //
-    //	Build status bar display text - per-core CPU + space + RAM + space + Disk
+    //	Get network braille characters for in and out traffic
     //
-    let display_text = cpu_display_string + ' ' + ram_braille_character + ' ' + disk_braille_character;
+    let network_in_braille_character = await get_network_in_braille_character(network_usage_info.network_in_percent);
+    let network_out_braille_character = await get_network_out_braille_character(network_usage_info.network_out_percent);
+
+    //
+    //	Build status bar display text - per-core CPU + space + RAM + space + Disk + space + Network In + Network Out
+    //
+    let display_text = cpu_display_string + ' ' + ram_braille_character + ' ' + disk_braille_character + ' ' + network_in_braille_character + network_out_braille_character;
 
     //
     //	Update status bar item with new information
@@ -66,7 +76,7 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
         //	Build detailed tooltip information
         //
         let cpu_core_count = os.cpus().length;
-        let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB) | Disk: ${disk_usage_info.usage_percent.toFixed(1)}% used (${disk_usage_info.available_gb.toFixed(1)}GB / ${disk_usage_info.total_gb.toFixed(1)}GB)`;
+        let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB) | Disk: ${disk_usage_info.usage_percent.toFixed(1)}% used (${disk_usage_info.available_gb.toFixed(1)}GB / ${disk_usage_info.total_gb.toFixed(1)}GB) | Network: ${network_usage_info.interface_name} (${network_usage_info.capacity_mbps}Mbps) - In: ${network_usage_info.network_in_percent.toFixed(1)}% Out: ${network_usage_info.network_out_percent.toFixed(1)}%`;
 
         status_bar_item.tooltip = tooltip_text;
     }

@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -261,17 +261,168 @@ suite('Aetherion CPU Monitor Test Suite', function() {
         });
     });
 
+    suite('Network Braille Character Mapping', function() {
+        test('should use same braille patterns as CPU, RAM, and Disk', async function() {
+            // Test that network in/out uses the same progression as other metrics
+            let testValues = [5, 15, 25, 45, 65, 85];
+
+            for (let value of testValues) {
+                let cpuChar = await getSquareForUsage(value);
+                let ramChar = await getRamBlock(value);
+                let diskChar = await getDiskBlock(value);
+                let networkInChar = await getNetworkInBlock(value);
+                let networkOutChar = await getNetworkOutBlock(value);
+
+                assert.strictEqual(networkInChar, cpuChar, `Network In should use same braille as CPU for ${value}%`);
+                assert.strictEqual(networkInChar, ramChar, `Network In should use same braille as RAM for ${value}%`);
+                assert.strictEqual(networkInChar, diskChar, `Network In should use same braille as Disk for ${value}%`);
+
+                assert.strictEqual(networkOutChar, cpuChar, `Network Out should use same braille as CPU for ${value}%`);
+                assert.strictEqual(networkOutChar, ramChar, `Network Out should use same braille as RAM for ${value}%`);
+                assert.strictEqual(networkOutChar, diskChar, `Network Out should use same braille as Disk for ${value}%`);
+            }
+        });
+
+        test('should return correct braille for very low network usage (0-10%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(0), '⣀');
+            assert.strictEqual(await getNetworkInBlock(5), '⣀');
+            assert.strictEqual(await getNetworkInBlock(9), '⣀');
+
+            assert.strictEqual(await getNetworkOutBlock(0), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(5), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(9), '⣀');
+        });
+
+        test('should return correct braille for low network usage (10-20%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(10), '⣄');
+            assert.strictEqual(await getNetworkInBlock(15), '⣄');
+            assert.strictEqual(await getNetworkInBlock(19), '⣄');
+
+            assert.strictEqual(await getNetworkOutBlock(10), '⣄');
+            assert.strictEqual(await getNetworkOutBlock(15), '⣄');
+            assert.strictEqual(await getNetworkOutBlock(19), '⣄');
+        });
+
+        test('should return correct braille for moderate network usage (20-40%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(20), '⣤');
+            assert.strictEqual(await getNetworkInBlock(30), '⣤');
+            assert.strictEqual(await getNetworkInBlock(39), '⣤');
+
+            assert.strictEqual(await getNetworkOutBlock(20), '⣤');
+            assert.strictEqual(await getNetworkOutBlock(30), '⣤');
+            assert.strictEqual(await getNetworkOutBlock(39), '⣤');
+        });
+
+        test('should return correct braille for high network usage (40-60%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(40), '⣶');
+            assert.strictEqual(await getNetworkInBlock(50), '⣶');
+            assert.strictEqual(await getNetworkInBlock(59), '⣶');
+
+            assert.strictEqual(await getNetworkOutBlock(40), '⣶');
+            assert.strictEqual(await getNetworkOutBlock(50), '⣶');
+            assert.strictEqual(await getNetworkOutBlock(59), '⣶');
+        });
+
+        test('should return correct braille for very high network usage (60-80%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(60), '⣷');
+            assert.strictEqual(await getNetworkInBlock(70), '⣷');
+            assert.strictEqual(await getNetworkInBlock(79), '⣷');
+
+            assert.strictEqual(await getNetworkOutBlock(60), '⣷');
+            assert.strictEqual(await getNetworkOutBlock(70), '⣷');
+            assert.strictEqual(await getNetworkOutBlock(79), '⣷');
+        });
+
+        test('should return correct braille for maximum network usage (80-100%)', async function() {
+            assert.strictEqual(await getNetworkInBlock(80), '⣿');
+            assert.strictEqual(await getNetworkInBlock(90), '⣿');
+            assert.strictEqual(await getNetworkInBlock(100), '⣿');
+
+            assert.strictEqual(await getNetworkOutBlock(80), '⣿');
+            assert.strictEqual(await getNetworkOutBlock(90), '⣿');
+            assert.strictEqual(await getNetworkOutBlock(100), '⣿');
+        });
+
+        test('should handle edge cases correctly', async function() {
+            assert.strictEqual(await getNetworkInBlock(0), '⣀');
+            assert.strictEqual(await getNetworkInBlock(100), '⣿');
+            assert.strictEqual(await getNetworkOutBlock(0), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(100), '⣿');
+
+            // Test boundary values
+            assert.strictEqual(await getNetworkInBlock(9.9), '⣀');
+            assert.strictEqual(await getNetworkInBlock(10.0), '⣄');
+            assert.strictEqual(await getNetworkOutBlock(19.9), '⣄');
+            assert.strictEqual(await getNetworkOutBlock(20.0), '⣤');
+        });
+    });
+
+    suite('Network Usage Calculation', function() {
+        test('should return valid network usage data', async function() {
+            let networkInfo = await calculateNetworkUsage();
+
+            // Validate structure
+            assert.ok(typeof networkInfo.networkInPercent === 'number', 'networkInPercent should be a number');
+            assert.ok(typeof networkInfo.networkOutPercent === 'number', 'networkOutPercent should be a number');
+            assert.ok(typeof networkInfo.interfaceName === 'string', 'interfaceName should be a string');
+            assert.ok(typeof networkInfo.capacityMbps === 'number', 'capacityMbps should be a number');
+
+            // Validate ranges
+            assert.ok(networkInfo.networkInPercent >= 0 && networkInfo.networkInPercent <= 100, 'networkInPercent should be between 0-100');
+            assert.ok(networkInfo.networkOutPercent >= 0 && networkInfo.networkOutPercent <= 100, 'networkOutPercent should be between 0-100');
+            assert.ok(networkInfo.capacityMbps > 0, 'capacityMbps should be positive');
+            assert.ok(networkInfo.interfaceName.length > 0, 'interfaceName should not be empty');
+        });
+
+        test('should handle different OS platforms', async function() {
+            let platform = os.platform();
+            let networkInfo = await calculateNetworkUsage();
+
+            // Should work on any platform
+            assert.ok(networkInfo.capacityMbps > 0, `Should work on ${platform}`);
+
+            // Interface name should be meaningful on supported platforms
+            if (platform === 'darwin' || platform === 'linux') {
+                assert.ok(networkInfo.interfaceName !== 'Unknown', 'Should identify interface on supported platforms');
+            }
+        });
+
+        test('should provide consistent network capacity', async function() {
+            let networkInfo1 = await calculateNetworkUsage();
+            let networkInfo2 = await calculateNetworkUsage();
+
+            // Network capacity should be consistent between calls
+            assert.strictEqual(networkInfo1.capacityMbps, networkInfo2.capacityMbps, 'Network capacity should be consistent');
+            assert.strictEqual(networkInfo1.interfaceName, networkInfo2.interfaceName, 'Interface name should be consistent');
+        });
+
+        test('should handle network interface detection gracefully', async function() {
+            let networkInfo = await calculateNetworkUsage();
+
+            // Should never have undefined or null values
+            assert.ok(networkInfo.networkInPercent !== undefined && networkInfo.networkInPercent !== null, 'networkInPercent should be defined');
+            assert.ok(networkInfo.networkOutPercent !== undefined && networkInfo.networkOutPercent !== null, 'networkOutPercent should be defined');
+            assert.ok(networkInfo.interfaceName !== undefined && networkInfo.interfaceName !== null, 'interfaceName should be defined');
+            assert.ok(networkInfo.capacityMbps !== undefined && networkInfo.capacityMbps !== null, 'capacityMbps should be defined');
+        });
+    });
+
     suite('Integration Tests', function() {
         test('should provide meaningful system monitoring data', async function() {
             let ramInfo = await calculateRamUsage();
             let ramBlock = await getRamBlock(ramInfo.usagePercent);
             let diskInfo = await calculateDiskUsage();
             let diskBlock = await getDiskBlock(diskInfo.usagePercent);
+            let networkInfo = await calculateNetworkUsage();
+            let networkInBlock = await getNetworkInBlock(networkInfo.networkInPercent);
+            let networkOutBlock = await getNetworkOutBlock(networkInfo.networkOutPercent);
 
             // Should provide valid braille characters
             let validBraille = ['⣀', '⣄', '⣤', '⣶', '⣷', '⣿'];
             assert.ok(validBraille.includes(ramBlock), 'Should return valid RAM braille character');
             assert.ok(validBraille.includes(diskBlock), 'Should return valid disk braille character');
+            assert.ok(validBraille.includes(networkInBlock), 'Should return valid network in braille character');
+            assert.ok(validBraille.includes(networkOutBlock), 'Should return valid network out braille character');
 
             // Usage should correlate with braille intensity
             if (ramInfo.usagePercent < 10) {
@@ -285,11 +436,23 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             } else if (diskInfo.usagePercent >= 80) {
                 assert.strictEqual(diskBlock, '⣿', 'High disk usage should show full braille');
             }
+
+            if (networkInfo.networkInPercent < 10) {
+                assert.strictEqual(networkInBlock, '⣀', 'Low network in usage should show minimal braille');
+            } else if (networkInfo.networkInPercent >= 80) {
+                assert.strictEqual(networkInBlock, '⣿', 'High network in usage should show full braille');
+            }
+
+            if (networkInfo.networkOutPercent < 10) {
+                assert.strictEqual(networkOutBlock, '⣀', 'Low network out usage should show minimal braille');
+            } else if (networkInfo.networkOutPercent >= 80) {
+                assert.strictEqual(networkOutBlock, '⣿', 'High network out usage should show full braille');
+            }
         });
     });
 
     suite('UI Display Format Protection', function() {
-        test('should maintain exact display format: CPU cores + space + RAM + space + Disk', async function() {
+        test('should maintain exact display format: CPU cores + space + RAM + space + Disk + space + Network In/Out', async function() {
             // Test the exact display format with known values
             let expectedCpuString = '⣄⣤⣶⣷'; // 10%, 25%, 45%, 75%
             let expectedRamChar = '⣷';         // 60%

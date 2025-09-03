@@ -1,8 +1,8 @@
 {
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
-  "description": "Real-time CPU, RAM, and disk space monitoring with per-core usage visualization in VS Code status bar",
-  "version": "1.3.0",
+  "description": "Real-time CPU, RAM, disk space, and network traffic monitoring with per-core usage visualization in VS Code status bar",
+  "version": "1.4.0",
   "publisher": "gatti",
   "repository": {
     "type": "git",
@@ -20,7 +20,9 @@
     "status-bar",
     "real-time",
     "disk",
-    "memory"
+    "memory",
+    "network",
+    "traffic"
   ],
   "engines": {
     "vscode": "^1.103.0"
