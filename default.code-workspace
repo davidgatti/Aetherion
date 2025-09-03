@@ -1,0 +1,27 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        // File Management
+        "files.exclude": {
+            "**/node_modules": true,
+            "**/.git": false,
+            "**/dist": true,
+            "**/.vite": true,
+            "**/coverage": true,
+            "**/.tests/cypress/videos": true,
+            "**/.tests/cypress/screenshots": true,
+            "**/storybook-static": true
+        },
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/coverage": true,
+            "**/.tests/cypress/videos": true,
+            "**/.tests/cypress/screenshots": true
+        }
+    }
+}

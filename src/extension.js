@@ -10,10 +10,11 @@ let calculate_ram_usage_internal = require('./03_calculate_ram_usage.js');
 let get_ram_braille_character = require('./04_get_ram_braille_character.js');
 let update_status_bar_display = require('./05_update_status_bar_display.js');
 let show_system_info_command = require('./06_show_system_info_command.js');
+let calculate_disk_usage_internal = require('./13_calculate_disk_usage.js');
+let get_disk_braille_character = require('./14_get_disk_braille_character.js');
 let { SystemMonitorTreeProvider } = require('./08_system_monitor_tree_provider.js');
 let show_tree_item_details = require('./09_show_tree_item_details.js');
 let focus_system_monitor_tree_view = require('./11_focus_system_monitor_tree_view.js');
-let { SystemProcessesTreeProvider } = require('./12_system_processes_tree_provider.js');
 
 //
 //	Export functions for external access and testing
@@ -49,6 +50,31 @@ async function calculateRamUsage() {
         availableGB: ram_info.available_gb,
         totalGB: ram_info.total_gb
     };
+}
+
+async function calculateDiskUsage() {
+
+    //
+    //	Get disk usage information from modular function
+    //
+    let disk_info = await calculate_disk_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        usagePercent: disk_info.usage_percent,
+        availableGB: disk_info.available_gb,
+        totalGB: disk_info.total_gb
+    };
+}
+
+async function getDiskBlock(usage) {
+
+    //
+    //	--> delegate to modular disk braille function
+    //
+    return await get_disk_braille_character(usage);
 }
 
 //
@@ -124,9 +150,6 @@ function activate(context) {
     let treeProvider = new SystemMonitorTreeProvider();
     vscode.window.registerTreeDataProvider('systemMonitorView', treeProvider);
 
-    let processesProvider = new SystemProcessesTreeProvider();
-    vscode.window.registerTreeDataProvider('systemProcessesView', processesProvider);
-
     //
     //	Register tree item click command
     //
@@ -142,7 +165,6 @@ function activate(context) {
     //
     let refreshDisposable = vscode.commands.registerCommand('sysmag.refreshSystemMonitor', () => {
         treeProvider.refresh();
-        processesProvider.refresh();
         vscode.window.showInformationMessage('System monitor refreshed! 🔄');
     });
 
@@ -151,7 +173,6 @@ function activate(context) {
     //
     let treeRefreshInterval = setInterval(() => {
         treeProvider.refresh();
-        processesProvider.refresh();
     }, 5000);
 
     context.subscriptions.push(disposable);
@@ -174,5 +195,7 @@ module.exports = {
     deactivate: deactivate,
     getSquareForUsage: getSquareForUsage,
     getRamBlock: getRamBlock,
-    calculateRamUsage: calculateRamUsage
+    calculateRamUsage: calculateRamUsage,
+    getDiskBlock: getDiskBlock,
+    calculateDiskUsage: calculateDiskUsage
 };

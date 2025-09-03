@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -145,30 +145,156 @@ suite('Aetherion CPU Monitor Test Suite', function() {
         });
     });
 
+    suite('Disk Braille Character Mapping', function() {
+        test('should use same braille patterns as CPU and RAM', async function() {
+            // Test that disk uses the same progression as CPU and RAM
+            let testValues = [5, 15, 25, 45, 65, 85];
+
+            for (let value of testValues) {
+                let cpuChar = await getSquareForUsage(value);
+                let ramChar = await getRamBlock(value);
+                let diskChar = await getDiskBlock(value);
+
+                assert.strictEqual(diskChar, cpuChar, `Disk should use same braille as CPU for ${value}%`);
+                assert.strictEqual(diskChar, ramChar, `Disk should use same braille as RAM for ${value}%`);
+            }
+        });
+
+        test('should return correct braille for very low disk usage (0-10%)', async function() {
+            assert.strictEqual(await getDiskBlock(0), '⣀');
+            assert.strictEqual(await getDiskBlock(5), '⣀');
+            assert.strictEqual(await getDiskBlock(9), '⣀');
+        });
+
+        test('should return correct braille for low disk usage (10-20%)', async function() {
+            assert.strictEqual(await getDiskBlock(10), '⣄');
+            assert.strictEqual(await getDiskBlock(15), '⣄');
+            assert.strictEqual(await getDiskBlock(19), '⣄');
+        });
+
+        test('should return correct braille for moderate disk usage (20-40%)', async function() {
+            assert.strictEqual(await getDiskBlock(20), '⣤');
+            assert.strictEqual(await getDiskBlock(30), '⣤');
+            assert.strictEqual(await getDiskBlock(39), '⣤');
+        });
+
+        test('should return correct braille for high disk usage (40-60%)', async function() {
+            assert.strictEqual(await getDiskBlock(40), '⣶');
+            assert.strictEqual(await getDiskBlock(50), '⣶');
+            assert.strictEqual(await getDiskBlock(59), '⣶');
+        });
+
+        test('should return correct braille for very high disk usage (60-80%)', async function() {
+            assert.strictEqual(await getDiskBlock(60), '⣷');
+            assert.strictEqual(await getDiskBlock(70), '⣷');
+            assert.strictEqual(await getDiskBlock(79), '⣷');
+        });
+
+        test('should return correct braille for maximum disk usage (80-100%)', async function() {
+            assert.strictEqual(await getDiskBlock(80), '⣿');
+            assert.strictEqual(await getDiskBlock(90), '⣿');
+            assert.strictEqual(await getDiskBlock(100), '⣿');
+        });
+
+        test('should handle edge cases correctly', async function() {
+            assert.strictEqual(await getDiskBlock(0), '⣀');
+            assert.strictEqual(await getDiskBlock(100), '⣿');
+
+            // Test boundary values
+            assert.strictEqual(await getDiskBlock(9.9), '⣀');
+            assert.strictEqual(await getDiskBlock(10.0), '⣄');
+            assert.strictEqual(await getDiskBlock(19.9), '⣄');
+            assert.strictEqual(await getDiskBlock(20.0), '⣤');
+        });
+    });
+
+    suite('Disk Usage Calculation', function() {
+        test('should return valid disk usage data', async function() {
+            let diskInfo = await calculateDiskUsage();
+
+            // Validate structure
+            assert.ok(typeof diskInfo.usagePercent === 'number', 'usagePercent should be a number');
+            assert.ok(typeof diskInfo.availableGB === 'number', 'availableGB should be a number');
+            assert.ok(typeof diskInfo.totalGB === 'number', 'totalGB should be a number');
+
+            // Validate ranges
+            assert.ok(diskInfo.usagePercent >= 0 && diskInfo.usagePercent <= 100, 'usagePercent should be between 0-100');
+            assert.ok(diskInfo.availableGB >= 0, 'availableGB should be positive');
+            assert.ok(diskInfo.totalGB > 0, 'totalGB should be positive');
+            assert.ok(diskInfo.availableGB <= diskInfo.totalGB, 'availableGB should not exceed totalGB');
+        });
+
+        test('should handle different OS platforms', async function() {
+            let platform = os.platform();
+            let diskInfo = await calculateDiskUsage();
+
+            // Should work on any platform
+            assert.ok(diskInfo.totalGB > 0, `Should work on ${platform}`);
+
+            // Usage should be reasonable (not exactly 50% which would indicate fallback)
+            if (platform === 'darwin' || platform === 'linux' || platform === 'win32') {
+                // On supported platforms, should not use the fallback default of 50%
+                // unless the disk is actually around 50% used
+                assert.ok(diskInfo.usagePercent !== 50 || Math.abs(diskInfo.totalGB - 200) > 10,
+                    'Should use platform-specific calculation, not fallback defaults');
+            }
+        });
+
+        test('should provide consistent total disk space', async function() {
+            let diskInfo1 = await calculateDiskUsage();
+            let diskInfo2 = await calculateDiskUsage();
+
+            // Total disk space should be consistent between calls
+            assert.strictEqual(diskInfo1.totalGB, diskInfo2.totalGB, 'Total disk space should be consistent');
+        });
+
+        test('should handle byte-level precision correctly', async function() {
+            let diskInfo = await calculateDiskUsage();
+
+            // The usage percent should be calculated with high precision
+            // to ensure accuracy across different platforms
+            let calculatedPercent = ((diskInfo.totalGB - diskInfo.availableGB) / diskInfo.totalGB) * 100;
+            let percentDifference = Math.abs(diskInfo.usagePercent - calculatedPercent);
+
+            // Should be within 0.1% due to rounding in GB conversion
+            assert.ok(percentDifference < 0.1, `Usage percent should be precise: expected ~${calculatedPercent}, got ${diskInfo.usagePercent}`);
+        });
+    });
+
     suite('Integration Tests', function() {
         test('should provide meaningful system monitoring data', async function() {
             let ramInfo = await calculateRamUsage();
             let ramBlock = await getRamBlock(ramInfo.usagePercent);
+            let diskInfo = await calculateDiskUsage();
+            let diskBlock = await getDiskBlock(diskInfo.usagePercent);
 
-            // Should provide a valid braille character
+            // Should provide valid braille characters
             let validBraille = ['⣀', '⣄', '⣤', '⣶', '⣷', '⣿'];
-            assert.ok(validBraille.includes(ramBlock), 'Should return valid braille character');
+            assert.ok(validBraille.includes(ramBlock), 'Should return valid RAM braille character');
+            assert.ok(validBraille.includes(diskBlock), 'Should return valid disk braille character');
 
             // Usage should correlate with braille intensity
             if (ramInfo.usagePercent < 10) {
-                assert.strictEqual(ramBlock, '⣀', 'Low usage should show minimal braille');
+                assert.strictEqual(ramBlock, '⣀', 'Low RAM usage should show minimal braille');
             } else if (ramInfo.usagePercent >= 80) {
-                assert.strictEqual(ramBlock, '⣿', 'High usage should show full braille');
+                assert.strictEqual(ramBlock, '⣿', 'High RAM usage should show full braille');
+            }
+
+            if (diskInfo.usagePercent < 10) {
+                assert.strictEqual(diskBlock, '⣀', 'Low disk usage should show minimal braille');
+            } else if (diskInfo.usagePercent >= 80) {
+                assert.strictEqual(diskBlock, '⣿', 'High disk usage should show full braille');
             }
         });
     });
 
     suite('UI Display Format Protection', function() {
-        test('should maintain exact display format: CPU cores + space + RAM', async function() {
+        test('should maintain exact display format: CPU cores + space + RAM + space + Disk', async function() {
             // Test the exact display format with known values
             let expectedCpuString = '⣄⣤⣶⣷'; // 10%, 25%, 45%, 75%
             let expectedRamChar = '⣷';         // 60%
-            let expectedDisplay = expectedCpuString + ' ' + expectedRamChar; // Space separator!
+            let expectedDiskChar = '⣤';        // 30%
+            let expectedDisplay = expectedCpuString + ' ' + expectedRamChar + ' ' + expectedDiskChar; // Space separators!
 
             // Verify each CPU braille character
             assert.strictEqual(await getSquareForUsage(10), '⣄', 'CPU 10% should be ⣄');
@@ -179,16 +305,19 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             // Verify RAM braille character
             assert.strictEqual(await getRamBlock(60), '⣷', 'RAM 60% should be ⣷');
 
+            // Verify disk braille character
+            assert.strictEqual(await getDiskBlock(30), '⣤', 'Disk 30% should be ⣤');
+
             // The complete expected display should be exactly this format
-            assert.strictEqual(expectedDisplay, '⣄⣤⣶⣷ ⣷', 'Display format must be: CPUcores + space + RAM');
+            assert.strictEqual(expectedDisplay, '⣄⣤⣶⣷ ⣷ ⣤', 'Display format must be: CPUcores + space + RAM + space + Disk');
         });
 
         test('should never add text labels to display', async function() {
-            // Test various usage levels to ensure no "CPU" or "RAM" text is added
+            // Test various usage levels to ensure no "CPU", "RAM", or "Disk" text is added
             let testCases = [
-                { cpu: [0, 15, 35, 55, 75, 95], ram: 20 },
-                { cpu: [10, 30, 50, 70], ram: 80 },
-                { cpu: [5, 25], ram: 45 }
+                { cpu: [0, 15, 35, 55, 75, 95], ram: 20, disk: 45 },
+                { cpu: [10, 30, 50, 70], ram: 80, disk: 15 },
+                { cpu: [5, 25], ram: 45, disk: 65 }
             ];
 
             for (let testCase of testCases) {
@@ -199,36 +328,42 @@ suite('Aetherion CPU Monitor Test Suite', function() {
                     displayString += await getSquareForUsage(cpuUsage);
                 }
 
-                // Add space separator and RAM portion (correct format)
-                displayString += ' ' + await getRamBlock(testCase.ram);
+                // Add space separator, RAM portion, space separator, and disk portion (correct format)
+                displayString += ' ' + await getRamBlock(testCase.ram) + ' ' + await getDiskBlock(testCase.disk);
 
-                // Display should contain braille characters and exactly one space
-                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF]$/;
+                // Display should contain braille characters and exactly two spaces
+                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF] [\u2800-\u28FF]$/;
                 assert.ok(correctPattern.test(displayString),
-                    `Display "${displayString}" should be: [braille chars] + space + [braille char]`);
+                    `Display "${displayString}" should be: [braille chars] + space + [braille char] + space + [braille char]`);
 
                 // Should not contain any English words
                 assert.ok(!displayString.includes('CPU'), 'Display should not contain "CPU" text');
                 assert.ok(!displayString.includes('RAM'), 'Display should not contain "RAM" text');
+                assert.ok(!displayString.includes('Disk'), 'Display should not contain "Disk" text');
                 assert.ok(!displayString.includes('|'), 'Display should not contain separators');
                 assert.ok(!displayString.includes('%'), 'Display should not contain percentage symbols');
 
-                // Should contain exactly one space (between CPU and RAM)
-                assert.strictEqual(displayString.split(' ').length, 2, 'Display should contain exactly one space');
+                // Should contain exactly two spaces (between CPU and RAM, and between RAM and disk)
+                assert.strictEqual(displayString.split(' ').length, 3, 'Display should contain exactly two spaces');
             }
         });
 
         test('should maintain braille character progression integrity', async function() {
-            // Test boundary values for both CPU and RAM
+            // Test boundary values for CPU, RAM, and Disk
             let testValues = [0, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
             for (let value of testValues) {
                 let cpuChar = await getSquareForUsage(value);
                 let ramChar = await getRamBlock(value);
+                let diskChar = await getDiskBlock(value);
 
-                // CPU and RAM should use identical progression
+                // CPU, RAM, and Disk should use identical progression
                 assert.strictEqual(cpuChar, ramChar,
                     `CPU and RAM should use same braille for ${value}%`);
+                assert.strictEqual(cpuChar, diskChar,
+                    `CPU and Disk should use same braille for ${value}%`);
+                assert.strictEqual(ramChar, diskChar,
+                    `RAM and Disk should use same braille for ${value}%`);
 
                 // Verify against expected progression
                 let expectedChar;
@@ -271,23 +406,28 @@ suite('Aetherion CPU Monitor Test Suite', function() {
                 }
 
                 let ramString = await getRamBlock(50); // 50% RAM
-                let fullDisplay = cpuString + ' ' + ramString; // Include space separator
+                let diskString = await getDiskBlock(30); // 30% Disk
+                let fullDisplay = cpuString + ' ' + ramString + ' ' + diskString; // Include space separators
 
-                // Verify format rules (CPU cores + space + RAM char)
-                assert.strictEqual(fullDisplay.length, config.cores + 1 + 1,
-                    `${config.description}: Display should be ${config.cores} CPU chars + 1 space + 1 RAM char`);
+                // Verify format rules (CPU cores + space + RAM char + space + Disk char)
+                assert.strictEqual(fullDisplay.length, config.cores + 1 + 1 + 1 + 1,
+                    `${config.description}: Display should be ${config.cores} CPU chars + 1 space + 1 RAM char + 1 space + 1 Disk char`);
 
-                // Should contain braille characters and exactly one space
-                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF]$/;
+                // Should contain braille characters and exactly two spaces
+                let correctPattern = /^[\u2800-\u28FF]+ [\u2800-\u28FF] [\u2800-\u28FF]$/;
                 assert.ok(correctPattern.test(fullDisplay),
-                    `${config.description}: Should be [braille chars] + space + [braille char]`);
+                    `${config.description}: Should be [braille chars] + space + [braille char] + space + [braille char]`);
 
-                // Last character should be RAM, space before that, CPU cores before space
-                assert.strictEqual(fullDisplay.slice(-1), ramString,
-                    `${config.description}: Last character should be RAM`);
+                // Last character should be Disk, space before that, RAM before that space, etc.
+                assert.strictEqual(fullDisplay.slice(-1), diskString,
+                    `${config.description}: Last character should be Disk`);
                 assert.strictEqual(fullDisplay.slice(-2, -1), ' ',
                     `${config.description}: Second to last character should be space`);
-                assert.strictEqual(fullDisplay.slice(0, -2), cpuString,
+                assert.strictEqual(fullDisplay.slice(-3, -2), ramString,
+                    `${config.description}: Third to last character should be RAM`);
+                assert.strictEqual(fullDisplay.slice(-4, -3), ' ',
+                    `${config.description}: Fourth to last character should be space`);
+                assert.strictEqual(fullDisplay.slice(0, -4), cpuString,
                     `${config.description}: First ${config.cores} characters should be CPU cores`);
             }
         });

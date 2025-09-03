@@ -2,6 +2,8 @@ let calculate_cpu_usage = require('./01_calculate_cpu_usage.js');
 let get_cpu_braille_character = require('./02_get_cpu_braille_character.js');
 let calculate_ram_usage = require('./03_calculate_ram_usage.js');
 let get_ram_braille_character = require('./04_get_ram_braille_character.js');
+let calculate_disk_usage = require('./13_calculate_disk_usage.js');
+let get_disk_braille_character = require('./14_get_disk_braille_character.js');
 let os = require('os');
 
 //
@@ -25,6 +27,7 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     //
     let cpu_usage_percentages = await calculate_cpu_usage();
     let ram_usage_info = await calculate_ram_usage();
+    let disk_usage_info = await calculate_disk_usage();
 
     //
     //	Get braille characters for each CPU core
@@ -41,9 +44,14 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     let ram_braille_character = await get_ram_braille_character(ram_usage_info.usage_percent);
 
     //
-    //	Build status bar display text - per-core CPU + space + RAM
+    //	Get disk braille character
     //
-    let display_text = cpu_display_string + ' ' + ram_braille_character;
+    let disk_braille_character = await get_disk_braille_character(disk_usage_info.usage_percent);
+
+    //
+    //	Build status bar display text - per-core CPU + space + RAM + space + Disk
+    //
+    let display_text = cpu_display_string + ' ' + ram_braille_character + ' ' + disk_braille_character;
 
     //
     //	Update status bar item with new information
@@ -58,7 +66,7 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
         //	Build detailed tooltip information
         //
         let cpu_core_count = os.cpus().length;
-        let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB)`;
+        let tooltip_text = `CPU Cores: ${cpu_core_count} | RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB) | Disk: ${disk_usage_info.usage_percent.toFixed(1)}% used (${disk_usage_info.available_gb.toFixed(1)}GB / ${disk_usage_info.total_gb.toFixed(1)}GB)`;
 
         status_bar_item.tooltip = tooltip_text;
     }
