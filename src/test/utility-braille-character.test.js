@@ -6,26 +6,26 @@ suite('Braille Character Utility Tests', function() {
     suite('Input Validation', function() {
         test('should throw error for non-number input', async function() {
             await assert.rejects(
-                async () => await get_braille_character('50'),
+                async() => await get_braille_character('50'),
                 /percentage-must-be-number/
             );
             await assert.rejects(
-                async () => await get_braille_character(null),
+                async() => await get_braille_character(null),
                 /percentage-must-be-number/
             );
             await assert.rejects(
-                async () => await get_braille_character(undefined),
+                async() => await get_braille_character(undefined),
                 /percentage-must-be-number/
             );
         });
 
         test('should throw error for out-of-range input', async function() {
             await assert.rejects(
-                async () => await get_braille_character(-1),
+                async() => await get_braille_character(-1),
                 /percentage-out-of-range/
             );
             await assert.rejects(
-                async () => await get_braille_character(101),
+                async() => await get_braille_character(101),
                 /percentage-out-of-range/
             );
         });

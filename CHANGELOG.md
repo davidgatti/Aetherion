@@ -5,6 +5,29 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-09-04
+
+### ✨ New Features
+
+- **Dedicated System Monitor Sidebar**: Added standalone activity bar panel with dashboard icon
+- **Static System Information Tree View**: Platform, architecture, CPU details, and uptime display
+- **Manual Refresh Control**: Tree view updates on demand to eliminate visual noise
+- **Emoji Icons in Tree View**: Clean visual indicators for system information categories
+- **Activity Bar Integration**: Separate system monitor panel independent of Explorer
+
+### 🔧 Improvements
+
+- **Optimized Tree Refresh Strategy**: Removed auto-refresh to prevent progress bar flashing
+- **Enhanced UI Organization**: Clear separation between live status bar and detailed sidebar
+- **Updated Documentation**: README accurately reflects current UI implementation
+- **Improved User Experience**: Click status bar to focus system monitor sidebar
+
+### 🛠️ Technical Changes
+
+- **Tree Provider Refactoring**: Simplified to show only system information
+- **Status Bar Click Handler**: Integrated focus command for seamless navigation
+- **Package Configuration**: Updated viewsContainers for activity bar integration
+
 ## [1.4.0] - 2025-09-03
 
 ### ✨ New Features
