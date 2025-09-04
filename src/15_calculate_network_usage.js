@@ -87,33 +87,33 @@ async function calculate_network_usage_internal() {
                     //
                     let current_time = Date.now();
                     let time_key = interface_name;
-                    
+
                     if (previous_network_data[time_key]) {
                         //
                         //	Calculate time difference in seconds
                         //
                         let time_diff = (current_time - previous_network_data[time_key].timestamp) / 1000;
-                        
+
                         if (time_diff > 0.1) { // Only calculate if enough time has passed (100ms)
                             //
                             //	Calculate bytes per second
                             //
                             let bytes_in_diff = bytes_in - previous_network_data[time_key].bytes_in;
                             let bytes_out_diff = bytes_out - previous_network_data[time_key].bytes_out;
-                            
+
                             let bytes_in_per_second = Math.max(0, bytes_in_diff / time_diff);
                             let bytes_out_per_second = Math.max(0, bytes_out_diff / time_diff);
-                            
+
                             //
                             //	Convert to percentage of interface capacity
                             //
                             let max_bytes_per_second = (capacity_mbps * 1000000) / 8; // Convert Mbps to bytes/sec
-                            
+
                             network_in_percent = Math.min((bytes_in_per_second / max_bytes_per_second) * 100, 100);
                             network_out_percent = Math.min((bytes_out_per_second / max_bytes_per_second) * 100, 100);
                         }
                     }
-                    
+
                     //
                     //	Store current measurement for next calculation
                     //
@@ -123,7 +123,8 @@ async function calculate_network_usage_internal() {
                         timestamp: current_time
                     };
                 }
-            }        } catch (_error) {
+            }
+        } catch (_error) {
             //
             //	macOS fallback: use basic estimation
             //
@@ -206,33 +207,33 @@ async function calculate_network_usage_internal() {
                 //
                 let current_time = Date.now();
                 let time_key = interface_name + '_linux';
-                
+
                 if (previous_network_data[time_key]) {
                     //
                     //	Calculate time difference in seconds
                     //
                     let time_diff = (current_time - previous_network_data[time_key].timestamp) / 1000;
-                    
+
                     if (time_diff > 0.1) { // Only calculate if enough time has passed
                         //
                         //	Calculate bytes per second
                         //
                         let rx_diff = best_interface.rx_bytes - previous_network_data[time_key].rx_bytes;
                         let tx_diff = best_interface.tx_bytes - previous_network_data[time_key].tx_bytes;
-                        
+
                         let rx_per_second = Math.max(0, rx_diff / time_diff);
                         let tx_per_second = Math.max(0, tx_diff / time_diff);
-                        
+
                         //
                         //	Convert to percentage of interface capacity
                         //
                         let max_bytes_per_second = (capacity_mbps * 1000000) / 8;
-                        
+
                         network_in_percent = Math.min((rx_per_second / max_bytes_per_second) * 100, 100);
                         network_out_percent = Math.min((tx_per_second / max_bytes_per_second) * 100, 100);
                     }
                 }
-                
+
                 //
                 //	Store current measurement for next calculation
                 //

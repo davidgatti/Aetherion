@@ -61,7 +61,7 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     //
     //	Build status bar display text - per-core CPU + space + RAM + space + Disk + space + Network In + Network Out
     //
-    let display_text = cpu_display_string + ' ' + ram_braille_character + ' ' + disk_braille_character + ' ' + network_in_braille_character + network_out_braille_character;
+    let display_text = `${cpu_display_string} ${ram_braille_character} ${disk_braille_character} ${network_in_braille_character}${network_out_braille_character}`;
 
     //
     //	Update status bar item with new information

@@ -14,92 +14,36 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('CPU Braille Character Mapping', function() {
-        test('should return correct braille for very low usage (0-10%)', async function() {
-            assert.strictEqual(await getSquareForUsage(0), '⣀');
-            assert.strictEqual(await getSquareForUsage(5), '⣀');
-            assert.strictEqual(await getSquareForUsage(9), '⣀');
-        });
+        test('should delegate to utility braille function', async function() {
+            // Test that CPU function delegates correctly to utility
+            let get_braille_character = require('../utility/get_braille_character.js');
 
-        test('should return correct braille for low usage (10-20%)', async function() {
-            assert.strictEqual(await getSquareForUsage(10), '⣄');
-            assert.strictEqual(await getSquareForUsage(15), '⣄');
-            assert.strictEqual(await getSquareForUsage(19), '⣄');
-        });
-
-        test('should return correct braille for moderate usage (20-40%)', async function() {
-            assert.strictEqual(await getSquareForUsage(20), '⣤');
-            assert.strictEqual(await getSquareForUsage(30), '⣤');
-            assert.strictEqual(await getSquareForUsage(39), '⣤');
-        });
-
-        test('should return correct braille for high usage (40-60%)', async function() {
-            assert.strictEqual(await getSquareForUsage(40), '⣶');
-            assert.strictEqual(await getSquareForUsage(50), '⣶');
-            assert.strictEqual(await getSquareForUsage(59), '⣶');
-        });
-
-        test('should return correct braille for very high usage (60-80%)', async function() {
-            assert.strictEqual(await getSquareForUsage(60), '⣷');
-            assert.strictEqual(await getSquareForUsage(70), '⣷');
-            assert.strictEqual(await getSquareForUsage(79), '⣷');
-        });
-
-        test('should return correct braille for maximum usage (80-100%)', async function() {
-            assert.strictEqual(await getSquareForUsage(80), '⣿');
-            assert.strictEqual(await getSquareForUsage(90), '⣿');
-            assert.strictEqual(await getSquareForUsage(100), '⣿');
+            let testValues = [0, 15, 30, 45, 60, 75, 90, 100];
+            for (let value of testValues) {
+                let cpuResult = await getSquareForUsage(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(cpuResult, utilityResult,
+                    `CPU function should delegate to utility for ${value}%`);
+            }
         });
     });
 
     suite('RAM Braille Character Mapping', function() {
-        test('should use same braille patterns as CPU', async function() {
-            // Test that RAM and CPU use identical braille progression
-            assert.strictEqual(await getRamBlock(5), await getSquareForUsage(5));
-            assert.strictEqual(await getRamBlock(15), await getSquareForUsage(15));
-            assert.strictEqual(await getRamBlock(30), await getSquareForUsage(30));
-            assert.strictEqual(await getRamBlock(50), await getSquareForUsage(50));
-            assert.strictEqual(await getRamBlock(70), await getSquareForUsage(70));
-            assert.strictEqual(await getRamBlock(90), await getSquareForUsage(90));
-        });
+        test('should use same braille patterns as utility function', async function() {
+            // Test that RAM and utility use identical braille progression
+            let get_braille_character = require('../utility/get_braille_character.js');
 
-        test('should return correct braille for very low RAM usage (0-10%)', async function() {
-            assert.strictEqual(await getRamBlock(0), '⣀');
-            assert.strictEqual(await getRamBlock(5), '⣀');
-            assert.strictEqual(await getRamBlock(9), '⣀');
-        });
-
-        test('should return correct braille for low RAM usage (10-20%)', async function() {
-            assert.strictEqual(await getRamBlock(10), '⣄');
-            assert.strictEqual(await getRamBlock(15), '⣄');
-            assert.strictEqual(await getRamBlock(19), '⣄');
-        });
-
-        test('should return correct braille for moderate RAM usage (20-40%)', async function() {
-            assert.strictEqual(await getRamBlock(20), '⣤');
-            assert.strictEqual(await getRamBlock(30), '⣤');
-            assert.strictEqual(await getRamBlock(39), '⣤');
-        });
-
-        test('should return correct braille for high RAM usage (40-60%)', async function() {
-            assert.strictEqual(await getRamBlock(40), '⣶');
-            assert.strictEqual(await getRamBlock(50), '⣶');
-            assert.strictEqual(await getRamBlock(59), '⣶');
-        });
-
-        test('should return correct braille for very high RAM usage (60-80%)', async function() {
-            assert.strictEqual(await getRamBlock(60), '⣷');
-            assert.strictEqual(await getRamBlock(70), '⣷');
-            assert.strictEqual(await getRamBlock(79), '⣷');
-        });
-
-        test('should return correct braille for maximum RAM usage (80-100%)', async function() {
-            assert.strictEqual(await getRamBlock(80), '⣿');
-            assert.strictEqual(await getRamBlock(90), '⣿');
-            assert.strictEqual(await getRamBlock(100), '⣿');
+            let testValues = [5, 15, 30, 50, 70, 90];
+            for (let value of testValues) {
+                let ramResult = await getRamBlock(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(ramResult, utilityResult,
+                    `RAM should use same braille as utility for ${value}%`);
+            }
         });
 
         test('should handle edge cases correctly', async function() {
-            assert.strictEqual(await getRamBlock(0), '⣀');
+            assert.strictEqual(await getRamBlock(0), '⡀');
             assert.strictEqual(await getRamBlock(100), '⣿');
         });
     });
@@ -146,65 +90,28 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('Disk Braille Character Mapping', function() {
-        test('should use same braille patterns as CPU and RAM', async function() {
-            // Test that disk uses the same progression as CPU and RAM
-            let testValues = [5, 15, 25, 45, 65, 85];
+        test('should use same braille patterns as utility function', async function() {
+            // Test that disk uses the same progression as utility
+            let get_braille_character = require('../utility/get_braille_character.js');
 
+            let testValues = [5, 15, 30, 40, 55, 70, 80, 95];
             for (let value of testValues) {
-                let cpuChar = await getSquareForUsage(value);
-                let ramChar = await getRamBlock(value);
-                let diskChar = await getDiskBlock(value);
-
-                assert.strictEqual(diskChar, cpuChar, `Disk should use same braille as CPU for ${value}%`);
-                assert.strictEqual(diskChar, ramChar, `Disk should use same braille as RAM for ${value}%`);
+                let diskResult = await getDiskBlock(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(diskResult, utilityResult,
+                    `Disk should use same braille as utility for ${value}%`);
             }
         });
 
-        test('should return correct braille for very low disk usage (0-10%)', async function() {
-            assert.strictEqual(await getDiskBlock(0), '⣀');
-            assert.strictEqual(await getDiskBlock(5), '⣀');
-            assert.strictEqual(await getDiskBlock(9), '⣀');
-        });
-
-        test('should return correct braille for low disk usage (10-20%)', async function() {
-            assert.strictEqual(await getDiskBlock(10), '⣄');
-            assert.strictEqual(await getDiskBlock(15), '⣄');
-            assert.strictEqual(await getDiskBlock(19), '⣄');
-        });
-
-        test('should return correct braille for moderate disk usage (20-40%)', async function() {
-            assert.strictEqual(await getDiskBlock(20), '⣤');
-            assert.strictEqual(await getDiskBlock(30), '⣤');
-            assert.strictEqual(await getDiskBlock(39), '⣤');
-        });
-
-        test('should return correct braille for high disk usage (40-60%)', async function() {
-            assert.strictEqual(await getDiskBlock(40), '⣶');
-            assert.strictEqual(await getDiskBlock(50), '⣶');
-            assert.strictEqual(await getDiskBlock(59), '⣶');
-        });
-
-        test('should return correct braille for very high disk usage (60-80%)', async function() {
-            assert.strictEqual(await getDiskBlock(60), '⣷');
-            assert.strictEqual(await getDiskBlock(70), '⣷');
-            assert.strictEqual(await getDiskBlock(79), '⣷');
-        });
-
-        test('should return correct braille for maximum disk usage (80-100%)', async function() {
-            assert.strictEqual(await getDiskBlock(80), '⣿');
-            assert.strictEqual(await getDiskBlock(90), '⣿');
-            assert.strictEqual(await getDiskBlock(100), '⣿');
-        });
-
         test('should handle edge cases correctly', async function() {
-            assert.strictEqual(await getDiskBlock(0), '⣀');
+            assert.strictEqual(await getDiskBlock(0), '⡀');
             assert.strictEqual(await getDiskBlock(100), '⣿');
 
-            // Test boundary values
-            assert.strictEqual(await getDiskBlock(9.9), '⣀');
-            assert.strictEqual(await getDiskBlock(10.0), '⣄');
-            assert.strictEqual(await getDiskBlock(19.9), '⣄');
-            assert.strictEqual(await getDiskBlock(20.0), '⣤');
+            // Test boundary values for 8-level progression
+            assert.strictEqual(await getDiskBlock(12.4), '⡀');
+            assert.strictEqual(await getDiskBlock(12.5), '⣀');
+            assert.strictEqual(await getDiskBlock(24.9), '⣀');
+            assert.strictEqual(await getDiskBlock(25.0), '⣠');
         });
     });
 
@@ -262,98 +169,34 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('Network Braille Character Mapping', function() {
-        test('should use same braille patterns as CPU, RAM, and Disk', async function() {
-            // Test that network in/out uses the same progression as other metrics
-            let testValues = [5, 15, 25, 45, 65, 85];
+        test('should use same braille patterns as utility function', async function() {
+            // Test that network in/out uses the same progression as utility
+            let get_braille_character = require('../utility/get_braille_character.js');
+            let testValues = [5, 15, 30, 40, 55, 70, 80, 95];
 
             for (let value of testValues) {
-                let cpuChar = await getSquareForUsage(value);
-                let ramChar = await getRamBlock(value);
-                let diskChar = await getDiskBlock(value);
-                let networkInChar = await getNetworkInBlock(value);
-                let networkOutChar = await getNetworkOutBlock(value);
+                let networkInResult = await getNetworkInBlock(value);
+                let networkOutResult = await getNetworkOutBlock(value);
+                let utilityResult = await get_braille_character(value);
 
-                assert.strictEqual(networkInChar, cpuChar, `Network In should use same braille as CPU for ${value}%`);
-                assert.strictEqual(networkInChar, ramChar, `Network In should use same braille as RAM for ${value}%`);
-                assert.strictEqual(networkInChar, diskChar, `Network In should use same braille as Disk for ${value}%`);
-
-                assert.strictEqual(networkOutChar, cpuChar, `Network Out should use same braille as CPU for ${value}%`);
-                assert.strictEqual(networkOutChar, ramChar, `Network Out should use same braille as RAM for ${value}%`);
-                assert.strictEqual(networkOutChar, diskChar, `Network Out should use same braille as Disk for ${value}%`);
+                assert.strictEqual(networkInResult, utilityResult,
+                    `Network In should use same braille as utility for ${value}%`);
+                assert.strictEqual(networkOutResult, utilityResult,
+                    `Network Out should use same braille as utility for ${value}%`);
             }
         });
 
-        test('should return correct braille for very low network usage (0-10%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(0), '⣀');
-            assert.strictEqual(await getNetworkInBlock(5), '⣀');
-            assert.strictEqual(await getNetworkInBlock(9), '⣀');
-
-            assert.strictEqual(await getNetworkOutBlock(0), '⣀');
-            assert.strictEqual(await getNetworkOutBlock(5), '⣀');
-            assert.strictEqual(await getNetworkOutBlock(9), '⣀');
-        });
-
-        test('should return correct braille for low network usage (10-20%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(10), '⣄');
-            assert.strictEqual(await getNetworkInBlock(15), '⣄');
-            assert.strictEqual(await getNetworkInBlock(19), '⣄');
-
-            assert.strictEqual(await getNetworkOutBlock(10), '⣄');
-            assert.strictEqual(await getNetworkOutBlock(15), '⣄');
-            assert.strictEqual(await getNetworkOutBlock(19), '⣄');
-        });
-
-        test('should return correct braille for moderate network usage (20-40%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(20), '⣤');
-            assert.strictEqual(await getNetworkInBlock(30), '⣤');
-            assert.strictEqual(await getNetworkInBlock(39), '⣤');
-
-            assert.strictEqual(await getNetworkOutBlock(20), '⣤');
-            assert.strictEqual(await getNetworkOutBlock(30), '⣤');
-            assert.strictEqual(await getNetworkOutBlock(39), '⣤');
-        });
-
-        test('should return correct braille for high network usage (40-60%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(40), '⣶');
-            assert.strictEqual(await getNetworkInBlock(50), '⣶');
-            assert.strictEqual(await getNetworkInBlock(59), '⣶');
-
-            assert.strictEqual(await getNetworkOutBlock(40), '⣶');
-            assert.strictEqual(await getNetworkOutBlock(50), '⣶');
-            assert.strictEqual(await getNetworkOutBlock(59), '⣶');
-        });
-
-        test('should return correct braille for very high network usage (60-80%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(60), '⣷');
-            assert.strictEqual(await getNetworkInBlock(70), '⣷');
-            assert.strictEqual(await getNetworkInBlock(79), '⣷');
-
-            assert.strictEqual(await getNetworkOutBlock(60), '⣷');
-            assert.strictEqual(await getNetworkOutBlock(70), '⣷');
-            assert.strictEqual(await getNetworkOutBlock(79), '⣷');
-        });
-
-        test('should return correct braille for maximum network usage (80-100%)', async function() {
-            assert.strictEqual(await getNetworkInBlock(80), '⣿');
-            assert.strictEqual(await getNetworkInBlock(90), '⣿');
-            assert.strictEqual(await getNetworkInBlock(100), '⣿');
-
-            assert.strictEqual(await getNetworkOutBlock(80), '⣿');
-            assert.strictEqual(await getNetworkOutBlock(90), '⣿');
-            assert.strictEqual(await getNetworkOutBlock(100), '⣿');
-        });
-
         test('should handle edge cases correctly', async function() {
-            assert.strictEqual(await getNetworkInBlock(0), '⣀');
+            assert.strictEqual(await getNetworkInBlock(0), '⡀');
             assert.strictEqual(await getNetworkInBlock(100), '⣿');
-            assert.strictEqual(await getNetworkOutBlock(0), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(0), '⡀');
             assert.strictEqual(await getNetworkOutBlock(100), '⣿');
 
-            // Test boundary values
-            assert.strictEqual(await getNetworkInBlock(9.9), '⣀');
-            assert.strictEqual(await getNetworkInBlock(10.0), '⣄');
-            assert.strictEqual(await getNetworkOutBlock(19.9), '⣄');
-            assert.strictEqual(await getNetworkOutBlock(20.0), '⣤');
+            // Test boundary values for 8-level progression
+            assert.strictEqual(await getNetworkInBlock(12.4), '⡀');
+            assert.strictEqual(await getNetworkInBlock(12.5), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(24.9), '⣀');
+            assert.strictEqual(await getNetworkOutBlock(25.0), '⣠');
         });
     });
 
@@ -417,35 +260,35 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             let networkInBlock = await getNetworkInBlock(networkInfo.networkInPercent);
             let networkOutBlock = await getNetworkOutBlock(networkInfo.networkOutPercent);
 
-            // Should provide valid braille characters
-            let validBraille = ['⣀', '⣄', '⣤', '⣶', '⣷', '⣿'];
+            // Should provide valid braille characters (8-level progression)
+            let validBraille = ['⡀', '⣀', '⣠', '⣤', '⣦', '⣶', '⣾', '⣿'];
             assert.ok(validBraille.includes(ramBlock), 'Should return valid RAM braille character');
             assert.ok(validBraille.includes(diskBlock), 'Should return valid disk braille character');
             assert.ok(validBraille.includes(networkInBlock), 'Should return valid network in braille character');
             assert.ok(validBraille.includes(networkOutBlock), 'Should return valid network out braille character');
 
-            // Usage should correlate with braille intensity
-            if (ramInfo.usagePercent < 10) {
-                assert.strictEqual(ramBlock, '⣀', 'Low RAM usage should show minimal braille');
-            } else if (ramInfo.usagePercent >= 80) {
+            // Usage should correlate with braille intensity (8-level system)
+            if (ramInfo.usagePercent < 12.5) {
+                assert.strictEqual(ramBlock, '⡀', 'Low RAM usage should show minimal braille');
+            } else if (ramInfo.usagePercent >= 87.5) {
                 assert.strictEqual(ramBlock, '⣿', 'High RAM usage should show full braille');
             }
 
-            if (diskInfo.usagePercent < 10) {
-                assert.strictEqual(diskBlock, '⣀', 'Low disk usage should show minimal braille');
-            } else if (diskInfo.usagePercent >= 80) {
+            if (diskInfo.usagePercent < 12.5) {
+                assert.strictEqual(diskBlock, '⡀', 'Low disk usage should show minimal braille');
+            } else if (diskInfo.usagePercent >= 87.5) {
                 assert.strictEqual(diskBlock, '⣿', 'High disk usage should show full braille');
             }
 
-            if (networkInfo.networkInPercent < 10) {
-                assert.strictEqual(networkInBlock, '⣀', 'Low network in usage should show minimal braille');
-            } else if (networkInfo.networkInPercent >= 80) {
+            if (networkInfo.networkInPercent < 12.5) {
+                assert.strictEqual(networkInBlock, '⡀', 'Low network in usage should show minimal braille');
+            } else if (networkInfo.networkInPercent >= 87.5) {
                 assert.strictEqual(networkInBlock, '⣿', 'High network in usage should show full braille');
             }
 
-            if (networkInfo.networkOutPercent < 10) {
-                assert.strictEqual(networkOutBlock, '⣀', 'Low network out usage should show minimal braille');
-            } else if (networkInfo.networkOutPercent >= 80) {
+            if (networkInfo.networkOutPercent < 12.5) {
+                assert.strictEqual(networkOutBlock, '⡀', 'Low network out usage should show minimal braille');
+            } else if (networkInfo.networkOutPercent >= 87.5) {
                 assert.strictEqual(networkOutBlock, '⣿', 'High network out usage should show full braille');
             }
         });
@@ -453,26 +296,28 @@ suite('Aetherion CPU Monitor Test Suite', function() {
 
     suite('UI Display Format Protection', function() {
         test('should maintain exact display format: CPU cores + space + RAM + space + Disk + space + Network In/Out', async function() {
-            // Test the exact display format with known values
-            let expectedCpuString = '⣄⣤⣶⣷'; // 10%, 25%, 45%, 75%
-            let expectedRamChar = '⣷';         // 60%
-            let expectedDiskChar = '⣤';        // 30%
-            let expectedDisplay = expectedCpuString + ' ' + expectedRamChar + ' ' + expectedDiskChar; // Space separators!
+            // Test the exact display format with known values (8-level progression)
+            let expectedCpuString = '⡀⣠⣤⣾'; // 10%, 25%, 45%, 75%
+            let expectedRamChar = '⣦';         // 60%
+            let expectedDiskChar = '⣠';        // 30%
 
-            // Verify each CPU braille character
-            assert.strictEqual(await getSquareForUsage(10), '⣄', 'CPU 10% should be ⣄');
-            assert.strictEqual(await getSquareForUsage(25), '⣤', 'CPU 25% should be ⣤');
-            assert.strictEqual(await getSquareForUsage(45), '⣶', 'CPU 45% should be ⣶');
-            assert.strictEqual(await getSquareForUsage(75), '⣷', 'CPU 75% should be ⣷');
+            // Verify each CPU braille character (8-level progression)
+            assert.strictEqual(await getSquareForUsage(10), '⡀', 'CPU 10% should be ⡀');
+            assert.strictEqual(await getSquareForUsage(25), '⣠', 'CPU 25% should be ⣠');
+            assert.strictEqual(await getSquareForUsage(45), '⣤', 'CPU 45% should be ⣤');
+            assert.strictEqual(await getSquareForUsage(75), '⣾', 'CPU 75% should be ⣾');
 
             // Verify RAM braille character
-            assert.strictEqual(await getRamBlock(60), '⣷', 'RAM 60% should be ⣷');
+            assert.strictEqual(await getRamBlock(60), '⣦', 'RAM 60% should be ⣦');
 
             // Verify disk braille character
-            assert.strictEqual(await getDiskBlock(30), '⣤', 'Disk 30% should be ⣤');
+            assert.strictEqual(await getDiskBlock(30), '⣠', 'Disk 30% should be ⣠');
 
-            // The complete expected display should be exactly this format
-            assert.strictEqual(expectedDisplay, '⣄⣤⣶⣷ ⣷ ⣤', 'Display format must be: CPUcores + space + RAM + space + Disk');
+            // The complete expected display should include network components
+            let expectedNetworkIn = '⡀';       // Low network usage
+            let expectedNetworkOut = '⡀';      // Low network usage
+            let fullExpectedDisplay = expectedCpuString + ' ' + expectedRamChar + ' ' + expectedDiskChar + ' ' + expectedNetworkIn + expectedNetworkOut;
+            assert.strictEqual(fullExpectedDisplay, '⡀⣠⣤⣾ ⣦ ⣠ ⡀⡀', 'Display format must be: CPUcores + space + RAM + space + Disk + space + NetworkIn+NetworkOut');
         });
 
         test('should never add text labels to display', async function() {
@@ -528,18 +373,22 @@ suite('Aetherion CPU Monitor Test Suite', function() {
                 assert.strictEqual(ramChar, diskChar,
                     `RAM and Disk should use same braille for ${value}%`);
 
-                // Verify against expected progression
+                // Verify against expected 8-level progression
                 let expectedChar;
-                if (value < 10) {
+                if (value < 12.5) {
+                    expectedChar = '⡀';
+                } else if (value < 25) {
                     expectedChar = '⣀';
-                } else if (value < 20) {
-                    expectedChar = '⣄';
-                } else if (value < 40) {
+                } else if (value < 37.5) {
+                    expectedChar = '⣠';
+                } else if (value < 50) {
                     expectedChar = '⣤';
-                } else if (value < 60) {
+                } else if (value < 62.5) {
+                    expectedChar = '⣦';
+                } else if (value < 75) {
                     expectedChar = '⣶';
-                } else if (value < 80) {
-                    expectedChar = '⣷';
+                } else if (value < 87.5) {
+                    expectedChar = '⣾';
                 } else {
                     expectedChar = '⣿';
                 }
