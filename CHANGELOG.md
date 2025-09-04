@@ -5,6 +5,71 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-09-04
+
+### ✨ New Features
+
+- **Dedicated System Monitor Sidebar**: Added standalone activity bar panel with dashboard icon
+- **Static System Information Tree View**: Platform, architecture, CPU details, and uptime display
+- **Manual Refresh Control**: Tree view updates on demand to eliminate visual noise
+- **Emoji Icons in Tree View**: Clean visual indicators for system information categories
+- **Activity Bar Integration**: Separate system monitor panel independent of Explorer
+
+### 🔧 Improvements
+
+- **Optimized Tree Refresh Strategy**: Removed auto-refresh to prevent progress bar flashing
+- **Enhanced UI Organization**: Clear separation between live status bar and detailed sidebar
+- **Updated Documentation**: README accurately reflects current UI implementation
+- **Improved User Experience**: Click status bar to focus system monitor sidebar
+
+### 🛠️ Technical Changes
+
+- **Tree Provider Refactoring**: Simplified to show only system information
+- **Status Bar Click Handler**: Integrated focus command for seamless navigation
+- **Package Configuration**: Updated viewsContainers for activity bar integration
+
+## [1.4.0] - 2025-09-03
+
+### ✨ New Features
+
+- **Network traffic monitoring**: Added real-time network in/out traffic visualization
+- **Interface detection**: Automatically detects active network interface (e.g., en0, eth0)
+- **Capacity-based percentages**: Network usage calculated based on interface maximum capacity
+- **Enhanced status bar**: Display now shows CPU cores + RAM + Disk + Network In/Out
+- **Cross-platform network support**: Works on macOS and Linux with platform-specific commands
+
+### 🔧 Improvements
+
+- **Expanded test coverage**: Added 12 new tests for network functionality (53 total tests)
+- **Consistent braille progression**: Network traffic uses the same visual patterns as other metrics
+- **Enhanced tooltip**: Now includes network interface and traffic information
+- **Smart interface selection**: Automatically selects the most active non-loopback interface
+
+### 📊 Status Bar Format
+
+The status bar now displays: `[CPU_cores] [RAM] [Disk] [Network_In][Network_Out]`
+
+Example: `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤ ⣀ ⣶⣄` shows 8 CPU cores, moderate RAM usage, low disk usage, and high network in/low network out traffic.
+
+## [1.3.0] - 2025-09-03
+
+### ✨ New Features
+
+- **Disk space monitoring**: Added real-time disk usage tracking for the main disk
+- **Enhanced status bar**: Display now shows CPU cores + RAM + Disk space usage
+- **Cross-platform disk support**: Works on macOS, Linux, and Windows with platform-specific commands
+- **Comprehensive tooltip**: Now includes disk usage information alongside CPU and RAM data
+
+### 🔧 Improvements
+
+- **Expanded test coverage**: Added 11 new tests for disk functionality (40 total tests)
+- **Consistent braille progression**: Disk usage uses the same visual patterns as CPU and RAM
+- **Better fallback handling**: Robust error handling for disk space calculation across platforms
+
+### 🐛 Bug Fixes
+
+- **Accurate macOS disk usage**: Fixed disk calculation to use APFS container data instead of just root filesystem, providing accurate readings that match System Settings (e.g., 82.7% vs previous incorrect 4.4%)
+
 ## [1.2.0] - 2025-08-30
 
 ### � Critical Fixes

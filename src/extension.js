@@ -10,6 +10,14 @@ let calculate_ram_usage_internal = require('./03_calculate_ram_usage.js');
 let get_ram_braille_character = require('./04_get_ram_braille_character.js');
 let update_status_bar_display = require('./05_update_status_bar_display.js');
 let show_system_info_command = require('./06_show_system_info_command.js');
+let calculate_disk_usage_internal = require('./13_calculate_disk_usage.js');
+let get_disk_braille_character = require('./14_get_disk_braille_character.js');
+let calculate_network_usage_internal = require('./15_calculate_network_usage.js');
+let get_network_in_braille_character = require('./16_get_network_in_braille_character.js');
+let get_network_out_braille_character = require('./17_get_network_out_braille_character.js');
+let { SystemMonitorTreeProvider } = require('./08_system_monitor_tree_provider.js');
+let show_tree_item_details = require('./09_show_tree_item_details.js');
+let focus_system_monitor_tree_view = require('./11_focus_system_monitor_tree_view.js');
 
 //
 //	Export functions for external access and testing
@@ -47,6 +55,65 @@ async function calculateRamUsage() {
     };
 }
 
+async function calculateDiskUsage() {
+
+    //
+    //	Get disk usage information from modular function
+    //
+    let disk_info = await calculate_disk_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        usagePercent: disk_info.usage_percent,
+        availableGB: disk_info.available_gb,
+        totalGB: disk_info.total_gb
+    };
+}
+
+async function getDiskBlock(usage) {
+
+    //
+    //	--> delegate to modular disk braille function
+    //
+    return await get_disk_braille_character(usage);
+}
+
+async function calculateNetworkUsage() {
+
+    //
+    //	Get network usage information from modular function
+    //
+    let network_info = await calculate_network_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        networkInPercent: network_info.network_in_percent,
+        networkOutPercent: network_info.network_out_percent,
+        interfaceName: network_info.interface_name,
+        capacityMbps: network_info.capacity_mbps
+    };
+}
+
+async function getNetworkInBlock(usage) {
+
+    //
+    //	--> delegate to modular network in braille function
+    //
+    return await get_network_in_braille_character(usage);
+}
+
+async function getNetworkOutBlock(usage) {
+
+    //
+    //	--> delegate to modular network out braille function
+    //
+    return await get_network_out_braille_character(usage);
+}
+
 //
 //	This method is called when your extension is activated
 //	Your extension is activated the very first time the command is executed
@@ -63,6 +130,12 @@ function activate(context) {
     //	Create a status bar item
     //
     let status_bar_item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
+
+    //
+    //	Make status bar item clickable - focus tree view
+    //
+    status_bar_item.command = 'sysmag.focusSystemMonitor';
+
     status_bar_item.show();
 
     //
@@ -108,7 +181,42 @@ function activate(context) {
     //
     let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
 
+    //
+    //	Create and register the tree view providers
+    //
+    let treeProvider = new SystemMonitorTreeProvider();
+    vscode.window.registerTreeDataProvider('systemMonitorView', treeProvider);
+
+    //
+    //	Register tree item click command
+    //
+    let treeItemDisposable = vscode.commands.registerCommand('sysmag.showItemDetails', show_tree_item_details);
+
+    //
+    //	Register status bar click command - focus tree view
+    //
+    let statusBarDisposable = vscode.commands.registerCommand('sysmag.focusSystemMonitor', focus_system_monitor_tree_view);
+
+    //
+    //	Register refresh command for tree view
+    //
+    let refreshDisposable = vscode.commands.registerCommand('sysmag.refreshSystemMonitor', () => {
+        treeProvider.refresh();
+        vscode.window.showInformationMessage('System monitor refreshed! 🔄');
+    });
+
+    //
+    //	Set up automatic tree refresh every 5 seconds
+    //
+    let treeRefreshInterval = setInterval(() => {
+        treeProvider.refresh();
+    }, 5000);
+
     context.subscriptions.push(disposable);
+    context.subscriptions.push(treeItemDisposable);
+    context.subscriptions.push(statusBarDisposable);
+    context.subscriptions.push(refreshDisposable);
+    context.subscriptions.push({ dispose: function() { clearInterval(treeRefreshInterval); } });
 }
 
 //
@@ -124,5 +232,10 @@ module.exports = {
     deactivate: deactivate,
     getSquareForUsage: getSquareForUsage,
     getRamBlock: getRamBlock,
-    calculateRamUsage: calculateRamUsage
+    calculateRamUsage: calculateRamUsage,
+    getDiskBlock: getDiskBlock,
+    calculateDiskUsage: calculateDiskUsage,
+    getNetworkInBlock: getNetworkInBlock,
+    getNetworkOutBlock: getNetworkOutBlock,
+    calculateNetworkUsage: calculateNetworkUsage
 };

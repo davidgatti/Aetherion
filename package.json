@@ -1,8 +1,8 @@
 {
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
-  "description": "Real-time CPU and RAM monitoring with per-core usage visualization in VS Code status bar",
-  "version": "1.2.0",
+  "description": "Real-time CPU, RAM, disk space, and network traffic monitoring with animated braille characters in VS Code status bar and dedicated system information sidebar",
+  "version": "1.6.0",
   "publisher": "gatti",
   "repository": {
     "type": "git",
@@ -18,7 +18,11 @@
     "system",
     "performance",
     "status-bar",
-    "real-time"
+    "real-time",
+    "disk",
+    "memory",
+    "network",
+    "traffic"
   ],
   "engines": {
     "vscode": "^1.103.0"
@@ -35,8 +39,49 @@
       {
         "command": "sysmag.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "sysmag.showItemDetails",
+        "title": "Show System Item Details"
+      },
+      {
+        "command": "sysmag.refreshSystemMonitor",
+        "title": "Refresh System Monitor",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "sysmag.focusSystemMonitor",
+        "title": "Focus System Monitor Tree View"
       }
-    ]
+    ],
+    "views": {
+      "systemMonitor": [
+        {
+          "id": "systemMonitorView",
+          "name": "System Performance",
+          "when": "true",
+          "icon": "$(pulse)"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "systemMonitor",
+          "title": "System Monitor",
+          "icon": "$(dashboard)"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "sysmag.refreshSystemMonitor",
+          "when": "view == systemMonitorView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run lint",
