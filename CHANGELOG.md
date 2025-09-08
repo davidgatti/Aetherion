@@ -5,6 +5,12 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2025-09-08
+
+### Added
+
+- Extension logo for VS Code marketplace display
+
 ## [1.6.0] - 2025-09-04
 
 ### ✨ New Features
