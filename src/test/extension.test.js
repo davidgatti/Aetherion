@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, calculateDiskIO, getDiskReadBlock, getDiskWriteBlock } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -589,6 +589,57 @@ Inactive:        4096000 kB
             let calculated_total = (result.total_gb - result.available_gb) + result.available_gb;
             let diff = Math.abs(calculated_total - result.total_gb);
             assert.ok(diff < 1, `Used + Available should equal Total (diff: ${diff.toFixed(3)}GB)`);
+        });
+    });
+
+    suite('Disk I/O Braille Character Mapping', function() {
+        test('should use same braille patterns as utility function', async function() {
+            // Test that disk I/O read/write uses the same progression as utility
+            let get_braille_character = require('../utility/get_braille_character.js');
+            let testValues = [5, 15, 30, 40, 55, 70, 80, 95];
+
+            for (let value of testValues) {
+                let diskReadResult = await getDiskReadBlock(value);
+                let diskWriteResult = await getDiskWriteBlock(value);
+                let utilityResult = await get_braille_character(value);
+
+                assert.strictEqual(diskReadResult, utilityResult,
+                    `Disk read should use same braille as utility for ${value}%`);
+                assert.strictEqual(diskWriteResult, utilityResult,
+                    `Disk write should use same braille as utility for ${value}%`);
+            }
+        });
+
+        test('should handle edge cases correctly', async function() {
+            assert.strictEqual(await getDiskReadBlock(0), '⡀');
+            assert.strictEqual(await getDiskReadBlock(100), '⣿');
+            assert.strictEqual(await getDiskWriteBlock(0), '⡀');
+            assert.strictEqual(await getDiskWriteBlock(100), '⣿');
+        });
+    });
+
+    suite('Disk I/O Calculation', function() {
+        test('should return valid disk I/O data structure', async function() {
+            let diskIoInfo = await calculateDiskIO();
+
+            // Check that all required properties exist
+            assert.ok(diskIoInfo.hasOwnProperty('diskReadPercent'), 'Should have diskReadPercent');
+            assert.ok(diskIoInfo.hasOwnProperty('diskWritePercent'), 'Should have diskWritePercent');
+            assert.ok(diskIoInfo.hasOwnProperty('deviceName'), 'Should have deviceName');
+            assert.ok(diskIoInfo.hasOwnProperty('estimatedMaxIops'), 'Should have estimatedMaxIops');
+
+            // Check data types
+            assert.strictEqual(typeof diskIoInfo.diskReadPercent, 'number', 'diskReadPercent should be number');
+            assert.strictEqual(typeof diskIoInfo.diskWritePercent, 'number', 'diskWritePercent should be number');
+            assert.strictEqual(typeof diskIoInfo.deviceName, 'string', 'deviceName should be string');
+            assert.strictEqual(typeof diskIoInfo.estimatedMaxIops, 'number', 'estimatedMaxIops should be number');
+
+            // Check value ranges
+            assert.ok(diskIoInfo.diskReadPercent >= 0 && diskIoInfo.diskReadPercent <= 100, 
+                'diskReadPercent should be between 0 and 100');
+            assert.ok(diskIoInfo.diskWritePercent >= 0 && diskIoInfo.diskWritePercent <= 100, 
+                'diskWritePercent should be between 0 and 100');
+            assert.ok(diskIoInfo.estimatedMaxIops > 0, 'estimatedMaxIops should be positive');
         });
     });
 });
