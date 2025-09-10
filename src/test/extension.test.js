@@ -635,9 +635,9 @@ Inactive:        4096000 kB
             assert.strictEqual(typeof diskIoInfo.estimatedMaxIops, 'number', 'estimatedMaxIops should be number');
 
             // Check value ranges
-            assert.ok(diskIoInfo.diskReadPercent >= 0 && diskIoInfo.diskReadPercent <= 100, 
+            assert.ok(diskIoInfo.diskReadPercent >= 0 && diskIoInfo.diskReadPercent <= 100,
                 'diskReadPercent should be between 0 and 100');
-            assert.ok(diskIoInfo.diskWritePercent >= 0 && diskIoInfo.diskWritePercent <= 100, 
+            assert.ok(diskIoInfo.diskWritePercent >= 0 && diskIoInfo.diskWritePercent <= 100,
                 'diskWritePercent should be between 0 and 100');
             assert.ok(diskIoInfo.estimatedMaxIops > 0, 'estimatedMaxIops should be positive');
         });

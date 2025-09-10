@@ -14,7 +14,7 @@ let last_cache_time = 0;
 //	Calculate disk I/O usage percentage for the main disk
 //
 //	This function provides cross-platform disk I/O speed calculation:
-//	- macOS: Uses 'iostat -d' for disk I/O statistics  
+//	- macOS: Uses 'iostat -d' for disk I/O statistics
 //	- Linux: Uses '/proc/diskstats' for real-time disk I/O data
 //	- Both platforms calculate I/O speed as percentage of estimated capacity
 //	- Returns separate read/write percentages based on recent I/O patterns
@@ -75,11 +75,10 @@ async function calculate_disk_io_internal() {
 
                 if (stats_line.length >= 3) {
                     //
-                    //	iostat format: device KB/t tps KB/s  
+                    //	iostat format: device KB/t tps KB/s
                     //	We want the read and write operations per second
                     //
                     let tps = parseFloat(stats_line[1]) || 0; // transactions per second
-                    let kbps = parseFloat(stats_line[2]) || 0; // KB per second
 
                     //
                     //	Estimate read vs write split (approximate 60/40 read/write)
@@ -91,8 +90,10 @@ async function calculate_disk_io_internal() {
                     //
                     //	Calculate percentages based on estimated max IOPS
                     //
-                    disk_read_percent = Math.min((estimated_reads / estimated_max_iops) * 100, 100);
-                    disk_write_percent = Math.min((estimated_writes / estimated_max_iops) * 100, 100);
+                    let read_percentage_calc = (estimated_reads / estimated_max_iops) * 100;
+                    let write_percentage_calc = (estimated_writes / estimated_max_iops) * 100;
+                    disk_read_percent = Math.min(read_percentage_calc, 100);
+                    disk_write_percent = Math.min(write_percentage_calc, 100);
                 }
             }
 
@@ -127,11 +128,13 @@ async function calculate_disk_io_internal() {
                     let parts = line.trim().split(/\s+/);
                     if (parts.length >= 14) {
                         let device = parts[2];
-                        
+
                         //
                         //	Skip partitions, look for main devices
                         //
-                        if (device.match(/^(sd[a-z]|nvme\d+n\d+|hd[a-z])$/) && !device.match(/\d+$/)) {
+                        let device_pattern = /^(sd[a-z]|nvme\d+n\d+|hd[a-z])$/;
+                        let partition_pattern = /\d+$/;
+                        if (device.match(device_pattern) && !device.match(partition_pattern)) {
                             //
                             //	Fields: reads_completed, reads_merged, sectors_read, read_time_ms,
                             //	        writes_completed, writes_merged, sectors_written, write_time_ms
@@ -183,8 +186,10 @@ async function calculate_disk_io_internal() {
                         //
                         //	Convert to percentage of estimated maximum IOPS
                         //
-                        disk_read_percent = Math.min((reads_per_second / estimated_max_iops) * 100, 100);
-                        disk_write_percent = Math.min((writes_per_second / estimated_max_iops) * 100, 100);
+                        let read_pct_calc = (reads_per_second / estimated_max_iops) * 100;
+                        let write_pct_calc = (writes_per_second / estimated_max_iops) * 100;
+                        disk_read_percent = Math.min(read_pct_calc, 100);
+                        disk_write_percent = Math.min(write_pct_calc, 100);
                     }
                 }
 
