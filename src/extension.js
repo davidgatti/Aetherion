@@ -9,6 +9,7 @@ let { get_cpu_braille_character } = require('./01_monitors/01_cpu-monitor.js');
 let { calculate_ram_usage_internal, get_ram_braille_character } = require('./01_monitors/02_ram-monitor.js');
 let { calculate_disk_usage_internal, get_disk_braille_character } = require('./01_monitors/03_disk-monitor.js');
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./01_monitors/04_network-monitor.js');
+let { calculate_swap_usage_internal, get_swap_braille_character } = require('./01_monitors/05_swap-monitor.js');
 let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
 let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
 let { SystemMonitorTreeProvider } = require('./02_ui/02_system-monitor-tree-provider.js');
@@ -108,6 +109,33 @@ async function getNetworkOutBlock(usage) {
     //	--> delegate to modular network out braille function
     //
     return await get_network_out_braille_character(usage);
+}
+
+async function calculateSwapUsage() {
+
+    //
+    //	Get swap usage information from modular function
+    //
+    let swap_info = await calculate_swap_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        usagePercent: swap_info.usage_percent,
+        usedGB: swap_info.used_gb,
+        totalGB: swap_info.total_gb,
+        availableGB: swap_info.available_gb,
+        swapEnabled: swap_info.swap_enabled
+    };
+}
+
+async function getSwapBlock(usage) {
+
+    //
+    //	--> delegate to modular swap braille function
+    //
+    return await get_swap_braille_character(usage);
 }
 
 //
@@ -233,5 +261,7 @@ module.exports = {
     calculateDiskUsage: calculateDiskUsage,
     getNetworkInBlock: getNetworkInBlock,
     getNetworkOutBlock: getNetworkOutBlock,
-    calculateNetworkUsage: calculateNetworkUsage
+    calculateNetworkUsage: calculateNetworkUsage,
+    getSwapBlock: getSwapBlock,
+    calculateSwapUsage: calculateSwapUsage
 };

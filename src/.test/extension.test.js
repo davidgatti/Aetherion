@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, getSwapBlock, calculateSwapUsage } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -250,6 +250,110 @@ suite('Aetherion CPU Monitor Test Suite', function() {
         });
     });
 
+    suite('Swap Braille Character Mapping', function() {
+        test('should use same braille patterns as utility function', async function() {
+            // Test that Swap and utility use identical braille progression
+            let get_braille_character = require('../.utility/get_braille_character.js');
+
+            let testValues = [5, 15, 30, 50, 70, 90];
+            for (let value of testValues) {
+                let swapResult = await getSwapBlock(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(swapResult, utilityResult,
+                    `Swap should use same braille as utility for ${value}%`);
+            }
+        });
+
+        test('should handle edge cases correctly', async function() {
+            assert.strictEqual(await getSwapBlock(0), '⡀');
+            assert.strictEqual(await getSwapBlock(100), '⣿');
+        });
+    });
+
+    suite('Swap Usage Calculation', function() {
+        test('should return valid swap usage data', async function() {
+            let swapInfo = await calculateSwapUsage();
+
+            // Validate structure
+            assert.ok(typeof swapInfo.usagePercent === 'number', 'usagePercent should be a number');
+            assert.ok(typeof swapInfo.usedGB === 'number', 'usedGB should be a number');
+            assert.ok(typeof swapInfo.totalGB === 'number', 'totalGB should be a number');
+            assert.ok(typeof swapInfo.availableGB === 'number', 'availableGB should be a number');
+            assert.ok(typeof swapInfo.swapEnabled === 'boolean', 'swapEnabled should be a boolean');
+
+            // If swap is enabled, validate ranges
+            if (swapInfo.swapEnabled) {
+                assert.ok(swapInfo.usagePercent >= 0 && swapInfo.usagePercent <= 100, 'usagePercent should be between 0-100');
+                assert.ok(swapInfo.totalGB >= 0, 'totalGB should be non-negative');
+                assert.ok(swapInfo.usedGB >= 0, 'usedGB should be non-negative');
+                assert.ok(swapInfo.availableGB >= 0, 'availableGB should be non-negative');
+                assert.ok(swapInfo.usedGB <= swapInfo.totalGB, 'usedGB should not exceed totalGB');
+            } else {
+                // If swap is disabled, all values should be 0
+                assert.strictEqual(swapInfo.usagePercent, 0, 'usagePercent should be 0 when swap is disabled');
+                assert.strictEqual(swapInfo.totalGB, 0, 'totalGB should be 0 when swap is disabled');
+                assert.strictEqual(swapInfo.usedGB, 0, 'usedGB should be 0 when swap is disabled');
+                assert.strictEqual(swapInfo.availableGB, 0, 'availableGB should be 0 when swap is disabled');
+            }
+        });
+
+        test('should handle different OS platforms', async function() {
+            let platform = os.platform();
+            let swapInfo = await calculateSwapUsage();
+
+            // Should work on any platform (swap may or may not be enabled)
+            assert.ok(typeof swapInfo.swapEnabled === 'boolean', `Should return boolean swapEnabled on ${platform}`);
+
+            // On platforms where swap is common (Linux, macOS), check for reasonable behavior
+            if (platform === 'darwin' || platform === 'linux') {
+                // Swap might be enabled or disabled, both are valid
+                assert.ok(swapInfo.totalGB >= 0, 'Total swap should be non-negative');
+            }
+        });
+
+        test('should provide consistent swap information', async function() {
+            let swapInfo1 = await calculateSwapUsage();
+            let swapInfo2 = await calculateSwapUsage();
+
+            // Swap configuration should be consistent between calls
+            assert.strictEqual(swapInfo1.swapEnabled, swapInfo2.swapEnabled, 'Swap enabled status should be consistent');
+            assert.strictEqual(swapInfo1.totalGB, swapInfo2.totalGB, 'Total swap should be consistent');
+
+            // Usage might change slightly, but should be within reasonable bounds
+            if (swapInfo1.swapEnabled) {
+                let usageDiff = Math.abs(swapInfo1.usagePercent - swapInfo2.usagePercent);
+                assert.ok(usageDiff < 10, 'Swap usage should not change dramatically between calls');
+            }
+        });
+
+        test('should handle swap detection gracefully', async function() {
+            let swapInfo = await calculateSwapUsage();
+
+            // Should never have undefined or null values
+            assert.ok(swapInfo.usagePercent !== undefined && swapInfo.usagePercent !== null, 'usagePercent should be defined');
+            assert.ok(swapInfo.usedGB !== undefined && swapInfo.usedGB !== null, 'usedGB should be defined');
+            assert.ok(swapInfo.totalGB !== undefined && swapInfo.totalGB !== null, 'totalGB should be defined');
+            assert.ok(swapInfo.availableGB !== undefined && swapInfo.availableGB !== null, 'availableGB should be defined');
+            assert.ok(swapInfo.swapEnabled !== undefined && swapInfo.swapEnabled !== null, 'swapEnabled should be defined');
+
+            // Values should never be negative
+            assert.ok(swapInfo.usagePercent >= 0, 'Usage percent should never be negative');
+            assert.ok(swapInfo.usedGB >= 0, 'Used swap should never be negative');
+            assert.ok(swapInfo.totalGB >= 0, 'Total swap should never be negative');
+            assert.ok(swapInfo.availableGB >= 0, 'Available swap should never be negative');
+
+            // Usage should never exceed 100%
+            assert.ok(swapInfo.usagePercent <= 100, 'Usage should never exceed 100%');
+
+            // Used + Available should approximately equal Total
+            if (swapInfo.swapEnabled && swapInfo.totalGB > 0) {
+                let calculated_total = swapInfo.usedGB + swapInfo.availableGB;
+                let diff = Math.abs(calculated_total - swapInfo.totalGB);
+                assert.ok(diff < 0.1, `Used + Available should equal Total (diff: ${diff.toFixed(3)}GB)`);
+            }
+        });
+    });
+
     suite('Integration Tests', function() {
         test('should provide meaningful system monitoring data', async function() {
             let ramInfo = await calculateRamUsage();
@@ -259,6 +363,8 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             let networkInfo = await calculateNetworkUsage();
             let networkInBlock = await getNetworkInBlock(networkInfo.networkInPercent);
             let networkOutBlock = await getNetworkOutBlock(networkInfo.networkOutPercent);
+            let swapInfo = await calculateSwapUsage();
+            let swapBlock = swapInfo.swapEnabled ? await getSwapBlock(swapInfo.usagePercent) : null;
 
             // Should provide valid braille characters (8-level progression)
             let validBraille = ['⡀', '⣀', '⣠', '⣤', '⣦', '⣶', '⣾', '⣿'];
@@ -266,6 +372,10 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             assert.ok(validBraille.includes(diskBlock), 'Should return valid disk braille character');
             assert.ok(validBraille.includes(networkInBlock), 'Should return valid network in braille character');
             assert.ok(validBraille.includes(networkOutBlock), 'Should return valid network out braille character');
+
+            if (swapInfo.swapEnabled) {
+                assert.ok(validBraille.includes(swapBlock), 'Should return valid swap braille character when swap is enabled');
+            }
 
             // Usage should correlate with braille intensity (8-level system)
             if (ramInfo.usagePercent < 12.5) {
@@ -601,7 +711,7 @@ Inactive:        4096000 kB
             //
             let extension = vscode.extensions.getExtension('gatti.aetherion-cpu-monitor');
             assert.ok(extension, 'Extension should be found');
-            
+
             if (!extension.isActive) {
                 await extension.activate();
             }
@@ -610,7 +720,7 @@ Inactive:        4096000 kB
             //	Find the status bar item by looking for system monitor items
             //
             let statusBarItems = [];
-            
+
             //
             //	Wait a moment for status bar to initialize
             //
@@ -624,24 +734,24 @@ Inactive:        4096000 kB
             let lastDisplayValue = null;
             let displayChangeDetected = false;
             let displayInitialized = false;
-            
+
             //
             //	Check every 500ms for 6 seconds (12 checks total)
             //
             let checkCount = 0;
             let maxChecks = 12;
-            
+
             let monitorPromise = new Promise((resolve, reject) => {
                 let checkInterval = setInterval(() => {
                     checkCount++;
-                    
+
                     try {
                         //
                         //	Simulate status bar access by calling the display function directly
                         //	This tests the core functionality that drives the UI
                         //
                         let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
-                        
+
                         //
                         //	Create a mock status bar item to test the display logic
                         //
@@ -651,13 +761,13 @@ Inactive:        4096000 kB
                             show: () => {},
                             command: ''
                         };
-                        
+
                         //
                         //	Test that the update function works and produces output
                         //
                         update_status_bar_display(mockStatusBarItem, false).then(() => {
                             let currentDisplay = mockStatusBarItem.text;
-                            
+
                             //
                             //	Check if display has content (not empty)
                             //
@@ -666,7 +776,7 @@ Inactive:        4096000 kB
                                 firstDisplayValue = currentDisplay;
                                 console.log(`✓ Status bar initialized with: "${currentDisplay}"`);
                             }
-                            
+
                             //
                             //	Check for changes in display
                             //
@@ -674,9 +784,9 @@ Inactive:        4096000 kB
                                 displayChangeDetected = true;
                                 console.log(`✓ Status bar update detected: "${lastDisplayValue}" → "${currentDisplay}"`);
                             }
-                            
+
                             lastDisplayValue = currentDisplay;
-                            
+
                             //
                             //	Success conditions: display initialized and either changes detected or reasonable time passed
                             //
@@ -689,7 +799,7 @@ Inactive:        4096000 kB
                                     checksPerformed: checkCount
                                 });
                             }
-                            
+
                             //
                             //	Timeout condition: no initialization or updates after max checks
                             //
@@ -701,7 +811,7 @@ Inactive:        4096000 kB
                             clearInterval(checkInterval);
                             reject(new Error(`Status bar update function failed: ${error.message}`));
                         });
-                        
+
                     } catch (error) {
                         clearInterval(checkInterval);
                         reject(new Error(`Status bar monitoring failed: ${error.message}`));
@@ -713,19 +823,19 @@ Inactive:        4096000 kB
             //	Wait for monitoring to complete
             //
             let result = await monitorPromise;
-            
+
             //
             //	Verify results
             //
             assert.ok(result.initialized, 'Status bar should initialize with content within 5 seconds');
             assert.ok(result.finalDisplay.length > 0, 'Status bar should have non-empty display content');
-            
+
             //
             //	Status bar should contain braille characters (system monitoring data)
             //
             let hasBraillePattern = /[⡀-⣿]/.test(result.finalDisplay);
             assert.ok(hasBraillePattern, `Status bar should contain braille monitoring characters. Got: "${result.finalDisplay}"`);
-            
+
             console.log(`✅ Status bar UI test passed - Initialized: ${result.initialized}, Changes: ${result.changesDetected}, Checks: ${result.checksPerformed}`);
         });
 
@@ -734,25 +844,25 @@ Inactive:        4096000 kB
             //	This test monitors for display freezing by watching for changes over time
             //
             let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
-            
+
             let mockStatusBarItem = {
                 text: '',
                 tooltip: '',
                 show: () => {},
                 command: ''
             };
-            
+
             let displayHistory = [];
             let checksPerformed = 0;
             let maxChecks = 15; // 7.5 seconds of monitoring
-            
+
             //
             //	Monitor display changes every 500ms
             //
             let freezeDetectionPromise = new Promise((resolve, reject) => {
                 let monitorInterval = setInterval(async () => {
                     checksPerformed++;
-                    
+
                     try {
                         await update_status_bar_display(mockStatusBarItem, false);
                         let currentDisplay = mockStatusBarItem.text;
@@ -761,31 +871,31 @@ Inactive:        4096000 kB
                             display: currentDisplay,
                             timestamp: Date.now()
                         });
-                        
+
                         //
                         //	After collecting enough samples, analyze for freeze patterns
                         //
                         if (checksPerformed >= maxChecks) {
                             clearInterval(monitorInterval);
-                            
+
                             //
                             //	Analyze display history for freeze detection
                             //
                             let uniqueDisplays = new Set(displayHistory.map(h => h.display));
                             let displayChangeCount = uniqueDisplays.size;
-                            
+
                             //
                             //	Check if display remained completely static (frozen)
                             //
                             let isCompletelyFrozen = displayChangeCount === 1 && displayHistory.length > 10;
-                            
+
                             //
                             //	Check for recent activity (last 5 seconds / 10 checks)
                             //
                             let recentDisplays = displayHistory.slice(-10).map(h => h.display);
                             let recentUniqueDisplays = new Set(recentDisplays);
                             let recentActivity = recentUniqueDisplays.size > 1;
-                            
+
                             resolve({
                                 totalChecks: checksPerformed,
                                 uniqueDisplayCount: displayChangeCount,
@@ -801,25 +911,25 @@ Inactive:        4096000 kB
                     }
                 }, 500);
             });
-            
+
             let result = await freezeDetectionPromise;
-            
+
             //
             //	Verify the display is not completely frozen
             //
             assert.ok(!result.isCompletelyFrozen, `Status bar appears to be completely frozen. Only ${result.uniqueDisplayCount} unique display(s) detected over ${result.totalChecks} checks`);
-            
+
             //
             //	Verify there's recent activity (changes in the last 5 seconds)
             //
             assert.ok(result.hasRecentActivity, `Status bar appears frozen - no changes detected in recent monitoring period. Final display: "${result.finalDisplay}"`);
-            
+
             //
             //	Verify display contains expected braille content
             //
             let hasBraillePattern = /[⡀-⣿]/.test(result.finalDisplay);
             assert.ok(hasBraillePattern, `Status bar should contain braille monitoring characters. Got: "${result.finalDisplay}"`);
-            
+
             console.log(`✅ Status bar freeze detection passed - ${result.uniqueDisplayCount} unique displays over ${result.totalChecks} checks, recent activity: ${result.hasRecentActivity}`);
         });
     });
