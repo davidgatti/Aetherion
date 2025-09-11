@@ -10,6 +10,7 @@ let { calculate_ram_usage_internal, get_ram_braille_character } = require('./01_
 let { calculate_disk_usage_internal, get_disk_braille_character } = require('./01_monitors/03_disk-monitor.js');
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./01_monitors/04_network-monitor.js');
 let { calculate_swap_usage_internal, get_swap_braille_character } = require('./01_monitors/05_swap-monitor.js');
+let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./01_monitors/06_disk-activity-monitor.js');
 let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
 let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
 let { SystemMonitorTreeProvider } = require('./02_ui/02_system-monitor-tree-provider.js');
@@ -138,6 +139,55 @@ async function getSwapBlock(usage) {
     return await get_swap_braille_character(usage);
 }
 
+async function calculateDiskActivity() {
+
+    //
+    //	Get disk activity information from modular function
+    //
+    let activity_info = await calculate_disk_activity_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        activity_level: activity_info.activity_level,
+        total_kb_s: activity_info.total_kb_s,
+        transfers_per_second: activity_info.transfers_per_second,
+        activity_description: activity_info.activity_description,
+        mb_per_second: activity_info.mb_per_second,
+        // New TPS-based properties
+        total_tps: activity_info.total_tps,
+        read_tps: activity_info.read_tps,
+        write_tps: activity_info.write_tps,
+        read_activity_level: activity_info.read_activity_level,
+        write_activity_level: activity_info.write_activity_level
+    };
+}
+
+async function getDiskActivityBlock(activity_level) {
+
+    //
+    //	--> delegate to modular disk activity braille function
+    //
+    return await get_disk_activity_braille_character(activity_level);
+}
+
+async function getDiskReadActivityBlock(read_activity_level) {
+
+    //
+    //	--> delegate to modular disk read activity braille function
+    //
+    return await get_disk_read_activity_braille_character(read_activity_level);
+}
+
+async function getDiskWriteActivityBlock(write_activity_level) {
+
+    //
+    //	--> delegate to modular disk write activity braille function
+    //
+    return await get_disk_write_activity_braille_character(write_activity_level);
+}
+
 //
 //	This method is called when your extension is activated
 //	Your extension is activated the very first time the command is executed
@@ -263,5 +313,9 @@ module.exports = {
     getNetworkOutBlock: getNetworkOutBlock,
     calculateNetworkUsage: calculateNetworkUsage,
     getSwapBlock: getSwapBlock,
-    calculateSwapUsage: calculateSwapUsage
+    calculateSwapUsage: calculateSwapUsage,
+    calculateDiskActivity: calculateDiskActivity,
+    getDiskActivityBlock: getDiskActivityBlock,
+    getDiskReadActivityBlock: getDiskReadActivityBlock,
+    getDiskWriteActivityBlock: getDiskWriteActivityBlock
 };
