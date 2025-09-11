@@ -1,6 +1,6 @@
 # Aetherion CPU Monitor
 
-A real-time system monitoring extension for VS Code that displays CPU, memory, disk, and network usage directly in your status bar using animated braille characters, with a dedicated sidebar showing detailed system information.
+A real-time system monitoring extension for VS Code that displays CPU, memory, swap, disk, and network usage directly in your status bar using animated braille characters, with a dedicated sidebar showing detailed system information.
 
 ## 🎯 Why Aetherion?
 
@@ -10,7 +10,7 @@ When developing on **remote hosts via SSH or cloud environments**, you lose acce
 
 - **Real-time status bar monitoring** - Animated braille characters update every 200ms for live performance feedback
 - **Dedicated system monitor sidebar** - Standalone activity bar panel with detailed system information
-- **Multi-metric monitoring** - CPU, RAM, disk space, and network traffic visualization
+- **Multi-metric monitoring** - CPU, RAM, swap, disk space, and network traffic visualization
 - **Braille character animation** - Progressive visual indicators for different usage levels
 - **Static system information** - Platform, architecture, CPU details, and uptime in tree view
 - **Always visible status bar** - Integrated into VS Code's status bar (right side, high priority)
@@ -31,10 +31,11 @@ Aetherion uses progressive braille characters in the status bar to show system u
 - `⣷` - Very high usage (60-80%)
 - `⣿` - Maximum usage (80-100%)
 
-**Example Status Bar:** `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤ ⣀ ⣶⣄` represents:
+**Example Status Bar:** `⣀⣄⣤⣶⣷⣿⣀⣄ ⣤ ⣠ ⣀ ⣶⣄` represents:
 
 - **CPU cores** (8 cores): `⣀⣄⣤⣶⣷⣿⣀⣄` - varying load per core
 - **RAM usage**: `⣤` - moderate memory usage (20-40%)
+- **Swap usage**: `⣠` - low swap usage (10-20%) - *only shown when swap is enabled*
 - **Disk usage**: `⣀` - low disk usage (0-10%)
 - **Network traffic**: `⣶⣄` - high incoming (40-60%), low outgoing (10-20%)
 

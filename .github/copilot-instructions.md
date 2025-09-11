@@ -83,12 +83,12 @@ Iterate untill all the brakegase are detected. Only then you can trully know tha
 
 ## Restrictions
 
-- You are not allowed to git commit
-- You are not allowed to git push
+* You are not allowed to git commit
+* You are not allowed to git push
 
 ## Naming convetion
 
 Use Hierarchical Prefix Naming, a file naming convention that uses category-subcategory-specific structure to create logical grouping and hierarchy.
 
-- pattern: {category}-{subcategory}-{specific-function}
-- example: security-scan-dependencies.yml, security-scan-code.yml.
+* pattern: {category}-{subcategory}-{specific-function}
+* example: security-scan-dependencies.yml, security-scan-code.yml.

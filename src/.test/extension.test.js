@@ -860,7 +860,7 @@ Inactive:        4096000 kB
             //	Monitor display changes every 500ms
             //
             let freezeDetectionPromise = new Promise((resolve, reject) => {
-                let monitorInterval = setInterval(async () => {
+                let monitorInterval = setInterval(async() => {
                     checksPerformed++;
 
                     try {
