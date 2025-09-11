@@ -4,7 +4,9 @@ This folder contains all packaged `.vsix` files for the Aetherion CPU Monitor ex
 
 ## Current Releases
 
-- `v1.7.0` - **Latest**: Added swap usage monitoring with cross-platform support
+- `v1.9.0` - **Latest**: Consistent status bar layout with always-visible swap section
+- `v1.8.0` - TPS-based disk activity monitoring with read/write separation  
+- `v1.7.0` - Added swap usage monitoring with cross-platform support
 - `v1.6.1` - Extension logo for VS Code marketplace display
 - `v1.6.0` - Dedicated system monitor sidebar and static system information tree view
 - `v1.0.0` - Initial release with CPU, RAM, disk, and network monitoring

@@ -5,6 +5,21 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2025-09-11
+
+### 🔧 UX Improvements
+
+- **Consistent Status Bar Layout**: Swap section now always appears in status bar for predictable positioning
+  - **Always Show Swap**: Swap section displays even on systems without swap configuration
+  - **Clear No-Swap Indication**: Uses ⣛ braille character when swap is not configured
+  - **Consistent Tooltip**: Always includes swap information with "Not configured" message when appropriate
+  - **Predictable Learning**: Users can now rely on consistent section positioning across all systems
+
+### 🐛 Bug Fixes
+
+- **Cross-Platform Consistency**: Eliminates status bar layout differences between systems with and without swap
+- **UI Stability**: Prevents status bar sections from shifting position based on system configuration
+
 ## [1.8.0] - 2025-09-11
 
 ### 🎯 Major Features
