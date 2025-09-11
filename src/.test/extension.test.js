@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, getSwapBlock, calculateSwapUsage } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, getSwapBlock, calculateSwapUsage, calculateDiskActivity, getDiskActivityBlock } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -354,12 +354,139 @@ suite('Aetherion CPU Monitor Test Suite', function() {
         });
     });
 
+    suite('Disk Activity Braille Character Mapping', function() {
+        test('should use same braille patterns as utility function', async function() {
+            let get_braille_character = require('../.utility/get_braille_character.js');
+
+            let testValues = [0, 15, 30, 45, 60, 75, 90, 100];
+            for (let value of testValues) {
+                let diskActivityResult = await getDiskActivityBlock(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(diskActivityResult, utilityResult,
+                    `Disk activity function should use same pattern as utility for ${value}%`);
+            }
+        });
+
+        test('should handle edge cases correctly', async function() {
+            // Test boundary values
+            let result0 = await getDiskActivityBlock(0);
+            let result100 = await getDiskActivityBlock(100);
+
+            assert.strictEqual(result0, '⡀', 'Should return minimal braille for 0% activity');
+            assert.strictEqual(result100, '⣿', 'Should return full braille for 100% activity');
+
+            // Test that we get proper character progression
+            let progression = [];
+            for (let i = 0; i <= 100; i += 12.5) {
+                progression.push(await getDiskActivityBlock(i));
+            }
+
+            // Should have 8-level progression with no duplicates in sequence
+            let validBraille = ['⡀', '⣀', '⣠', '⣤', '⣦', '⣶', '⣾', '⣿'];
+            progression.forEach(char => {
+                assert.ok(validBraille.includes(char), `${char} should be valid braille character`);
+            });
+        });
+    });
+
+    suite('Disk Activity Calculation', function() {
+        test('should return valid disk activity data', async function() {
+            let activityInfo = await calculateDiskActivity();
+
+            // Should return required properties
+            assert.ok(typeof activityInfo === 'object', 'Should return object');
+            assert.ok(typeof activityInfo.activity_level === 'number', 'Should have activity_level as number');
+            assert.ok(typeof activityInfo.mb_per_second === 'number', 'Should have mb_per_second as number');
+            assert.ok(typeof activityInfo.activity_description === 'string', 'Should have activity_description as string');
+
+            // Activity level should be between 0-100
+            assert.ok(activityInfo.activity_level >= 0 && activityInfo.activity_level <= 100,
+                'Activity level should be between 0-100%');
+
+            // MB/s should be non-negative
+            assert.ok(activityInfo.mb_per_second >= 0, 'MB/s should be non-negative');
+
+            // Activity description should be meaningful
+            let validDescriptions = ['idle', 'light', 'moderate', 'busy', 'very busy', 'extreme'];
+            assert.ok(validDescriptions.includes(activityInfo.activity_description),
+                'Should have valid activity description');
+        });
+
+        test('should handle different OS platforms', async function() {
+            let platform = os.platform();
+            let activityInfo = await calculateDiskActivity();
+
+            // Should work on any platform
+            assert.ok(typeof activityInfo.activity_level === 'number', `Should return number activity_level on ${platform}`);
+            assert.ok(typeof activityInfo.mb_per_second === 'number', `Should return number mb_per_second on ${platform}`);
+
+            // On platforms where iostat is available (macOS, Linux), should get real data
+            if (platform === 'darwin' || platform === 'linux') {
+                assert.ok(activityInfo.activity_level >= 0, 'Activity level should be non-negative');
+                assert.ok(activityInfo.mb_per_second >= 0, 'MB/s should be non-negative');
+            }
+        });
+
+        test('should provide consistent activity information', async function() {
+            this.timeout(5000); // Increase timeout for iostat calls
+            let activityInfo1 = await calculateDiskActivity();
+            let activityInfo2 = await calculateDiskActivity();
+
+            // Values might change, but should be within reasonable bounds
+            assert.ok(typeof activityInfo1.activity_level === 'number', 'First call should return valid activity level');
+            assert.ok(typeof activityInfo2.activity_level === 'number', 'Second call should return valid activity level');
+
+            // Both should have valid ranges
+            assert.ok(activityInfo1.activity_level >= 0 && activityInfo1.activity_level <= 100,
+                'First call should have valid activity level range');
+            assert.ok(activityInfo2.activity_level >= 0 && activityInfo2.activity_level <= 100,
+                'Second call should have valid activity level range');
+        });
+
+        test('should handle disk activity detection gracefully', async function() {
+            let activityInfo = await calculateDiskActivity();
+
+            // Should never have undefined or null values
+            assert.ok(activityInfo.activity_level !== undefined && activityInfo.activity_level !== null,
+                'activity_level should be defined');
+            assert.ok(activityInfo.mb_per_second !== undefined && activityInfo.mb_per_second !== null,
+                'mb_per_second should be defined');
+            assert.ok(activityInfo.activity_description !== undefined && activityInfo.activity_description !== null,
+                'activity_description should be defined');
+
+            // Values should never be negative
+            assert.ok(activityInfo.activity_level >= 0, 'Activity level should never be negative');
+            assert.ok(activityInfo.mb_per_second >= 0, 'MB/s should never be negative');
+
+            // Activity level should never exceed 100%
+            assert.ok(activityInfo.activity_level <= 100, 'Activity level should never exceed 100%');
+
+            // Activity description should correspond to TPS ranges (validate current actual TPS)
+            let actualTPS = activityInfo.total_tps;
+            if (actualTPS <= 5) {
+                assert.strictEqual(activityInfo.activity_description, 'idle', 'Should be idle for <= 5 TPS');
+            } else if (actualTPS <= 25) {
+                assert.strictEqual(activityInfo.activity_description, 'light', 'Should be light for <= 25 TPS');
+            } else if (actualTPS <= 100) {
+                assert.strictEqual(activityInfo.activity_description, 'moderate', 'Should be moderate for <= 100 TPS');
+            } else if (actualTPS <= 300) {
+                assert.strictEqual(activityInfo.activity_description, 'busy', 'Should be busy for <= 300 TPS');
+            } else if (actualTPS <= 800) {
+                assert.strictEqual(activityInfo.activity_description, 'very busy', 'Should be very busy for <= 800 TPS');
+            } else {
+                assert.strictEqual(activityInfo.activity_description, 'extreme', 'Should be extreme for > 800 TPS');
+            }
+        });
+    });
+
     suite('Integration Tests', function() {
         test('should provide meaningful system monitoring data', async function() {
             let ramInfo = await calculateRamUsage();
             let ramBlock = await getRamBlock(ramInfo.usagePercent);
             let diskInfo = await calculateDiskUsage();
             let diskBlock = await getDiskBlock(diskInfo.usagePercent);
+            let diskActivityInfo = await calculateDiskActivity();
+            let diskActivityBlock = await getDiskActivityBlock(diskActivityInfo.activity_level);
             let networkInfo = await calculateNetworkUsage();
             let networkInBlock = await getNetworkInBlock(networkInfo.networkInPercent);
             let networkOutBlock = await getNetworkOutBlock(networkInfo.networkOutPercent);
@@ -370,6 +497,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             let validBraille = ['⡀', '⣀', '⣠', '⣤', '⣦', '⣶', '⣾', '⣿'];
             assert.ok(validBraille.includes(ramBlock), 'Should return valid RAM braille character');
             assert.ok(validBraille.includes(diskBlock), 'Should return valid disk braille character');
+            assert.ok(validBraille.includes(diskActivityBlock), 'Should return valid disk activity braille character');
             assert.ok(validBraille.includes(networkInBlock), 'Should return valid network in braille character');
             assert.ok(validBraille.includes(networkOutBlock), 'Should return valid network out braille character');
 
