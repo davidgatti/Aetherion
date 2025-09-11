@@ -5,6 +5,44 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-09-11
+
+### 🎯 Major Features
+
+- **TPS-Based Disk Activity Monitoring**: Revolutionary modernization of classic 90s PC case LED experience
+  - **Dual Read/Write Activity Display**: Separate braille characters for read and write operations
+  - **TPS (Transfers Per Second) Focus**: Measures drive "busyness" like original hardware LEDs, not just raw throughput
+  - **Intelligent I/O Pattern Detection**: Estimates read/write ratios based on transfer sizes
+    - Small transfers (<8KB): 70% reads, 30% writes (typical random I/O)
+    - Large transfers (>32KB): 50% reads, 50% writes (sequential I/O)
+    - Medium transfers: Blended ratio based on actual transfer size
+  - **Realistic Activity Thresholds**:
+    - Idle: 0-5 TPS, Light: 5-25 TPS, Moderate: 25-100 TPS
+    - Busy: 100-300 TPS, Very Busy: 300-800 TPS, Extreme: 800+ TPS
+  - **Enhanced Status Bar Format**: `CPU RAM SWAP DISK READ WRITE NETWORK_IN NETWORK_OUT`
+  - **Detailed Activity Tooltip**: Shows TPS breakdown, MB/s, and read/write distribution
+
+### 🔧 Technical Improvements
+
+- **Drive-Agnostic Performance**: Works equally well on HDDs, SATA SSDs, NVMe SSDs, and enterprise drives
+- **Authentic 90s LED Feel**: Captures the "crunchy" random I/O that made classic LEDs flicker rapidly
+- **Backwards Compatibility**: Maintains all existing APIs while adding new TPS-based functionality
+- **Cross-Platform iostat Integration**: Uses native disk statistics without requiring elevated permissions
+
+### 🧪 Testing Enhancements
+
+- **Comprehensive Disk Activity Test Suite**: 8 new tests covering TPS monitoring, read/write estimation, and activity level calculation
+- **TPS Validation**: Tests ensure accurate activity descriptions based on actual transfer rates
+- **Enhanced Integration Testing**: Validates new dual-character display format
+- **Total Test Coverage**: 58 passing tests ensuring robust functionality
+
+### 📁 Architecture Updates
+
+- **New Disk Activity Monitor**: `01_monitors/06_disk-activity-monitor.js` with TPS-based calculations
+- **Extended Extension API**: Added `getDiskReadActivityBlock()` and `getDiskWriteActivityBlock()` functions
+- **Enhanced Status Bar Logic**: Updated display formatting for dual activity indicators
+- **Improved Module Exports**: Extended API surface for new read/write activity functions
+
 ## [1.7.0] - 2025-09-11
 
 ### ✨ New Features
