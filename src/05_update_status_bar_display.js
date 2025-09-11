@@ -1,12 +1,7 @@
-let calculate_cpu_usage = require('./01_calculate_cpu_usage.js');
-let get_cpu_braille_character = require('./02_get_cpu_braille_character.js');
-let calculate_ram_usage = require('./03_calculate_ram_usage.js');
-let get_ram_braille_character = require('./04_get_ram_braille_character.js');
-let calculate_disk_usage = require('./13_calculate_disk_usage.js');
-let get_disk_braille_character = require('./14_get_disk_braille_character.js');
-let calculate_network_usage = require('./15_calculate_network_usage.js');
-let get_network_in_braille_character = require('./16_get_network_in_braille_character.js');
-let get_network_out_braille_character = require('./17_get_network_out_braille_character.js');
+let { calculate_cpu_usage, get_cpu_braille_character } = require('./01_calculate_cpu_usage.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('./03_calculate_ram_usage.js');
+let { calculate_disk_usage_internal, get_disk_braille_character } = require('./13_calculate_disk_usage.js');
+let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./15_calculate_network_usage.js');
 let os = require('os');
 
 //
@@ -29,9 +24,9 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     //	Get current system usage information
     //
     let cpu_usage_percentages = await calculate_cpu_usage();
-    let ram_usage_info = await calculate_ram_usage();
-    let disk_usage_info = await calculate_disk_usage();
-    let network_usage_info = await calculate_network_usage();
+    let ram_usage_info = await calculate_ram_usage_internal();
+    let disk_usage_info = await calculate_disk_usage_internal();
+    let network_usage_info = await calculate_network_usage_internal();
 
     //
     //	Get braille characters for each CPU core

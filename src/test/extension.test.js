@@ -446,11 +446,11 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('Cross-Platform Memory Calculation Tests', function() {
-        let calculate_ram_usage = require('../03_calculate_ram_usage.js');
+        let { calculate_ram_usage_internal } = require('../03_calculate_ram_usage.js');
 
         test('should use platform-specific memory calculation methods', async function() {
             let platform = os.platform();
-            let result = await calculate_ram_usage();
+            let result = await calculate_ram_usage_internal();
 
             // Basic validation for all platforms
             assert.ok(result.total_gb > 0, 'Total memory should be positive');
@@ -468,7 +468,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
                 return;
             }
 
-            let result = await calculate_ram_usage();
+            let result = await calculate_ram_usage_internal();
             let rawUsagePercent = ((os.totalmem() - os.freemem()) / os.totalmem()) * 100;
 
             // Our improved calculation should be more reasonable than raw os.freemem()
@@ -501,7 +501,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
             };
 
             try {
-                let result = await calculate_ram_usage();
+                let result = await calculate_ram_usage_internal();
                 assert.ok(result.total_gb > 0, 'Should fallback gracefully when memory_pressure fails');
                 console.log('✅ macOS fallback test passed');
             } finally {
@@ -550,7 +550,7 @@ Inactive:        4096000 kB
 
             // Take 3 measurements
             for (let i = 0; i < 3; i++) {
-                results.push(await calculate_ram_usage());
+                results.push(await calculate_ram_usage_internal());
                 await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
             }
 
@@ -574,7 +574,7 @@ Inactive:        4096000 kB
 
         test('should handle edge cases gracefully', async function() {
             // Test that our calculation handles edge cases
-            let result = await calculate_ram_usage();
+            let result = await calculate_ram_usage_internal();
 
             // Should never have negative available memory
             assert.ok(result.available_gb >= 0, 'Available memory should never be negative');

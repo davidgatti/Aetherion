@@ -1,4 +1,5 @@
 let os = require('os');
+let get_braille_character = require('./utility/get_braille_character.js');
 
 //
 //	Store previous CPU times for usage calculation
@@ -73,4 +74,18 @@ async function calculate_cpu_usage() {
     return usage_percentages;
 }
 
-module.exports = calculate_cpu_usage;
+//
+//	Convert CPU usage percentage to braille character
+//
+async function get_cpu_braille_character(cpu_usage_percent) {
+
+    //
+    //  --> delegate to common braille character utility
+    //
+    return await get_braille_character(cpu_usage_percent);
+}
+
+module.exports = {
+    calculate_cpu_usage,
+    get_cpu_braille_character
+};

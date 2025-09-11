@@ -1,6 +1,7 @@
 let os = require('os');
 let { execSync } = require('child_process');
 let fs = require('fs');
+let get_braille_character = require('./utility/get_braille_character.js');
 
 //
 //	Cache for interface capacity and previous measurements
@@ -295,4 +296,30 @@ async function calculate_network_usage_internal() {
     };
 }
 
-module.exports = calculate_network_usage_internal;
+//
+//	Get braille character for network IN traffic percentage
+//
+async function get_network_in_braille_character(network_in_percentage) {
+
+    //
+    //	--> delegate to common braille character utility
+    //
+    return await get_braille_character(network_in_percentage);
+}
+
+//
+//	Get braille character for network OUT traffic percentage
+//
+async function get_network_out_braille_character(network_out_percentage) {
+
+    //
+    //	--> delegate to common braille character utility
+    //
+    return await get_braille_character(network_out_percentage);
+}
+
+module.exports = {
+    calculate_network_usage_internal,
+    get_network_in_braille_character,
+    get_network_out_braille_character
+};
