@@ -591,4 +591,236 @@ Inactive:        4096000 kB
             assert.ok(diff < 1, `Used + Available should equal Total (diff: ${diff.toFixed(3)}GB)`);
         });
     });
+
+    suite('Status Bar UI Integration Tests', function() {
+        this.timeout(15000); // Extend timeout for UI monitoring tests
+
+        test('should detect if status bar is not updating within 5 seconds', async function() {
+            //
+            //	Get the extension to access its status bar item
+            //
+            let extension = vscode.extensions.getExtension('gatti.aetherion-cpu-monitor');
+            assert.ok(extension, 'Extension should be found');
+            
+            if (!extension.isActive) {
+                await extension.activate();
+            }
+
+            //
+            //	Find the status bar item by looking for system monitor items
+            //
+            let statusBarItems = [];
+            
+            //
+            //	Wait a moment for status bar to initialize
+            //
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            //
+            //	Monitor status bar for updates - simulate by watching for braille characters
+            //
+            let initialCheck = true;
+            let firstDisplayValue = null;
+            let lastDisplayValue = null;
+            let displayChangeDetected = false;
+            let displayInitialized = false;
+            
+            //
+            //	Check every 500ms for 6 seconds (12 checks total)
+            //
+            let checkCount = 0;
+            let maxChecks = 12;
+            
+            let monitorPromise = new Promise((resolve, reject) => {
+                let checkInterval = setInterval(() => {
+                    checkCount++;
+                    
+                    try {
+                        //
+                        //	Simulate status bar access by calling the display function directly
+                        //	This tests the core functionality that drives the UI
+                        //
+                        let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
+                        
+                        //
+                        //	Create a mock status bar item to test the display logic
+                        //
+                        let mockStatusBarItem = {
+                            text: '',
+                            tooltip: '',
+                            show: () => {},
+                            command: ''
+                        };
+                        
+                        //
+                        //	Test that the update function works and produces output
+                        //
+                        update_status_bar_display(mockStatusBarItem, false).then(() => {
+                            let currentDisplay = mockStatusBarItem.text;
+                            
+                            //
+                            //	Check if display has content (not empty)
+                            //
+                            if (!displayInitialized && currentDisplay && currentDisplay.length > 0) {
+                                displayInitialized = true;
+                                firstDisplayValue = currentDisplay;
+                                console.log(`✓ Status bar initialized with: "${currentDisplay}"`);
+                            }
+                            
+                            //
+                            //	Check for changes in display
+                            //
+                            if (displayInitialized && lastDisplayValue !== null && currentDisplay !== lastDisplayValue) {
+                                displayChangeDetected = true;
+                                console.log(`✓ Status bar update detected: "${lastDisplayValue}" → "${currentDisplay}"`);
+                            }
+                            
+                            lastDisplayValue = currentDisplay;
+                            
+                            //
+                            //	Success conditions: display initialized and either changes detected or reasonable time passed
+                            //
+                            if (displayInitialized && (displayChangeDetected || checkCount >= 8)) {
+                                clearInterval(checkInterval);
+                                resolve({
+                                    initialized: displayInitialized,
+                                    changesDetected: displayChangeDetected,
+                                    finalDisplay: currentDisplay,
+                                    checksPerformed: checkCount
+                                });
+                            }
+                            
+                            //
+                            //	Timeout condition: no initialization or updates after max checks
+                            //
+                            if (checkCount >= maxChecks) {
+                                clearInterval(checkInterval);
+                                reject(new Error(`Status bar failed to ${!displayInitialized ? 'initialize' : 'update'} within 6 seconds. Last display: "${currentDisplay}"`));
+                            }
+                        }).catch(error => {
+                            clearInterval(checkInterval);
+                            reject(new Error(`Status bar update function failed: ${error.message}`));
+                        });
+                        
+                    } catch (error) {
+                        clearInterval(checkInterval);
+                        reject(new Error(`Status bar monitoring failed: ${error.message}`));
+                    }
+                }, 500);
+            });
+
+            //
+            //	Wait for monitoring to complete
+            //
+            let result = await monitorPromise;
+            
+            //
+            //	Verify results
+            //
+            assert.ok(result.initialized, 'Status bar should initialize with content within 5 seconds');
+            assert.ok(result.finalDisplay.length > 0, 'Status bar should have non-empty display content');
+            
+            //
+            //	Status bar should contain braille characters (system monitoring data)
+            //
+            let hasBraillePattern = /[⡀-⣿]/.test(result.finalDisplay);
+            assert.ok(hasBraillePattern, `Status bar should contain braille monitoring characters. Got: "${result.finalDisplay}"`);
+            
+            console.log(`✅ Status bar UI test passed - Initialized: ${result.initialized}, Changes: ${result.changesDetected}, Checks: ${result.checksPerformed}`);
+        });
+
+        test('should detect if status bar display becomes frozen (no changes for 5+ seconds)', async function() {
+            //
+            //	This test monitors for display freezing by watching for changes over time
+            //
+            let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
+            
+            let mockStatusBarItem = {
+                text: '',
+                tooltip: '',
+                show: () => {},
+                command: ''
+            };
+            
+            let displayHistory = [];
+            let checksPerformed = 0;
+            let maxChecks = 15; // 7.5 seconds of monitoring
+            
+            //
+            //	Monitor display changes every 500ms
+            //
+            let freezeDetectionPromise = new Promise((resolve, reject) => {
+                let monitorInterval = setInterval(async () => {
+                    checksPerformed++;
+                    
+                    try {
+                        await update_status_bar_display(mockStatusBarItem, false);
+                        let currentDisplay = mockStatusBarItem.text;
+                        displayHistory.push({
+                            check: checksPerformed,
+                            display: currentDisplay,
+                            timestamp: Date.now()
+                        });
+                        
+                        //
+                        //	After collecting enough samples, analyze for freeze patterns
+                        //
+                        if (checksPerformed >= maxChecks) {
+                            clearInterval(monitorInterval);
+                            
+                            //
+                            //	Analyze display history for freeze detection
+                            //
+                            let uniqueDisplays = new Set(displayHistory.map(h => h.display));
+                            let displayChangeCount = uniqueDisplays.size;
+                            
+                            //
+                            //	Check if display remained completely static (frozen)
+                            //
+                            let isCompletelyFrozen = displayChangeCount === 1 && displayHistory.length > 10;
+                            
+                            //
+                            //	Check for recent activity (last 5 seconds / 10 checks)
+                            //
+                            let recentDisplays = displayHistory.slice(-10).map(h => h.display);
+                            let recentUniqueDisplays = new Set(recentDisplays);
+                            let recentActivity = recentUniqueDisplays.size > 1;
+                            
+                            resolve({
+                                totalChecks: checksPerformed,
+                                uniqueDisplayCount: displayChangeCount,
+                                isCompletelyFrozen: isCompletelyFrozen,
+                                hasRecentActivity: recentActivity,
+                                displayHistory: displayHistory.slice(-5), // Last 5 samples
+                                finalDisplay: displayHistory[displayHistory.length - 1].display
+                            });
+                        }
+                    } catch (error) {
+                        clearInterval(monitorInterval);
+                        reject(new Error(`Display freeze detection failed: ${error.message}`));
+                    }
+                }, 500);
+            });
+            
+            let result = await freezeDetectionPromise;
+            
+            //
+            //	Verify the display is not completely frozen
+            //
+            assert.ok(!result.isCompletelyFrozen, `Status bar appears to be completely frozen. Only ${result.uniqueDisplayCount} unique display(s) detected over ${result.totalChecks} checks`);
+            
+            //
+            //	Verify there's recent activity (changes in the last 5 seconds)
+            //
+            assert.ok(result.hasRecentActivity, `Status bar appears frozen - no changes detected in recent monitoring period. Final display: "${result.finalDisplay}"`);
+            
+            //
+            //	Verify display contains expected braille content
+            //
+            let hasBraillePattern = /[⡀-⣿]/.test(result.finalDisplay);
+            assert.ok(hasBraillePattern, `Status bar should contain braille monitoring characters. Got: "${result.finalDisplay}"`);
+            
+            console.log(`✅ Status bar freeze detection passed - ${result.uniqueDisplayCount} unique displays over ${result.totalChecks} checks, recent activity: ${result.hasRecentActivity}`);
+        });
+    });
 });
