@@ -1,6 +1,7 @@
 let os = require('os');
 let { execSync } = require('child_process');
 let fs = require('fs');
+let get_braille_character = require('../.utility/get_braille_character.js');
 
 //
 //	Calculate disk usage percentage for the main disk
@@ -306,4 +307,18 @@ function get_fallback_disk_usage(path) {
     }
 }
 
-module.exports = calculate_disk_usage_internal;
+//
+//	Convert disk usage percentage to braille character
+//
+async function get_disk_braille_character(disk_usage_percent) {
+
+    //
+    //	--> delegate to common braille character utility
+    //
+    return await get_braille_character(disk_usage_percent);
+}
+
+module.exports = {
+    calculate_disk_usage_internal,
+    get_disk_braille_character
+};

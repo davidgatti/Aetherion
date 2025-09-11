@@ -1,5 +1,6 @@
 let os = require('os');
 let { execSync } = require('child_process');
+let get_braille_character = require('../.utility/get_braille_character.js');
 
 //
 //	Calculate RAM usage percentage and memory information
@@ -157,4 +158,18 @@ async function calculate_ram_usage_internal() {
     };
 }
 
-module.exports = calculate_ram_usage_internal;
+//
+//	Convert RAM usage percentage to braille character
+//
+async function get_ram_braille_character(ram_usage_percent) {
+
+    //
+    //	--> delegate to common braille character utility
+    //
+    return await get_braille_character(ram_usage_percent);
+}
+
+module.exports = {
+    calculate_ram_usage_internal,
+    get_ram_braille_character
+};

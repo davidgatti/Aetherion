@@ -1,6 +1,6 @@
-This repository is Visual studio code Extension.
+This repository is Visual studio code Extension that is a system manager to surface resoruce usage for a local PC or a remote host, to know know what is going on the machine.
 
-# Work Styles
+## Work Styles
 
 PRIORITY – READ THIS FILE, UNDERSTAND THIS FILE, FOLLOW THIS FILE, MAKE THIS FILE YOUR BIBLE, AND ACCEPT THAT YOU ARE BOUND BY THE RULES OF THIS REPO AND MOST OF ALL FOLLW THE OWNER INSTRUCTIONS, AS HE ASK, AND IF NOT SURE, ASK FOR CLARIFICATION.
 
@@ -80,3 +80,15 @@ Only when both are clean and pass should you consider the job finished.
 * Re-Run the test, and see if the test detect the problem
 
 Iterate untill all the brakegase are detected. Only then you can trully know that that the tests are usefull.
+
+## Restrictions
+
+* You are not allowed to git commit
+* You are not allowed to git push
+
+## Naming convetion
+
+Use Hierarchical Prefix Naming, a file naming convention that uses category-subcategory-specific structure to create logical grouping and hierarchy.
+
+* pattern: {category}-{subcategory}-{specific-function}
+* example: security-scan-dependencies.yml, security-scan-code.yml.

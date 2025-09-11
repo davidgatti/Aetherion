@@ -1,7 +1,7 @@
 let vscode = require('vscode');
 let os = require('os');
-let calculate_cpu_usage = require('./01_calculate_cpu_usage.js');
-let calculate_ram_usage = require('./03_calculate_ram_usage.js');
+let { calculate_cpu_usage } = require('../01_monitors/01_cpu-monitor.js');
+let { calculate_ram_usage_internal } = require('../01_monitors/02_ram-monitor.js');
 
 //
 //	Show quick system info when status bar is clicked
@@ -13,7 +13,7 @@ async function show_quick_system_info() {
         //	Get current system information
         //
         let cpu_usage_percentages = await calculate_cpu_usage();
-        let ram_usage_info = await calculate_ram_usage();
+        let ram_usage_info = await calculate_ram_usage_internal();
         let cpu_count = os.cpus().length;
 
         //

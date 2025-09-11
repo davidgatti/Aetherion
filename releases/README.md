@@ -4,9 +4,10 @@ This folder contains all packaged `.vsix` files for the Aetherion CPU Monitor ex
 
 ## Current Releases
 
-- `v1.0.0` - Initial release
-- `v1.0.1` - Bug fixes and improvements  
-- `v1.1.0` - Enhanced features and stability
+- `v1.7.0` - **Latest**: Added swap usage monitoring with cross-platform support
+- `v1.6.1` - Extension logo for VS Code marketplace display
+- `v1.6.0` - Dedicated system monitor sidebar and static system information tree view
+- `v1.0.0` - Initial release with CPU, RAM, disk, and network monitoring
 
 ## Release Commands
 

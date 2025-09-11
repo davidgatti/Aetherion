@@ -5,6 +5,37 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2025-09-11
+
+### ✨ New Features
+
+- **Swap Usage Monitoring**: Added real-time swap/virtual memory monitoring with braille display
+  - Cross-platform support (macOS, Linux, Windows) without requiring root permissions
+  - Smart detection - only shows swap indicator when swap is actually configured
+  - Uses native OS commands: `sysctl vm.swapusage` (macOS), `/proc/meminfo` (Linux), `wmic pagefile` (Windows)
+  - Integrated into status bar display format: `CPU RAM SWAP DISK NETWORK`
+  - Enhanced tooltip with swap usage details
+
+### 🧪 Testing Improvements
+
+- Added comprehensive swap functionality test suite (6 new tests)
+- Enhanced UI integration tests for status bar monitoring
+- Cross-platform swap detection validation
+- Total test count increased to 52 tests
+
+### 📁 Code Organization
+
+- New swap monitor module: `01_monitors/05_swap-monitor.js`
+- Updated status bar display logic to conditionally include swap
+- Enhanced file organization with leading zero numbering for framework compatibility
+- Organized codebase into logical subfolders by purpose
+
+## [1.6.1] - 2025-09-08
+
+### Added
+
+- Extension logo for VS Code marketplace display
+
 ## [1.6.0] - 2025-09-04
 
 ### ✨ New Features
