@@ -1,7 +1,7 @@
 let os = require('os');
 let { execSync } = require('child_process');
 let fs = require('fs');
-let get_braille_character = require('../utility/get_braille_character.js');
+let get_braille_character = require('../.utility/get_braille_character.js');
 
 //
 //	Cache for interface capacity and previous measurements
