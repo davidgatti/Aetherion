@@ -5,15 +5,15 @@ let vscode = require('vscode');
 //
 //	Import modular functions
 //
-let { get_cpu_braille_character } = require('./01_calculate_cpu_usage.js');
-let { calculate_ram_usage_internal, get_ram_braille_character } = require('./02_calculate_ram_usage.js');
-let { calculate_disk_usage_internal, get_disk_braille_character } = require('./03_calculate_disk_usage.js');
-let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./04_calculate_network_usage.js');
-let update_status_bar_display = require('./05_update_status_bar_display.js');
-let show_system_info_command = require('./06_show_system_info_command.js');
-let { SystemMonitorTreeProvider } = require('./08_system_monitor_tree_provider.js');
-let show_tree_item_details = require('./09_show_tree_item_details.js');
-let focus_system_monitor_tree_view = require('./11_focus_system_monitor_tree_view.js');
+let { get_cpu_braille_character } = require('./monitors/01_cpu-monitor.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('./monitors/02_ram-monitor.js');
+let { calculate_disk_usage_internal, get_disk_braille_character } = require('./monitors/03_disk-monitor.js');
+let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./monitors/04_network-monitor.js');
+let update_status_bar_display = require('./ui/05_status-bar-display.js');
+let show_system_info_command = require('./commands/06_show-system-info-command.js');
+let { SystemMonitorTreeProvider } = require('./ui/08_system-monitor-tree-provider.js');
+let show_tree_item_details = require('./commands/09_show-tree-item-details.js');
+let focus_system_monitor_tree_view = require('./commands/11_focus-system-monitor-tree-view.js');
 
 //
 //	Export functions for external access and testing

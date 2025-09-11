@@ -1,7 +1,7 @@
-let { calculate_cpu_usage, get_cpu_braille_character } = require('./01_calculate_cpu_usage.js');
-let { calculate_ram_usage_internal, get_ram_braille_character } = require('./02_calculate_ram_usage.js');
-let { calculate_disk_usage_internal, get_disk_braille_character } = require('./03_calculate_disk_usage.js');
-let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./04_calculate_network_usage.js');
+let { calculate_cpu_usage, get_cpu_braille_character } = require('../monitors/01_cpu-monitor.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('../monitors/02_ram-monitor.js');
+let { calculate_disk_usage_internal, get_disk_braille_character } = require('../monitors/03_disk-monitor.js');
+let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('../monitors/04_network-monitor.js');
 let os = require('os');
 
 //
