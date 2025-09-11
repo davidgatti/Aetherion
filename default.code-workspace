@@ -22,6 +22,21 @@
             "**/coverage": true,
             "**/.tests/cypress/videos": true,
             "**/.tests/cypress/screenshots": true
+        },
+
+        // Markdown linting configuration to match CLI behavior
+        "markdownlint.config": {
+            "MD013": false,
+            "MD033": {
+                "allowed_elements": ["details", "summary", "img", "br", "kbd", "sub", "sup"]
+            },
+            "MD041": false,
+            "MD025": {
+                "front_matter_title": ""
+            },
+            "MD024": {
+                "siblings_only": true
+            }
         }
     }
 }
