@@ -48,6 +48,47 @@ Only when both are clean and pass should you consider the job finished.
 * Write unit tests for any new functionality.
 * Do not wrtie on your own e2e tests since the team has to decide if it is worth it.
 
+## Webview Development Guidelines
+
+### Core Principle
+
+This extension uses VS Code's native webview API with HTML/CSS/JavaScript. NEVER suggest using @vscode/webview-ui-toolkit (deprecated January 2025). Always use native web technologies with VS Code's official theming system.
+
+### Design Language Requirements
+
+* Use VS Code CSS variables for ALL styling to ensure automatic theme adaptation
+* Follow VS Code's design patterns: card layouts, progress bars, button styles
+* Maintain consistency with VS Code's visual hierarchy and spacing
+* Test against Light, Dark, and High Contrast themes
+
+### Webview Architecture Standards
+
+* Use panel webviews (not sidebar) for dashboard-style interfaces
+* Implement real-time data updates via postMessage communication
+* Structure HTML with semantic markup and accessibility in mind
+* Use CSS Grid for responsive layouts that adapt to panel resizing
+
+### Required VS Code Theming
+
+* Background colors: `var(--vscode-editor-background)`, `var(--vscode-input-background)`
+* Foreground colors: `var(--vscode-editor-foreground)`, `var(--vscode-descriptionForeground)`
+* Interactive elements: `var(--vscode-button-background)`, `var(--vscode-textLink-foreground)`
+* Progress indicators: `var(--vscode-progressBar-background)`, `var(--vscode-progressBar-foreground)`
+* Typography: `var(--vscode-font-family)`, `var(--vscode-font-size)`
+
+### Enhancement Options
+
+* Chart libraries (Chart.js) for historical data visualization
+* CSS animations and transitions for smooth user experience
+* Codicons for VS Code-native iconography
+* Custom CSS components (gauges, sparklines) that follow VS Code design patterns
+
+### Webview Content Security
+
+* Use proper CSP headers: `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'`
+* Never load external resources without proper security considerations
+* Implement message passing for all extension-webview communication
+
 ## Repository Folder Structure
 
 * **.config**: Centralized configuration files to keep the repository root clean.
