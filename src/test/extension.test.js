@@ -446,7 +446,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('Cross-Platform Memory Calculation Tests', function() {
-        let { calculate_ram_usage_internal } = require('../03_calculate_ram_usage.js');
+        let { calculate_ram_usage_internal } = require('../02_calculate_ram_usage.js');
 
         test('should use platform-specific memory calculation methods', async function() {
             let platform = os.platform();

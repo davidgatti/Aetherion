@@ -1,7 +1,7 @@
 let vscode = require('vscode');
 let os = require('os');
 let { calculate_cpu_usage } = require('./01_calculate_cpu_usage.js');
-let { calculate_ram_usage_internal } = require('./03_calculate_ram_usage.js');
+let { calculate_ram_usage_internal } = require('./02_calculate_ram_usage.js');
 
 //
 //	Show quick system info when status bar is clicked
