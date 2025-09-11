@@ -62,11 +62,16 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     );
 
     //
-    //	Get swap braille character (if swap is enabled)
+    //	Get swap braille character (always show swap section for consistency)
     //
     let swap_braille_character = '';
     if (swap_usage_info.swap_enabled) {
         swap_braille_character = await get_swap_braille_character(swap_usage_info.usage_percent);
+    } else {
+        //
+        //	Show ⣛ character when swap is not configured (looks like exclamation mark)
+        //
+        swap_braille_character = '⣛';
     }
 
     //
@@ -81,10 +86,9 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
 
     //
     //	Build status bar display text - per-core CPU + space + RAM + space +
-    //  Swap (if enabled) + space + Disk + DiskRead + DiskWrite + space + Network In + Network Out
+    //  Swap (always shown) + space + Disk + DiskRead + DiskWrite + space + Network In + Network Out
     //
-    let swap_display = swap_usage_info.swap_enabled ? ` ${swap_braille_character}` : '';
-    let display_text = `${cpu_display_string} ${ram_braille_character}${swap_display} ${disk_braille_character}${disk_read_activity_braille_character}${disk_write_activity_braille_character} ${network_in_braille_character}${network_out_braille_character}`;
+    let display_text = `${cpu_display_string} ${ram_braille_character} ${swap_braille_character} ${disk_braille_character}${disk_read_activity_braille_character}${disk_write_activity_braille_character} ${network_in_braille_character}${network_out_braille_character}`;
 
     //
     //	Update status bar item with new information
@@ -100,14 +104,14 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
         //
         let cpu_core_count = os.cpus().length;
         let swap_tooltip = swap_usage_info.swap_enabled ?
-            ` | Swap: ${swap_usage_info.usage_percent.toFixed(1)}% used (${swap_usage_info.used_gb.toFixed(1)}GB / ${swap_usage_info.total_gb.toFixed(1)}GB)` :
-            '';
+            `Swap: ${swap_usage_info.usage_percent.toFixed(1)}% used (${swap_usage_info.used_gb.toFixed(1)}GB / ${swap_usage_info.total_gb.toFixed(1)}GB)` :
+            'Swap: Not configured';
         let cpu_part = `CPU Cores: ${cpu_core_count}`;
         let ram_part = `RAM: ${ram_usage_info.usage_percent.toFixed(1)}% used (${ram_usage_info.available_gb.toFixed(1)}GB / ${ram_usage_info.total_gb.toFixed(1)}GB)`;
         let disk_part = `Disk: ${disk_usage_info.usage_percent.toFixed(1)}% used (${disk_usage_info.available_gb.toFixed(1)}GB / ${disk_usage_info.total_gb.toFixed(1)}GB)`;
         let disk_activity_part = `Disk I/O: ${disk_activity_info.activity_description} (${disk_activity_info.total_tps.toFixed(0)} TPS, ${disk_activity_info.mb_per_second.toFixed(1)}MB/s) - Read: ${disk_activity_info.read_tps.toFixed(0)} TPS, Write: ${disk_activity_info.write_tps.toFixed(0)} TPS`;
         let network_part = `Network: ${network_usage_info.interface_name} (${network_usage_info.capacity_mbps}Mbps) - In: ${network_usage_info.network_in_percent.toFixed(1)}% Out: ${network_usage_info.network_out_percent.toFixed(1)}%`;
-        let tooltip_text = `${cpu_part} | ${ram_part}${swap_tooltip} | ${disk_part} | ${disk_activity_part} | ${network_part}`;
+        let tooltip_text = `${cpu_part} | ${ram_part} | ${swap_tooltip} | ${disk_part} | ${disk_activity_part} | ${network_part}`;
 
         status_bar_item.tooltip = tooltip_text;
     }
