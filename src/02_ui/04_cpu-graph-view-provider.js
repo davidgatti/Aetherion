@@ -14,7 +14,7 @@ class CpuGraphViewProvider {
     //
     //  Resolve webview view
     //
-    resolveWebviewView(webviewView, context, _token) {
+    resolveWebviewView(webviewView, context) {
         this._view = webviewView;
 
         //
@@ -62,12 +62,6 @@ class CpuGraphViewProvider {
                         //
                         this._startLiveUpdates();
                         return;
-                    case 'clear':
-                        //
-                        //  Clear the graph and restart
-                        //
-                        this._restartGraph();
-                        return;
                 }
             },
             undefined,
@@ -110,17 +104,6 @@ class CpuGraphViewProvider {
     }
 
     //
-    //  Restart graph (clear and begin fresh)
-    //
-    _restartGraph() {
-        if (this._view) {
-            this._view.webview.postMessage({
-                command: 'clearGraph'
-            });
-        }
-    }
-
-    //
     //  Generate HTML content for the webview
     //
     _getHtmlForWebview() {
@@ -147,41 +130,6 @@ class CpuGraphViewProvider {
                     height: calc(100vh - 40px);
                     display: flex;
                     flex-direction: column;
-                }
-
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 15px;
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                    padding-bottom: 10px;
-                }
-
-                h1 {
-                    color: var(--vscode-titleBar-activeForeground);
-                    margin: 0;
-                    font-size: 18px;
-                }
-
-                .controls {
-                    display: flex;
-                    gap: 10px;
-                }
-
-                .button {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 6px 12px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: var(--vscode-font-size);
-                    font-family: var(--vscode-font-family);
-                }
-
-                .button:hover {
-                    background-color: var(--vscode-button-hoverBackground);
                 }
 
                 .graph-container {
@@ -257,13 +205,6 @@ class CpuGraphViewProvider {
         </head>
         <body>
             <div class="container">
-                <div class="header">
-                    <h1>CPU Live Graph</h1>
-                    <div class="controls">
-                        <button class="button" onclick="clearGraph()">Clear Graph</button>
-                    </div>
-                </div>
-
                 <div class="graph-container">
                     <div class="cores-grid" id="coresGrid">
                         <!-- Core charts will be dynamically generated here -->
@@ -453,20 +394,8 @@ class CpuGraphViewProvider {
                         case 'updateCpuData':
                             updateChart(message.data);
                             break;
-                        case 'clearGraph':
-                            clearGraph();
-                            break;
                     }
                 });
-
-                //
-                //  Clear graph function (called by button)
-                //
-                function clearGraph() {
-                    vscode.postMessage({
-                        command: 'clearGraph'
-                    });
-                }
 
                 //
                 //  Initialize charts when DOM is ready (charts created on first data)

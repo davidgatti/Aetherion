@@ -13,7 +13,7 @@ class SystemPanelProvider {
     //
     //  Resolve webview view
     //
-    resolveWebviewView(webviewView, context, _token) {
+    resolveWebviewView(webviewView, context) {
         this._view = webviewView;
 
         //
@@ -44,13 +44,6 @@ class SystemPanelProvider {
                 switch (message.command) {
                     case 'alert':
                         vscode.window.showInformationMessage(message.text);
-                        return;
-                    case 'refresh':
-                        //
-                        //  Refresh the webview content asynchronously
-                        //
-                        this._loadContentAsync(webviewView);
-                        vscode.window.showInformationMessage('System information refreshed! 🔄');
                         return;
                 }
             },
@@ -223,28 +216,10 @@ class SystemPanelProvider {
                     text-align: right;
                     font-family: var(--vscode-editor-font-family, 'SF Mono', 'Monaco', 'Consolas', monospace);
                 }
-
-                .button {
-                    background-color: var(--vscode-button-background);
-                    color: var(--vscode-button-foreground);
-                    border: none;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: var(--vscode-font-size);
-                    font-family: var(--vscode-font-family);
-                    margin-top: 15px;
-                }
-
-                .button:hover {
-                    background-color: var(--vscode-button-hoverBackground);
-                }
             </style>
         </head>
         <body>
             <div class="container">
-                <h1>System Information</h1>
-
                 <div class="info-card">
                     <div class="info-row">
                         <span class="info-label">Operating System:</span>
@@ -297,20 +272,7 @@ class SystemPanelProvider {
                         <span class="info-value">${osInfo.uptime}</span>
                     </div>
                 </div>
-
-                <button class="button" onclick="refreshInfo()">Refresh Information</button>
             </div>
-
-            <script>
-                const vscode = acquireVsCodeApi();
-
-                function refreshInfo() {
-                    vscode.postMessage({
-                        command: 'refresh',
-                        text: 'Refreshing system information...'
-                    });
-                }
-            </script>
         </body>
         </html>`;
     }

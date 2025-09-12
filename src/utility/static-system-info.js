@@ -189,7 +189,7 @@ class StaticSystemInfo {
     //  Format bytes to human readable
     //
     static _formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) {return '0 Bytes';}
         let k = 1024;
         let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         let i = Math.floor(Math.log(bytes) / Math.log(k));
