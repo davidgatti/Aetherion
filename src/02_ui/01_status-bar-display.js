@@ -23,66 +23,63 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
     }
 
     //
-    //	Get current system usage information
+    //	Get current system usage information in parallel for better performance
     //
-    let cpu_usage_percentages = await calculate_cpu_usage();
-    let ram_usage_info = await calculate_ram_usage_internal();
-    let disk_usage_info = await calculate_disk_usage_internal();
-    let disk_activity_info = await calculate_disk_activity_internal();
-    let network_usage_info = await calculate_network_usage_internal();
-    let swap_usage_info = await calculate_swap_usage_internal();
+    let [
+        cpu_usage_percentages,
+        ram_usage_info,
+        disk_usage_info,
+        disk_activity_info,
+        network_usage_info,
+        swap_usage_info
+    ] = await Promise.all([
+        calculate_cpu_usage(),
+        calculate_ram_usage_internal(),
+        calculate_disk_usage_internal(),
+        calculate_disk_activity_internal(),
+        calculate_network_usage_internal(),
+        calculate_swap_usage_internal()
+    ]);
 
     //
-    //	Get braille characters for each CPU core
+    //	Get braille characters for each CPU core in parallel
     //
-    let cpu_display_string = '';
-    for (let i = 0; i < cpu_usage_percentages.length; i++) {
-        let core_braille = await get_cpu_braille_character(cpu_usage_percentages[i]);
-        cpu_display_string += core_braille;
-    }
+    let cpu_braille_promises = cpu_usage_percentages.map(async(usage) => {
+        return await get_cpu_braille_character(usage);
+    });
 
     //
-    //	Get RAM braille character
+    //	Get all other braille characters in parallel
     //
-    let ram_braille_character = await get_ram_braille_character(ram_usage_info.usage_percent);
-
-    //
-    //	Get disk braille character
-    //
-    let disk_braille_character = await get_disk_braille_character(disk_usage_info.usage_percent);
-
-    //
-    //	Get disk read and write activity braille characters (90s LED style)
-    //
-    let disk_read_activity_braille_character = await get_disk_read_activity_braille_character(
-        disk_activity_info.read_activity_level
-    );
-    let disk_write_activity_braille_character = await get_disk_write_activity_braille_character(
-        disk_activity_info.write_activity_level
-    );
-
-    //
-    //	Get swap braille character (always show swap section for consistency)
-    //
-    let swap_braille_character = '';
-    if (swap_usage_info.swap_enabled) {
-        swap_braille_character = await get_swap_braille_character(swap_usage_info.usage_percent);
-    } else {
+    let [
+        cpu_braille_chars,
+        ram_braille_character,
+        disk_braille_character,
+        disk_read_activity_braille_character,
+        disk_write_activity_braille_character,
+        network_in_braille_character,
+        network_out_braille_character,
+        swap_braille_character
+    ] = await Promise.all([
+        Promise.all(cpu_braille_promises),
+        get_ram_braille_character(ram_usage_info.usage_percent),
+        get_disk_braille_character(disk_usage_info.usage_percent),
+        get_disk_read_activity_braille_character(disk_activity_info.read_activity_level),
+        get_disk_write_activity_braille_character(disk_activity_info.write_activity_level),
+        get_network_in_braille_character(network_usage_info.network_in_percent),
+        get_network_out_braille_character(network_usage_info.network_out_percent),
         //
-        //	Show ⣛ character when swap is not configured (looks like exclamation mark)
+        //	Handle swap character - use braille if enabled, otherwise show ⣛ (exclamation-like)
         //
-        swap_braille_character = '⣛';
-    }
+        swap_usage_info.swap_enabled ?
+            get_swap_braille_character(swap_usage_info.usage_percent) :
+            Promise.resolve('⣛')
+    ]);
 
     //
-    //	Get network braille characters for in and out traffic
+    //	Build CPU display string from parallel results
     //
-    let network_in_braille_character = await get_network_in_braille_character(
-        network_usage_info.network_in_percent
-    );
-    let network_out_braille_character = await get_network_out_braille_character(
-        network_usage_info.network_out_percent
-    );
+    let cpu_display_string = cpu_braille_chars.join('');
 
     //
     //	Build status bar display text - per-core CPU + space + RAM + space +

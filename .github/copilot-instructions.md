@@ -26,6 +26,8 @@ This VS Code extension provides real-time system monitoring through multiple UI 
 - **Swap Monitor**: Virtual memory usage
 - **Disk Activity Monitor**: Read/write activity monitoring
 
+**⚠️ CRITICAL**: When adding new metrics, follow the **Performance-First Guidelines** section below to maintain the 2-second status bar update responsiveness.
+
 ## Extension Components Structure
 
 ### **Core Files**
@@ -138,6 +140,84 @@ Only when both are clean and pass should you consider the job finished.
 * chagnes has to be small and narrow to allow a clean git diff to see waht actaully changed.
 * Write unit tests for any new functionality.
 * Do not wrtie on your own e2e tests since the team has to decide if it is worth it.
+
+## Performance-First Guidelines for New Metrics
+
+### **Critical Performance Requirements**
+
+This extension must maintain responsive 2-second status bar updates WITHOUT blocking. Any new metric addition must follow these non-negotiable rules:
+
+### **1. Async-First Shell Commands**
+- **NEVER use `execSync`** - Always use `exec` with `promisify()` as `execAsync`
+- **Example Pattern**:
+  ```js
+  let { exec } = require('child_process');
+  let { promisify } = require('util');
+  let execAsync = promisify(exec);
+  
+  // ✅ CORRECT - Non-blocking
+  let { stdout } = await execAsync('your-command-here');
+  
+  // ❌ WRONG - Blocks JavaScript event loop
+  let output = execSync('your-command-here', { encoding: 'utf8' });
+  ```
+
+### **2. Parallel Monitoring Execution**
+- **All monitoring functions MUST be called in parallel** using `Promise.all()`
+- **Never use sequential `await` calls** for monitoring functions
+- **Status bar updates must complete under 100ms** (performance test enforced)
+- **Example Integration Pattern**:
+  ```js
+  // ✅ CORRECT - Parallel execution in status-bar-display.js
+  let [cpu_data, ram_data, new_metric_data] = await Promise.all([
+      calculate_cpu_usage(),
+      calculate_ram_usage_internal(),
+      calculate_new_metric_internal()  // Your new metric here
+  ]);
+  ```
+
+### **3. Monitoring Module Structure**
+- **File naming**: Follow `0X_metric-name-monitor.js` pattern
+- **Export pattern**: Export both calculation and braille functions
+- **Async functions**: All calculation functions must be `async` and return promises
+- **Error handling**: Graceful degradation with fallback values
+- **Cross-platform**: Support macOS, Linux, Windows with appropriate fallbacks
+
+### **4. Performance Testing Requirements**
+- **Add performance tests** for any new monitoring function in `src/.test/performance.test.js`
+- **Test individual function timing** (should complete under 500ms)
+- **Test integration impact** on status bar update cycles
+- **Verify no blocking behavior** (critical threshold: 100ms max per update)
+
+### **5. Braille Character Integration**
+- **Use existing utility**: Import `get_braille_character` from `src/.utility/`
+- **8-level progression**: Map metric percentages to braille character intensity
+- **Include in parallel braille generation** within status bar display
+- **Maintain display format**: Preserve existing spacing and arrangement
+
+### **6. Panel Integration Guidelines** 
+- **Static information only**: Panel should display configuration/details, not real-time metrics
+- **Use StaticSystemInfo utility**: For expensive one-time data collection
+- **Async loading**: Panel content must load asynchronously with loading screen
+- **No status bar interference**: Panel loading cannot impact 2-second update cycle
+
+### **7. Mandatory Performance Checks**
+Before considering any new metric complete:
+1. **Run performance tests**: `npm run test -- --grep "Performance"`
+2. **Verify no blocking**: All update operations under 100ms
+3. **Test status bar responsiveness**: 2-second cycles maintained
+4. **Check cross-platform compatibility**: Test fallback behaviors
+5. **Validate memory usage**: No memory leaks or excessive allocation
+
+### **8. Common Performance Anti-Patterns to Avoid**
+- ❌ Using `execSync` anywhere in monitoring code
+- ❌ Sequential `await` calls in status bar update cycle
+- ❌ Expensive operations in braille character generation
+- ❌ Blocking file I/O operations without async handling
+- ❌ Panel webview operations that interfere with status bar updates
+- ❌ Missing error handling that could cause Promise rejection cascades
+
+**Remember: Status bar performance is CRITICAL. The extension becomes unusable if status bar updates block or slow down. When in doubt, measure performance impact first.**
 
 ## Webview Development Guidelines
 

@@ -1,7 +1,10 @@
 let os = require('os');
-let { execSync } = require('child_process');
+let { exec } = require('child_process');
+let { promisify } = require('util');
 let fs = require('fs');
 let get_braille_character = require('../.utility/get_braille_character.js');
+
+let execAsync = promisify(exec);
 
 //
 //	Calculate disk usage percentage for the main disk
@@ -38,7 +41,7 @@ async function calculate_disk_usage_internal() {
         //	This gives us the real disk usage that matches System Settings
         //
         try {
-            let diskutil_output = execSync('diskutil apfs list', { encoding: 'utf8' });
+            let { stdout: diskutil_output } = await execAsync('diskutil apfs list');
 
             //
             //	Parse APFS container information for main disk
@@ -78,7 +81,7 @@ async function calculate_disk_usage_internal() {
             //	Fallback: Use df command for basic disk info
             //
             try {
-                let df_output = execSync('df -h /', { encoding: 'utf8' });
+                let { stdout: df_output } = await execAsync('df -h /');
                 let lines = df_output.split('\n');
                 let data_line = lines[1]; // Second line contains the data
 
@@ -120,7 +123,7 @@ async function calculate_disk_usage_internal() {
         //	Linux: Use df with byte output for more accurate calculation
         //
         try {
-            let df_output = execSync('df -B1 /', { encoding: 'utf8' });
+            let { stdout: df_output } = await execAsync('df -B1 /');
             let lines = df_output.split('\n');
             let data_line = lines[1]; // Second line contains the data
 
@@ -145,7 +148,7 @@ async function calculate_disk_usage_internal() {
             //	Fallback: Use df -h if df -B1 fails
             //
             try {
-                let df_output = execSync('df -h /', { encoding: 'utf8' });
+                let { stdout: df_output } = await execAsync('df -h /');
                 let lines = df_output.split('\n');
                 let data_line = lines[1]; // Second line contains the data
 
@@ -186,7 +189,7 @@ async function calculate_disk_usage_internal() {
         //	Windows: Use dir command or wmic to get disk usage for C: drive
         //
         try {
-            let wmic_output = execSync('wmic logicaldisk where size!=0 get size,freespace,caption', { encoding: 'utf8' });
+            let { stdout: wmic_output } = await execAsync('wmic logicaldisk where size!=0 get size,freespace,caption');
             let lines = wmic_output.split('\n');
 
             //
