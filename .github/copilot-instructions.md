@@ -1,4 +1,95 @@
-This repository is Visual studio code Extension that is a system manager to surface resoruce usage for a local PC or a remote host, to know know what is going on the machine.
+This repository is a Visual Studio Code Extension that is a system manager to surface resource usage for a local PC or a remote host, to know what is going on the machine.
+
+## Extension Architecture Overview
+
+This VS Code extension provides real-time system monitoring through multiple UI components:
+
+### **Status Bar Integration**
+- Displays live system metrics using animated braille characters
+- Shows CPU, RAM, disk, network, swap, and disk activity usage
+- Updates every 2 seconds with real-time data
+- Clickable to open the Panel Area interface
+
+### **Panel Area Interface** 
+- **View Container**: "System Monitor" panel in VS Code's bottom panel area (alongside Terminal, Problems, etc.)
+- **Multiple Views**: 4 tabbed views within the panel container:
+  - **System Monitor View**: Main dashboard and overview
+  - **Processes View**: Process management and monitoring  
+  - **System Logs View**: System logs and notifications
+  - **Performance Charts View**: Charts and historical data visualization
+
+### **System Monitoring Modules**
+- **CPU Monitor**: Multi-core usage tracking with braille visualization
+- **RAM Monitor**: Memory usage with cross-platform calculations
+- **Disk Monitor**: Storage usage monitoring
+- **Network Monitor**: Network traffic in/out tracking
+- **Swap Monitor**: Virtual memory usage
+- **Disk Activity Monitor**: Read/write activity monitoring
+
+## Extension Components Structure
+
+### **Core Files**
+- **`src/extension.js`**: Main extension entry point and activation logic
+- **`package.json`**: Extension manifest with view containers and commands
+
+### **Monitoring Modules** (`src/01_monitors/`)
+- **`01_cpu-monitor.js`**: CPU usage calculation and braille mapping
+- **`02_ram-monitor.js`**: RAM usage with platform-specific optimizations
+- **`03_disk-monitor.js`**: Disk space monitoring
+- **`04_network-monitor.js`**: Network traffic monitoring
+- **`05_swap-monitor.js`**: Swap/virtual memory monitoring  
+- **`06_disk-activity-monitor.js`**: Disk I/O activity tracking
+
+### **UI Components** (`src/02_ui/`)
+- **`01_status-bar-display.js`**: Status bar update logic
+- **`03_panel-view-provider.js`**: Main system monitor webview
+- **`04_process-manager-provider.js`**: Process management webview
+- **`05_system-logs-provider.js`**: System logs webview
+- **`06_performance-charts-provider.js`**: Performance charts webview
+
+### **Commands** (`src/03_commands/`)
+- **`01_show-system-info-command.js`**: System information dialog
+- **`03_show-quick-system-info.js`**: Quick system stats popup
+- **`05_open-system-panel.js`**: Panel area activation command
+
+## VS Code Extension API Usage
+
+### **View Containers and Views**
+```json
+"viewsContainers": {
+  "panel": [
+    {
+      "id": "systemMonitorPanel",
+      "title": "System Monitor", 
+      "icon": "$(pulse)"
+    }
+  ]
+}
+```
+
+### **Webview Views Registration**
+- Uses `vscode.window.registerWebviewViewProvider()` for each view
+- Each view implements `WebviewViewProvider` interface
+- Views support bidirectional communication via `postMessage`
+
+### **Status Bar Integration**
+- Uses `vscode.window.createStatusBarItem()` with right alignment
+- Updates every 2 seconds with live system data
+- Clickable command opens panel area views
+
+## Data Flow Architecture
+
+1. **Monitoring Modules** → Collect system metrics from OS
+2. **Status Bar Display** → Updates braille characters every 2s
+3. **Panel Views** → Display detailed information and controls
+4. **Commands** → Handle user interactions and navigation
+
+## Cross-Platform Compatibility
+
+- **macOS**: Uses `vm_stat`, `df`, `netstat` commands with memory_pressure fallbacks
+- **Linux**: Uses `/proc/meminfo`, `/proc/net/dev`, standard Unix commands  
+- **Windows**: Uses `wmic` and PowerShell commands where needed
+- **Fallbacks**: Graceful degradation when platform-specific commands fail
 
 ## Work Styles
 
@@ -95,28 +186,85 @@ This extension uses VS Code's native webview API with HTML/CSS/JavaScript. NEVER
 * **.git**: Repository history.
 * **.github**: Configuration for GitHub platform and tools.
 * **.knowledge**: Collection of Markdown files with in-depth explanations about the project and work style.
-* **releases**: Where all teh builds go.
-* **src**: All source code.
+* **releases**: Where all the builds go.
+* **src**: All source code organized by function:
+  * **01_monitors**: System monitoring modules (CPU, RAM, disk, network, swap, disk activity)
+  * **02_ui**: User interface components (status bar, webview providers)
+  * **03_commands**: VS Code command implementations
+  * **.test**: Test files and utilities
+  * **test**: Additional test configurations
+  * **utility**: Shared utility functions
+
+## Extension Development Patterns
+
+### **File Naming Convention**
+Uses Hierarchical Prefix Naming for logical grouping:
+- **Pattern**: `{category}-{subcategory}-{specific-function}`
+- **Examples**: 
+  - `01_cpu-monitor.js` (monitors category, CPU subcategory)
+  - `03_panel-view-provider.js` (UI category, panel subcategory)
+  - `05_open-system-panel.js` (commands category, panel subcategory)
+
+### **Module Organization**
+- **Monitors** (01_*): Pure data collection, no UI logic
+- **UI** (02_*): Webview providers and display logic  
+- **Commands** (03_*): VS Code command handlers and user interactions
+
+### **Function Export Pattern**
+- Each module exports specific functions for its responsibility
+- Monitoring modules export calculation and braille character functions
+- UI modules export provider classes
+- Commands modules export command handler functions
+
+### **Cross-Module Communication**
+- Status bar pulls data from all monitoring modules
+- Panel views can access the same monitoring data
+- Commands coordinate between UI components
+- No direct dependencies between monitoring modules
+
+## VS Code Extension Terminology
+
+### **Official Terms for Communication**
+When discussing the extension architecture, use these precise VS Code API terms:
+
+- **Panel Area**: The bottom section of VS Code (where Terminal, Problems, Output live)
+- **View Container**: A container that groups multiple views together (`systemMonitorPanel`)
+- **Views**: Individual tabs/pages within a View Container (System Monitor, Processes, etc.)
+- **Webview Views**: Views that display custom HTML content
+- **Status Bar Item**: The clickable indicator in VS Code's status bar
+
+### **Current Extension Structure**
+- **1 View Container** in Panel Area: "System Monitor"
+- **4 Webview Views** (tabs): System Monitor, Processes, System Logs, Performance Charts
+- **1 Status Bar Item**: Displays real-time metrics, opens panel when clicked
+- **6 Monitoring Modules**: Collect system data independently
+- **Multiple Commands**: Handle user interactions and navigation
+
+### **Interaction Flow**
+1. **Status Bar Item** displays live braille characters from monitoring modules
+2. **Click Status Bar** → Opens Panel Area → Shows View Container
+3. **View Container** displays 4 clickable tabs (Views)
+4. **Each View** shows different webview content for specific monitoring aspects
 
 ## What to do when
 
-* you find problems with the code not releated to the task at hand? You do nothing about them, you just update the TODO.md file where you mention the probme, and the team will decide if this finding is worth doing.
+* you find problems with the code not related to the task at hand? You do nothing about them, you just update the TODO.md file where you mention the problem, and the team will decide if this finding is worth doing.
 
-## How to wrtie tests
+## How to write tests
 
-* Wrtie the code
-* Then wrtie the test
-* Then brake the code
+* Write the code
+* Then write the test
+* Then break the code
 * Re-Run the test, and see if the test detect the problem
 
-Iterate untill all the brakegase are detected. Only then you can trully know that that the tests are usefull.
+Iterate until all the breakage cases are detected. Only then you can truly know that the tests are useful.
 
 ## Restrictions
 
 * You are not allowed to git commit
 * You are not allowed to git push
 
-## Naming convetion
+## Naming convention
 
 Use Hierarchical Prefix Naming, a file naming convention that uses category-subcategory-specific structure to create logical grouping and hierarchy.
 
