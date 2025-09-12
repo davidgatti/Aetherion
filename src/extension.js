@@ -13,7 +13,8 @@ let { calculate_swap_usage_internal, get_swap_braille_character } = require('./0
 let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./01_monitors/06_disk-activity-monitor.js');
 let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
 let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
-let show_tree_item_details = require('./03_commands/02_show-tree-item-details.js');
+let { SystemPanelProvider } = require('./02_ui/03_panel-view-provider.js');
+let open_system_panel = require('./03_commands/05_open-system-panel.js');
 
 //
 //	Export functions for external access and testing
@@ -203,6 +204,11 @@ function activate(context) {
     //
     let status_bar_item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
 
+    //
+    //	Make status bar item clickable - open panel view
+    //
+    status_bar_item.command = 'sysmag.openSystemPanel';
+
     status_bar_item.show();
 
     //
@@ -242,6 +248,12 @@ function activate(context) {
     context.subscriptions.push({ dispose: function() { clearInterval(tooltip_interval); } });
 
     //
+    //	Create and register the panel view provider
+    //
+    let panelProvider = new SystemPanelProvider();
+    vscode.window.registerWebviewViewProvider('systemMonitorView', panelProvider);
+
+    //
     //	The command has been defined in the package.json file
     //	Now provide the implementation of the command with registerCommand
     //	The commandId parameter must match the command field in package.json
@@ -249,12 +261,12 @@ function activate(context) {
     let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
 
     //
-    //	Register tree item click command
+    //	Register panel open command
     //
-    let treeItemDisposable = vscode.commands.registerCommand('sysmag.showItemDetails', show_tree_item_details);
+    let panelDisposable = vscode.commands.registerCommand('sysmag.openSystemPanel', () => open_system_panel(panelProvider));
 
     context.subscriptions.push(disposable);
-    context.subscriptions.push(treeItemDisposable);
+    context.subscriptions.push(panelDisposable);
 }
 
 //

@@ -43,13 +43,28 @@
         "title": "Hello World"
       },
       {
-        "command": "sysmag.showItemDetails",
-        "title": "Show System Item Details"
+        "command": "sysmag.openSystemPanel",
+        "title": "Open System Monitor Panel"
       }
-
-    ]
-
-
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "systemMonitorPanel",
+          "title": "System Monitor",
+          "icon": "$(pulse)"
+        }
+      ]
+    },
+    "views": {
+      "systemMonitorPanel": [
+        {
+          "id": "systemMonitorView",
+          "name": "System Monitor",
+          "type": "webview"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run lint",
