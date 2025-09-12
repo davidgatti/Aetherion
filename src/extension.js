@@ -14,6 +14,7 @@ let { calculate_disk_activity_internal, get_disk_activity_braille_character, get
 let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
 let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
 let { SystemPanelProvider } = require('./02_ui/03_panel-view-provider.js');
+let { CpuGraphViewProvider } = require('./02_ui/04_cpu-graph-view-provider.js');
 let open_system_panel = require('./03_commands/05_open-system-panel.js');
 
 //
@@ -212,17 +213,22 @@ function activate(context) {
     status_bar_item.show();
 
     //
+    //	Create CPU graph view provider (needed for status bar updates)
+    //
+    let cpuGraphProvider = new CpuGraphViewProvider();
+
+    //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false); // false = don't update tooltip
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider); // false = don't update tooltip, pass graph provider
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true); // true = update tooltip
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider); // true = update tooltip, pass graph provider
     }
 
     //
@@ -252,6 +258,11 @@ function activate(context) {
     //
     let panelProvider = new SystemPanelProvider();
     vscode.window.registerWebviewViewProvider('systemMonitorView', panelProvider);
+
+    //
+    //	Register the CPU graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('cpuGraphView', cpuGraphProvider);
 
     //
     //	The command has been defined in the package.json file

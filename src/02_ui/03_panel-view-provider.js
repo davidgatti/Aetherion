@@ -214,7 +214,7 @@ class SystemPanelProvider {
 
                 .info-label {
                     font-weight: bold;
-                    color: var(--vscode-textLink-foreground);
+                    color: var(--vscode-descriptionForeground);
                     min-width: 120px;
                 }
 
@@ -243,7 +243,7 @@ class SystemPanelProvider {
         </head>
         <body>
             <div class="container">
-                <h1>System Information 🖥️</h1>
+                <h1>System Information</h1>
 
                 <div class="info-card">
                     <div class="info-row">

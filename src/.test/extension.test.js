@@ -13,6 +13,14 @@ suite('Aetherion CPU Monitor Test Suite', function() {
         assert.ok(extension, 'Extension should be found');
     });
 
+    test('CPU Graph View Provider should be accessible', function() {
+        let { CpuGraphViewProvider } = require('../02_ui/04_cpu-graph-view-provider.js');
+        let provider = new CpuGraphViewProvider();
+        assert.ok(provider, 'CPU Graph View Provider should be creatable');
+        assert.strictEqual(typeof provider.resolveWebviewView, 'function', 'Provider should have resolveWebviewView method');
+        assert.strictEqual(typeof provider.show, 'function', 'Provider should have show method');
+    });
+
     suite('CPU Braille Character Mapping', function() {
         test('should delegate to utility braille function', async function() {
             // Test that CPU function delegates correctly to utility

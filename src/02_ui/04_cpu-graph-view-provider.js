@@ -1,0 +1,499 @@
+let vscode = require('vscode');
+
+//
+//  CPU Graph view provider for live CPU usage visualization
+//
+class CpuGraphViewProvider {
+
+    constructor() {
+        this._view = undefined;
+        this._updateInterval = undefined;
+        this._isActive = false;
+    }
+
+    //
+    //  Resolve webview view
+    //
+    resolveWebviewView(webviewView, context, _token) {
+        this._view = webviewView;
+
+        //
+        //  Configure webview
+        //
+        webviewView.webview.options = {
+            enableScripts: true,
+            localResourceRoots: [
+                context.extensionUri
+            ]
+        };
+
+        //
+        //  Set initial HTML content
+        //
+        webviewView.webview.html = this._getHtmlForWebview();
+
+        //
+        //  Handle view becoming visible/hidden
+        //
+        webviewView.onDidChangeVisibility(() => {
+            if (webviewView.visible) {
+                this._startLiveUpdates();
+            } else {
+                this._stopLiveUpdates();
+            }
+        });
+
+        //
+        //  Handle view disposal
+        //
+        webviewView.onDidDispose(() => {
+            this._stopLiveUpdates();
+        });
+
+        //
+        //  Handle messages from the webview
+        //
+        webviewView.webview.onDidReceiveMessage(
+            async message => {
+                switch (message.command) {
+                    case 'ready':
+                        //
+                        //  Start updates when webview is ready
+                        //
+                        this._startLiveUpdates();
+                        return;
+                    case 'clear':
+                        //
+                        //  Clear the graph and restart
+                        //
+                        this._restartGraph();
+                        return;
+                }
+            },
+            undefined,
+            context.subscriptions
+        );
+    }
+
+    //
+    //  Update CPU graph with data from status bar (shared calculation)
+    //
+    updateCpuData(cpu_usage_percentages) {
+        if (this._view && this._view.visible) {
+            //
+            //  Send CPU data to webview
+            //
+            this._view.webview.postMessage({
+                command: 'updateCpuData',
+                data: {
+                    timestamp: Date.now(),
+                    cpu_cores: cpu_usage_percentages
+                }
+            });
+        }
+    }
+
+    //
+    //  Start live CPU data updates (now just waits for status bar data)
+    //
+    _startLiveUpdates() {
+        this._isActive = true;
+        // CPU data now comes from status bar - no separate calculation needed
+    }
+
+    //
+    //  Stop live updates
+    //
+    _stopLiveUpdates() {
+        this._isActive = false;
+        // No interval to clear - data comes from status bar
+    }
+
+    //
+    //  Restart graph (clear and begin fresh)
+    //
+    _restartGraph() {
+        if (this._view) {
+            this._view.webview.postMessage({
+                command: 'clearGraph'
+            });
+        }
+    }
+
+    //
+    //  Generate HTML content for the webview
+    //
+    _getHtmlForWebview() {
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>CPU Live Graph</title>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <style>
+                body {
+                    font-family: var(--vscode-font-family);
+                    font-size: var(--vscode-font-size);
+                    color: var(--vscode-editor-foreground);
+                    background-color: var(--vscode-editor-background);
+                    margin: 0;
+                    padding: 20px;
+                    overflow: hidden;
+                }
+
+                .container {
+                    width: 100%;
+                    height: calc(100vh - 40px);
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 15px;
+                    border-bottom: 1px solid var(--vscode-panel-border);
+                    padding-bottom: 10px;
+                }
+
+                h1 {
+                    color: var(--vscode-titleBar-activeForeground);
+                    margin: 0;
+                    font-size: 18px;
+                }
+
+                .controls {
+                    display: flex;
+                    gap: 10px;
+                }
+
+                .button {
+                    background-color: var(--vscode-button-background);
+                    color: var(--vscode-button-foreground);
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: var(--vscode-font-size);
+                    font-family: var(--vscode-font-family);
+                }
+
+                .button:hover {
+                    background-color: var(--vscode-button-hoverBackground);
+                }
+
+                .graph-container {
+                    flex: 1;
+                    position: relative;
+                    background-color: var(--vscode-input-background);
+                    border: 1px solid var(--vscode-input-border);
+                    border-radius: 6px;
+                    overflow: auto;
+                    padding: 20px;
+                }
+
+                /* Custom scrollbar styling to match VS Code */
+                .graph-container::-webkit-scrollbar {
+                    width: 14px;
+                    height: 14px;
+                }
+
+                .graph-container::-webkit-scrollbar-thumb {
+                    background-color: var(--vscode-scrollbarSlider-background);
+                    border-radius: 7px;
+                    border: 3px solid var(--vscode-input-background);
+                }
+
+                .graph-container::-webkit-scrollbar-thumb:hover {
+                    background-color: var(--vscode-scrollbarSlider-hoverBackground);
+                }
+
+                .graph-container::-webkit-scrollbar-thumb:active {
+                    background-color: var(--vscode-scrollbarSlider-activeBackground);
+                }
+
+                .graph-container::-webkit-scrollbar-track {
+                    background-color: var(--vscode-input-background);
+                }
+
+                .cores-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                    gap: 10px;
+                    width: 100%;
+                    min-height: 100%;
+                }
+
+                .core-chart {
+                    background-color: var(--vscode-editor-background);
+                    border: 1px solid var(--vscode-input-border);
+                    border-radius: 4px;
+                    padding: 8px;
+                    position: relative;
+                    height: 120px;
+                }
+
+                .core-title {
+                    color: var(--vscode-descriptionForeground);
+                    font-size: 10px;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-bottom: 4px;
+                    font-family: var(--vscode-editor-font-family);
+                }
+
+                .chart-container {
+                    width: 100%;
+                    height: calc(100% - 18px);
+                    position: relative;
+                }
+
+                canvas {
+                    background-color: transparent !important;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>CPU Live Graph</h1>
+                    <div class="controls">
+                        <button class="button" onclick="clearGraph()">Clear Graph</button>
+                    </div>
+                </div>
+
+                <div class="graph-container">
+                    <div class="cores-grid" id="coresGrid">
+                        <!-- Core charts will be dynamically generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const vscode = acquireVsCodeApi();
+
+                //
+                //  Chart.js configuration and setup
+                //
+                let coreCharts = []; // Array to hold individual core charts
+                let maxDataPoints = 120; // Keep 2 minutes of data at 1-second intervals
+                // Always use VS Code's main chart foreground color for all cores
+                function getMainChartColor() {
+                    let computedStyles = getComputedStyle(document.body);
+                    let color = computedStyles.getPropertyValue('--vscode-charts-foreground').trim();
+                    if (!color) color = '#cccccc';
+                    return color;
+                }
+                let timeLabels = [];
+
+                //
+                //  Initialize individual charts for each CPU core
+                //
+                function initCharts(coreCount) {
+                    let coresGrid = document.getElementById('coresGrid');
+                    coresGrid.innerHTML = ''; // Clear existing charts
+                    coreCharts = []; // Reset charts array
+
+
+                    // Get VS Code theme colors
+                    let computedStyles = getComputedStyle(document.body);
+                    let textColor = computedStyles.getPropertyValue('--vscode-descriptionForeground') ||
+                                   computedStyles.getPropertyValue('--vscode-editor-foreground') || '#cccccc';
+                    let gridColor = 'rgba(128, 128, 128, 0.2)';
+                    let fontFamily = computedStyles.getPropertyValue('--vscode-editor-font-family') || 'monospace';
+                    let mainColor = getMainChartColor();
+
+                    // Create a chart for each CPU core
+                    for (let coreIndex = 0; coreIndex < coreCount; coreIndex++) {
+                        // Create core container
+                        let coreDiv = document.createElement('div');
+                        coreDiv.className = 'core-chart';
+
+                        // Create core title
+                        let coreTitle = document.createElement('div');
+                        coreTitle.className = 'core-title';
+                        coreTitle.textContent = 'Core ' + (coreIndex + 1);
+
+                        // Create chart container
+                        let chartContainer = document.createElement('div');
+                        chartContainer.className = 'chart-container';
+
+                        // Create canvas
+                        let canvas = document.createElement('canvas');
+                        canvas.id = 'core-chart-' + coreIndex;
+
+                        // Assemble structure
+                        chartContainer.appendChild(canvas);
+                        coreDiv.appendChild(coreTitle);
+                        coreDiv.appendChild(chartContainer);
+                        coresGrid.appendChild(coreDiv);
+
+                        // Create Chart.js instance for this core
+                        let ctx = canvas.getContext('2d');
+                        let chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: timeLabels,
+                                datasets: [{
+                                    label: 'Core ' + (coreIndex + 1),
+                                    data: [],
+                                    borderColor: mainColor,
+                                    backgroundColor: mainColor + '20',
+                                    fill: true,
+                                    tension: 0.1,
+                                    borderWidth: 1.5,
+                                    pointRadius: 0,
+                                    pointHoverRadius: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        enabled: false // Disable tooltips for minimal design
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        display: false, // Completely hide X-axis
+                                        grid: {
+                                            display: false
+                                        }
+                                    },
+                                    y: {
+                                        display: false, // Completely hide Y-axis
+                                        beginAtZero: true,
+                                        max: 100,
+                                        grid: {
+                                            display: false // Remove grid lines
+                                        }
+                                    }
+                                },
+                                layout: {
+                                    padding: 2 // Minimal padding
+                                },
+                                animation: {
+                                    duration: 0
+                                }
+                            }
+                        });
+                        coreCharts.push(chart);
+                    }
+                }
+
+                //
+                //  Clear all core charts
+                //
+                function clearGraph() {
+                    coreCharts.forEach(chart => {
+                        if (chart) {
+                            chart.data.labels = [];
+                            chart.data.datasets[0].data = [];
+                            chart.update();
+                        }
+                    });
+                    timeLabels = [];
+                }
+
+                //
+                //  Update all core charts with new CPU data
+                //
+                function updateChart(cpuData) {
+                    if (coreCharts.length === 0) {
+                        // Initialize charts if not done yet
+                        initCharts(cpuData.cpu_cores.length);
+                    }
+
+                    // Create concise time label (HH:MM:SS format)
+                    let now = new Date();
+                    let timestamp = now.getHours().toString().padStart(2, '0') + ':' +
+                                   now.getMinutes().toString().padStart(2, '0') + ':' +
+                                   now.getSeconds().toString().padStart(2, '0');
+
+                    // Add new time label
+                    timeLabels.push(timestamp);
+                    if (timeLabels.length > maxDataPoints) {
+                        timeLabels.shift();
+                    }
+
+                    // Update each core chart
+                    cpuData.cpu_cores.forEach((coreUsage, coreIndex) => {
+                        if (coreCharts[coreIndex]) {
+                            let chart = coreCharts[coreIndex];
+                            let dataset = chart.data.datasets[0];
+
+                            // Add new data point
+                            dataset.data.push(coreUsage);
+
+                            // Remove old data points
+                            if (dataset.data.length > maxDataPoints) {
+                                dataset.data.shift();
+                            }
+
+                            // Update labels and chart
+                            chart.data.labels = timeLabels;
+                            chart.update();
+                        }
+                    });
+                }
+
+                //
+                //  Handle messages from extension
+                //
+                window.addEventListener('message', event => {
+                    let message = event.data;
+
+                    switch (message.command) {
+                        case 'updateCpuData':
+                            updateChart(message.data);
+                            break;
+                        case 'clearGraph':
+                            clearGraph();
+                            break;
+                    }
+                });
+
+                //
+                //  Clear graph function (called by button)
+                //
+                function clearGraph() {
+                    vscode.postMessage({
+                        command: 'clearGraph'
+                    });
+                }
+
+                //
+                //  Initialize charts when DOM is ready (charts created on first data)
+                //
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Charts will be initialized when first CPU data arrives
+                });
+
+                //
+                //  Tell extension we're ready
+                //
+                vscode.postMessage({
+                    command: 'ready'
+                });
+            </script>
+        </body>
+        </html>`;
+    }
+
+    //
+    //  Show the view
+    //
+    show() {
+        if (this._view) {
+            this._view.show(true);
+        }
+    }
+}
+
+module.exports = { CpuGraphViewProvider };

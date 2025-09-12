@@ -9,7 +9,7 @@ let os = require('os');
 //
 //	Update status bar display with current system usage
 //
-async function update_status_bar_display(status_bar_item, update_tooltip = true) {
+async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null) {
 
     //
     //	Validate status bar item parameter
@@ -40,6 +40,13 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true)
         calculate_network_usage_internal(),
         calculate_swap_usage_internal()
     ]);
+
+    //
+    //	Share CPU data with graph view (same calculation, same timing)
+    //
+    if (cpuGraphProvider) {
+        cpuGraphProvider.updateCpuData(cpu_usage_percentages);
+    }
 
     //
     //	Get braille characters for each CPU core in parallel
