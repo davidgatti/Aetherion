@@ -1,7 +1,7 @@
 {
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
-  "description": "Real-time CPU, RAM, swap, disk space, disk activity, and network traffic monitoring with animated braille characters in VS Code status bar and dedicated system information sidebar",
+  "description": "Real-time CPU, RAM, swap, disk space, disk activity, and network traffic monitoring with animated braille characters in VS Code status bar",
   "version": "1.9.0",
   "publisher": "gatti",
   "icon": ".assets/logo.png",
@@ -45,45 +45,11 @@
       {
         "command": "sysmag.showItemDetails",
         "title": "Show System Item Details"
-      },
-      {
-        "command": "sysmag.refreshSystemMonitor",
-        "title": "Refresh System Monitor",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "sysmag.focusSystemMonitor",
-        "title": "Focus System Monitor Tree View"
       }
-    ],
-    "views": {
-      "systemMonitor": [
-        {
-          "id": "systemMonitorView",
-          "name": "System Performance",
-          "when": "true",
-          "icon": "$(pulse)"
-        }
-      ]
-    },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "systemMonitor",
-          "title": "System Monitor",
-          "icon": "$(dashboard)"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
-        {
-          "command": "sysmag.refreshSystemMonitor",
-          "when": "view == systemMonitorView",
-          "group": "navigation"
-        }
-      ]
-    }
+
+    ]
+
+
   },
   "scripts": {
     "vscode:prepublish": "npm run lint",

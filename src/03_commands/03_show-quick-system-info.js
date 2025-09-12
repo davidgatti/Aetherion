@@ -36,7 +36,6 @@ Available: ${ram_usage_info.available_gb.toFixed(1)}GB of ${ram_usage_info.total
         //
         let selection = await vscode.window.showInformationMessage(
             message,
-            'Refresh Tree View',
             'Copy Stats',
             'Detailed View'
         );
@@ -45,13 +44,6 @@ Available: ${ram_usage_info.available_gb.toFixed(1)}GB of ${ram_usage_info.total
         //	Handle user selection
         //
         switch (selection) {
-            case 'Refresh Tree View':
-                //
-                //	Trigger tree view refresh
-                //
-                await vscode.commands.executeCommand('sysmag.refreshSystemMonitor');
-                break;
-
             case 'Copy Stats':
                 //
                 //	Copy stats to clipboard
