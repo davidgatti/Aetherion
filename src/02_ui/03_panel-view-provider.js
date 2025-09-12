@@ -65,19 +65,19 @@ class SystemPanelProvider {
                     margin: 0;
                     padding: 20px;
                 }
-                
+
                 .container {
                     max-width: 100%;
                     margin: 0 auto;
                 }
-                
+
                 h1 {
                     color: var(--vscode-titleBar-activeForeground);
                     border-bottom: 1px solid var(--vscode-panel-border);
                     padding-bottom: 10px;
                     margin-bottom: 20px;
                 }
-                
+
                 .welcome-card {
                     background-color: var(--vscode-input-background);
                     border: 1px solid var(--vscode-input-border);
@@ -85,7 +85,7 @@ class SystemPanelProvider {
                     padding: 20px;
                     margin-bottom: 20px;
                 }
-                
+
                 .button {
                     background-color: var(--vscode-button-background);
                     color: var(--vscode-button-foreground);
@@ -96,7 +96,7 @@ class SystemPanelProvider {
                     font-size: var(--vscode-font-size);
                     font-family: var(--vscode-font-family);
                 }
-                
+
                 .button:hover {
                     background-color: var(--vscode-button-hoverBackground);
                 }
@@ -105,15 +105,15 @@ class SystemPanelProvider {
         <body>
             <div class="container">
                 <h1>System Monitor Panel</h1>
-                
+
                 <div class="welcome-card">
                     <h2>Hello World! 🌍</h2>
                     <p>This is your new Panel Area view for the System Monitor extension.</p>
                     <p>This panel appears in the same area as Terminal, Problems, and other VS Code panels.</p>
-                    
+
                     <button class="button" onclick="sendMessage()">Test Communication</button>
                 </div>
-                
+
                 <div class="welcome-card">
                     <h3>What's possible here?</h3>
                     <ul>
@@ -125,10 +125,10 @@ class SystemPanelProvider {
                     </ul>
                 </div>
             </div>
-            
+
             <script>
                 const vscode = acquireVsCodeApi();
-                
+
                 function sendMessage() {
                     vscode.postMessage({
                         command: 'alert',
