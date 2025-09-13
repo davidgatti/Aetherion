@@ -82,25 +82,21 @@ This VS Code extension provides real-time system monitoring through multiple UI 
 - **`src/extension.js`**: Main extension entry point and activation logic
 - **`package.json`**: Extension manifest with view containers and commands
 
-### **Monitoring Modules** (`src/01_monitors/`)
-- **`01_cpu-monitor.js`**: CPU usage calculation and braille mapping
-- **`02_ram-monitor.js`**: RAM usage with platform-specific optimizations
-- **`03_disk-monitor.js`**: Disk space monitoring
-- **`04_network-monitor.js`**: Network traffic monitoring
-- **`05_swap-monitor.js`**: Swap/virtual memory monitoring  
-- **`06_disk-activity-monitor.js`**: Disk I/O activity tracking
+### **Monitoring Modules** (`src/utility/metrics/live/`)
+- **`cpu-monitor.js`**: CPU usage calculation and braille mapping
+- **`ram-monitor.js`**: RAM usage with platform-specific optimizations
+- **`disk-monitor.js`**: Disk space monitoring
+- **`network-monitor.js`**: Network traffic monitoring
+- **`swap-monitor.js`**: Virtual memory usage
+- **`disk-activity-monitor.js`**: Read/write activity monitoring
 
-### **UI Components** (`src/02_ui/`)
-- **`01_status-bar-display.js`**: Status bar update logic
-- **`03_panel-view-provider.js`**: Main system monitor webview
-- **`04_process-manager-provider.js`**: Process management webview
-- **`05_system-logs-provider.js`**: System logs webview
-- **`06_performance-charts-provider.js`**: Performance charts webview
+### **UI Components** (`src/ui/`)
+- **`status-bar/status-bar-display.js`**: Status bar update logic
+- **`panel-views/system-monitor-view-provider.js`**: Main system monitor webview
+- **`panel-views/cpu-graph-view-provider.js`**: CPU graph view webview
 
-### **Commands** (`src/03_commands/`)
-- **`01_show-system-info-command.js`**: System information dialog
-- **`03_show-quick-system-info.js`**: Quick system stats popup
-- **`05_open-system-panel.js`**: Panel area activation command
+### **Commands** (`src/commands/`)
+- **`open-system-panel.js`**: Panel area activation command
 
 ## VS Code Extension API Usage
 
@@ -302,9 +298,9 @@ This extension uses VS Code's native webview API with HTML/CSS/JavaScript. NEVER
 * **.knowledge**: Collection of Markdown files with in-depth explanations about the project and work style.
 * **releases**: Where all the builds go.
 * **src**: All source code organized by function:
-  * **01_monitors**: System monitoring modules (CPU, RAM, disk, network, swap, disk activity)
-  * **02_ui**: User interface components (status bar, webview providers)
-  * **03_commands**: VS Code command implementations
+  * **utility**: Shared utility functions and system monitoring modules
+  * **ui**: User interface components (status bar, webview providers)
+  * **commands**: VS Code command implementations
   * **.test**: Test files and utilities
   * **test**: Additional test configurations
   * **utility**: Shared utility functions
@@ -315,14 +311,14 @@ This extension uses VS Code's native webview API with HTML/CSS/JavaScript. NEVER
 Uses Hierarchical Prefix Naming for logical grouping:
 - **Pattern**: `{category}-{subcategory}-{specific-function}`
 - **Examples**: 
-  - `01_cpu-monitor.js` (monitors category, CPU subcategory)
-  - `03_panel-view-provider.js` (UI category, panel subcategory)
-  - `05_open-system-panel.js` (commands category, panel subcategory)
+  - `cpu-monitor.js` (utility category, metrics subcategory)
+  - `system-monitor-view-provider.js` (UI category, panel-views subcategory)
+  - `open-system-panel.js` (commands category, panel subcategory)
 
 ### **Module Organization**
-- **Monitors** (01_*): Pure data collection, no UI logic
-- **UI** (02_*): Webview providers and display logic  
-- **Commands** (03_*): VS Code command handlers and user interactions
+- **Utility**: Pure data collection and shared functions, no UI logic
+- **UI**: Webview providers and display logic  
+- **Commands**: VS Code command handlers and user interactions
 
 ### **Function Export Pattern**
 - Each module exports specific functions for its responsibility

@@ -88,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📁 Architecture Updates
 
-- **New Disk Activity Monitor**: `01_monitors/06_disk-activity-monitor.js` with TPS-based calculations
+- **New Disk Activity Monitor**: `utility/metrics/live/disk-activity-monitor.js` with TPS-based calculations
 - **Extended Extension API**: Added `getDiskReadActivityBlock()` and `getDiskWriteActivityBlock()` functions
 - **Enhanced Status Bar Logic**: Updated display formatting for dual activity indicators
 - **Improved Module Exports**: Extended API surface for new read/write activity functions
@@ -113,9 +113,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📁 Code Organization
 
-- New swap monitor module: `01_monitors/05_swap-monitor.js`
+- New swap monitor module: `utility/metrics/live/swap-monitor.js`
 - Updated status bar display logic to conditionally include swap
-- Enhanced file organization with leading zero numbering for framework compatibility
+- Enhanced file organization with logical folder structure
 - Organized codebase into logical subfolders by purpose
 
 ## [1.6.1] - 2025-09-08

@@ -122,7 +122,6 @@ async function calculate_disk_activity_internal() {
                 activity_description: get_tps_activity_description(transfers_per_second),
                 mb_per_second: mb_per_second,
                 kb_per_transfer: kb_per_transfer,
-                // Keep legacy fields for compatibility
                 activity_level: total_activity_level,
                 total_kb_s: total_kb_s
             };
@@ -142,7 +141,6 @@ async function calculate_disk_activity_internal() {
             activity_description: 'idle',
             mb_per_second: 0,
             kb_per_transfer: 0,
-            // Keep legacy fields for compatibility
             activity_level: 0,
             total_kb_s: 0
         };
@@ -162,7 +160,6 @@ async function calculate_disk_activity_internal() {
             activity_description: 'idle',
             mb_per_second: 0,
             kb_per_transfer: 0,
-            // Keep legacy fields for compatibility
             activity_level: 0,
             total_kb_s: 0
         };
@@ -277,7 +274,7 @@ async function get_disk_write_activity_braille_character(write_activity_level) {
 }
 
 //
-//  Get total disk activity braille character (legacy compatibility)
+//  Get total disk activity braille character
 //
 async function get_disk_activity_braille_character(activity_level) {
 
@@ -292,7 +289,5 @@ module.exports = {
     get_disk_activity_braille_character,
     get_disk_read_activity_braille_character,
     get_disk_write_activity_braille_character,
-    get_tps_activity_description,
-    // Keep legacy exports for compatibility
-    get_activity_description: get_tps_activity_description
+    get_tps_activity_description
 };
