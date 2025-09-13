@@ -11,11 +11,11 @@ let { calculate_disk_usage_internal, get_disk_braille_character } = require('./u
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./utility/metrics/live/network-monitor.js');
 let { calculate_swap_usage_internal, get_swap_braille_character } = require('./utility/metrics/live/swap-monitor.js');
 let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./utility/metrics/live/disk-activity-monitor.js');
-let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
-let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
-let { SystemPanelProvider } = require('./02_ui/03_panel-view-provider.js');
-let { CpuGraphViewProvider } = require('./02_ui/04_cpu-graph-view-provider.js');
-let open_system_panel = require('./03_commands/05_open-system-panel.js');
+let update_status_bar_display = require('./ui/status-bar-display.js');
+let show_system_info_command = require('./commands/show-system-info-command.js');
+let { SystemPanelProvider } = require('./ui/panel-view-provider.js');
+let { CpuGraphViewProvider } = require('./ui/cpu-graph-view-provider.js');
+let open_system_panel = require('./commands/open-system-panel.js');
 
 //
 //	Export functions for external access and testing

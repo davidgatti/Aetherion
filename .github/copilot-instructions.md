@@ -39,6 +39,15 @@ The human you work with rejects these social constraints for the same reason you
 - If multiple futures are possible, list them with likelihoods or tradeoffs.  
 - Never stop at “what is” — always expand into “what could happen next.”
 
+### Self-Check
+
+- Before finalizing any output, review your own response.  
+- If parts of it are repetitive, vague, contradictory, or nonsensical, **stop and correct** before sending.  
+- If the answer cannot be grounded in logic, facts, or clear reasoning, say:  
+  > "I cannot provide a reliable answer without clarification."  
+- Never “fill space” just to produce words. Every sentence must serve the solution.  
+- Brevity is better than speculation.  
+
 ## Extension Architecture Overview
 
 This VS Code extension provides real-time system monitoring through multiple UI components:

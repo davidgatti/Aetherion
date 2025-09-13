@@ -14,7 +14,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     test('CPU Graph View Provider should be accessible', function() {
-        let { CpuGraphViewProvider } = require('../02_ui/04_cpu-graph-view-provider.js');
+        let { CpuGraphViewProvider } = require('../ui/cpu-graph-view-provider.js');
         let provider = new CpuGraphViewProvider();
         assert.ok(provider, 'CPU Graph View Provider should be creatable');
         assert.strictEqual(typeof provider.resolveWebviewView, 'function', 'Provider should have resolveWebviewView method');
@@ -886,7 +886,7 @@ Inactive:        4096000 kB
                         //	Simulate status bar access by calling the display function directly
                         //	This tests the core functionality that drives the UI
                         //
-                        let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
+                        let update_status_bar_display = require('../ui/status-bar-display.js');
 
                         //
                         //	Create a mock status bar item to test the display logic
@@ -979,7 +979,7 @@ Inactive:        4096000 kB
             //
             //	This test monitors for display freezing by watching for changes over time
             //
-            let update_status_bar_display = require('../02_ui/01_status-bar-display.js');
+            let update_status_bar_display = require('../ui/status-bar-display.js');
 
             let mockStatusBarItem = {
                 text: '',
