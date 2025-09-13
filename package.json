@@ -39,10 +39,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "sysmag.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "sysmag.openSystemPanel",
         "title": "Open System Monitor Panel"
       }

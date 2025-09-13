@@ -11,10 +11,9 @@ let { calculate_disk_usage_internal, get_disk_braille_character } = require('./u
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./utility/metrics/live/network-monitor.js');
 let { calculate_swap_usage_internal, get_swap_braille_character } = require('./utility/metrics/live/swap-monitor.js');
 let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./utility/metrics/live/disk-activity-monitor.js');
-let update_status_bar_display = require('./ui/status-bar-display.js');
-let show_system_info_command = require('./commands/show-system-info-command.js');
-let { SystemPanelProvider } = require('./ui/panel-view-provider.js');
-let { CpuGraphViewProvider } = require('./ui/cpu-graph-view-provider.js');
+let update_status_bar_display = require('./ui/status-bar/status-bar-display.js');
+let { SystemPanelProvider } = require('./ui/panel-views/system-monitor-view-provider.js');
+let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
 
 //
@@ -265,18 +264,10 @@ function activate(context) {
     vscode.window.registerWebviewViewProvider('cpuGraphView', cpuGraphProvider);
 
     //
-    //	The command has been defined in the package.json file
-    //	Now provide the implementation of the command with registerCommand
-    //	The commandId parameter must match the command field in package.json
-    //
-    let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
-
-    //
     //	Register panel open command
     //
     let panelDisposable = vscode.commands.registerCommand('sysmag.openSystemPanel', () => open_system_panel(panelProvider));
 
-    context.subscriptions.push(disposable);
     context.subscriptions.push(panelDisposable);
 }
 

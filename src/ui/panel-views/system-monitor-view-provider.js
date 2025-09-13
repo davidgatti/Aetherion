@@ -1,5 +1,5 @@
 let vscode = require('vscode');
-let { StaticSystemInfo } = require('../utility/metrics/static/system-info.js');
+let { StaticSystemInfo } = require('../../utility/metrics/static/system-info.js');
 
 //
 //  Panel view provider for system monitoring
