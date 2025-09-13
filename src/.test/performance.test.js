@@ -203,9 +203,10 @@ suite('Extension Performance Tests', function() {
         //
         //  Import monitoring functions directly to test performance
         //
-        let { calculate_cpu_usage } = require('../01_monitors/01_cpu-monitor.js');
-        let { calculate_ram_usage_internal } = require('../01_monitors/02_ram-monitor.js');
-        let { calculate_disk_usage_internal } = require('../01_monitors/03_disk-monitor.js');
+        // Test individual system monitoring function performance
+        let { calculate_cpu_usage } = require('../utility/metrics/live/cpu-monitor.js');
+        let { calculate_ram_usage_internal } = require('../utility/metrics/live/ram-monitor.js');
+        let { calculate_disk_usage_internal } = require('../utility/metrics/live/disk-monitor.js');
 
         //
         //  Performance thresholds for individual monitoring functions

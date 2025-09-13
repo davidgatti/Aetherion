@@ -2,7 +2,7 @@ let os = require('os');
 let { exec } = require('child_process');
 let { promisify } = require('util');
 let fs = require('fs');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let get_braille_character = require('../../get_braille_character.js');
 
 let execAsync = promisify(exec);
 

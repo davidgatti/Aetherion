@@ -24,7 +24,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     suite('CPU Braille Character Mapping', function() {
         test('should delegate to utility braille function', async function() {
             // Test that CPU function delegates correctly to utility
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
 
             let testValues = [0, 15, 30, 45, 60, 75, 90, 100];
             for (let value of testValues) {
@@ -39,7 +39,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     suite('RAM Braille Character Mapping', function() {
         test('should use same braille patterns as utility function', async function() {
             // Test that RAM and utility use identical braille progression
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
 
             let testValues = [5, 15, 30, 50, 70, 90];
             for (let value of testValues) {
@@ -100,7 +100,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     suite('Disk Braille Character Mapping', function() {
         test('should use same braille patterns as utility function', async function() {
             // Test that disk uses the same progression as utility
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
 
             let testValues = [5, 15, 30, 40, 55, 70, 80, 95];
             for (let value of testValues) {
@@ -179,7 +179,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     suite('Network Braille Character Mapping', function() {
         test('should use same braille patterns as utility function', async function() {
             // Test that network in/out uses the same progression as utility
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
             let testValues = [5, 15, 30, 40, 55, 70, 80, 95];
 
             for (let value of testValues) {
@@ -261,7 +261,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     suite('Swap Braille Character Mapping', function() {
         test('should use same braille patterns as utility function', async function() {
             // Test that Swap and utility use identical braille progression
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
 
             let testValues = [5, 15, 30, 50, 70, 90];
             for (let value of testValues) {
@@ -364,7 +364,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
 
     suite('Disk Activity Braille Character Mapping', function() {
         test('should use same braille patterns as utility function', async function() {
-            let get_braille_character = require('../.utility/get_braille_character.js');
+            let get_braille_character = require('../utility/get_braille_character.js');
 
             let testValues = [0, 15, 30, 45, 60, 75, 90, 100];
             for (let value of testValues) {
@@ -692,7 +692,7 @@ suite('Aetherion CPU Monitor Test Suite', function() {
     });
 
     suite('Cross-Platform Memory Calculation Tests', function() {
-        let { calculate_ram_usage_internal } = require('../01_monitors/02_ram-monitor.js');
+        let { calculate_ram_usage_internal } = require('../utility/metrics/live/ram-monitor.js');
 
         test('should use platform-specific memory calculation methods', async function() {
             let platform = os.platform();

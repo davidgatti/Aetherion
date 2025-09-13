@@ -1,7 +1,7 @@
 let { exec } = require('child_process');
 let { promisify } = require('util');
 let execAsync = promisify(exec);
-let { get_cpu_braille_character } = require('./01_cpu-monitor.js');
+let { get_cpu_braille_character } = require('./cpu-monitor.js');
 
 //
 //  Previous activity state for tracking changes

@@ -1,4 +1,4 @@
-let { calculate_ram_usage_internal, get_ram_braille_character } = require('../01_monitors/02_ram-monitor.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('../utility/metrics/live/ram-monitor.js');
 let vscode = require('vscode');
 let os = require('os');
 

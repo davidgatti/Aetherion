@@ -5,12 +5,12 @@ let vscode = require('vscode');
 //
 //	Import modular functions
 //
-let { get_cpu_braille_character } = require('./01_monitors/01_cpu-monitor.js');
-let { calculate_ram_usage_internal, get_ram_braille_character } = require('./01_monitors/02_ram-monitor.js');
-let { calculate_disk_usage_internal, get_disk_braille_character } = require('./01_monitors/03_disk-monitor.js');
-let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./01_monitors/04_network-monitor.js');
-let { calculate_swap_usage_internal, get_swap_braille_character } = require('./01_monitors/05_swap-monitor.js');
-let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./01_monitors/06_disk-activity-monitor.js');
+let { get_cpu_braille_character } = require('./utility/metrics/live/cpu-monitor.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('./utility/metrics/live/ram-monitor.js');
+let { calculate_disk_usage_internal, get_disk_braille_character } = require('./utility/metrics/live/disk-monitor.js');
+let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./utility/metrics/live/network-monitor.js');
+let { calculate_swap_usage_internal, get_swap_braille_character } = require('./utility/metrics/live/swap-monitor.js');
+let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./utility/metrics/live/disk-activity-monitor.js');
 let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
 let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
 let { SystemPanelProvider } = require('./02_ui/03_panel-view-provider.js');

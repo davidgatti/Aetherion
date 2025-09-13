@@ -1,6 +1,8 @@
 let os = require('os');
-let { execSync } = require('child_process');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let { exec } = require('child_process');
+let { promisify } = require('util');
+let execAsync = promisify(exec);
+let get_braille_character = require('../../get_braille_character.js');
 
 //
 //	Calculate RAM usage percentage and memory information
