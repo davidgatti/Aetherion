@@ -272,6 +272,19 @@ class SystemPanelProvider {
                         <span class="info-value">${osInfo.uptime}</span>
                     </div>
                 </div>
+
+                <div class="info-card">
+                    ${osInfo.drives.map(drive => `
+                        <div class="info-row">
+                            <span class="info-label">${drive.name}:</span>
+                            <span class="info-value">${drive.size} (${drive.usage} used)</span>
+                        </div>
+                        <div class="info-row" style="margin-top: -4px; margin-bottom: 8px;">
+                            <span class="info-label" style="color: var(--vscode-descriptionForeground); font-size: 0.9em;">Available:</span>
+                            <span class="info-value" style="color: var(--vscode-descriptionForeground); font-size: 0.9em;">${drive.available} free</span>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         </body>
         </html>`;
