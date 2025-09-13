@@ -290,16 +290,16 @@ class StaticSystemInfo {
                     //
                     //  Handle local drives (combine them into one)
                     //
-                    if (filesystem.startsWith('/dev/disk') && 
+                    if (filesystem.startsWith('/dev/disk') &&
                         (mountPoint === '/' || mountPoint === '/System/Volumes/Data')) {
-                        
+
                         //
                         //  Aggregate local drive data to show total system storage
                         //
                         let sizeBytes = StaticSystemInfo._parseSize(size);
                         let usedBytes = StaticSystemInfo._parseSize(used);
                         let availableBytes = StaticSystemInfo._parseSize(available);
-                        
+
                         localDriveData.totalSize = Math.max(localDriveData.totalSize, sizeBytes);
                         localDriveData.totalUsed = Math.max(localDriveData.totalUsed, usedBytes);
                         localDriveData.totalAvailable = Math.max(localDriveData.totalAvailable, availableBytes);
@@ -308,17 +308,17 @@ class StaticSystemInfo {
                     //  Handle network drives
                     //
                     } else if (mountPoint.startsWith('/Volumes/') && !mountPoint.includes('VM') && !mountPoint.includes('Preboot')) {
-                        
+
                         //
                         //  Detect network storage based on filesystem
                         //
-                        let isNetworkDrive = filesystem.includes('@') || filesystem.startsWith('//') || 
+                        let isNetworkDrive = filesystem.includes('@') || filesystem.startsWith('//') ||
                                            filesystem.includes('._smb.') || filesystem.includes('._afp.') ||
                                            filesystem.includes('nfs') || filesystem.includes('cifs');
-                        
+
                         let driveLabel = isNetworkDrive ? 'Network Storage' : 'External Drive';
                         let driveName = mountPoint.replace('/Volumes/', '');
-                        
+
                         drives.push({
                             name: `${driveName} (${driveLabel})`,
                             filesystem: filesystem,
@@ -362,16 +362,16 @@ class StaticSystemInfo {
     //
     static _parseSize(sizeStr) {
         if (!sizeStr || sizeStr === 'Unknown') return 0;
-        
+
         let multipliers = { 'B': 1, 'K': 1024, 'M': 1024*1024, 'G': 1024*1024*1024, 'T': 1024*1024*1024*1024 };
         let match = sizeStr.match(/^([0-9.]+)([KMGT]?)[iB]?$/);
-        
+
         if (match) {
             let value = parseFloat(match[1]);
             let unit = match[2] || 'B';
             return Math.round(value * (multipliers[unit] || 1));
         }
-        
+
         return 0;
     }
 
@@ -405,7 +405,7 @@ class StaticSystemInfo {
                     //
                     //  Detect network drives and local drives
                     //
-                    let isNetworkDrive = filesystem.includes(':') || filesystem.startsWith('//') || 
+                    let isNetworkDrive = filesystem.includes(':') || filesystem.startsWith('//') ||
                                        filesystem.includes('nfs') || filesystem.includes('cifs') ||
                                        filesystem.includes('smb') || filesystem.includes('ftp');
 
@@ -413,7 +413,7 @@ class StaticSystemInfo {
                     //  Include physical disks, root filesystem, and network mounts
                     //
                     if (filesystem.startsWith('/dev/') || mountPoint === '/' || isNetworkDrive) {
-                        
+
                         let driveName = 'Unknown Drive';
                         if (mountPoint === '/') {
                             driveName = 'Root Filesystem';
