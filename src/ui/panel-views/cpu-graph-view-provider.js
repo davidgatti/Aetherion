@@ -121,57 +121,18 @@ class CpuGraphViewProvider {
                     color: var(--vscode-editor-foreground);
                     background-color: var(--vscode-editor-background);
                     margin: 0;
-                    padding: 20px;
+                    padding: 20px 20px 0 20px;
                     overflow: hidden;
-                }
-
-                .container {
-                    width: 100%;
-                    height: calc(100vh - 40px);
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .graph-container {
-                    flex: 1;
-                    position: relative;
-                    background-color: var(--vscode-input-background);
-                    border: 1px solid var(--vscode-input-border);
-                    border-radius: 6px;
-                    overflow: auto;
-                    padding: 20px;
-                }
-
-                /* Custom scrollbar styling to match VS Code */
-                .graph-container::-webkit-scrollbar {
-                    width: 14px;
-                    height: 14px;
-                }
-
-                .graph-container::-webkit-scrollbar-thumb {
-                    background-color: var(--vscode-scrollbarSlider-background);
-                    border-radius: 7px;
-                    border: 3px solid var(--vscode-input-background);
-                }
-
-                .graph-container::-webkit-scrollbar-thumb:hover {
-                    background-color: var(--vscode-scrollbarSlider-hoverBackground);
-                }
-
-                .graph-container::-webkit-scrollbar-thumb:active {
-                    background-color: var(--vscode-scrollbarSlider-activeBackground);
-                }
-
-                .graph-container::-webkit-scrollbar-track {
-                    background-color: var(--vscode-input-background);
+                    height: 100vh;
+                    box-sizing: border-box;
                 }
 
                 .cores-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-                    gap: 10px;
+                    gap: 20px 10px;
                     width: 100%;
-                    min-height: 100%;
+                    align-content: start;
                 }
 
                 .core-chart {
@@ -195,12 +156,8 @@ class CpuGraphViewProvider {
             </style>
         </head>
         <body>
-            <div class="container">
-                <div class="graph-container">
-                    <div class="cores-grid" id="coresGrid">
-                        <!-- Core charts will be dynamically generated here -->
-                    </div>
-                </div>
+            <div class="cores-grid" id="coresGrid">
+                <!-- Core charts will be dynamically generated here -->
             </div>
 
             <script>
