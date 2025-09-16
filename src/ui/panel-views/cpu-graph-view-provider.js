@@ -168,7 +168,7 @@ class CpuGraphViewProvider {
 
                 .cores-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                    grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
                     gap: 10px;
                     width: 100%;
                     min-height: 100%;
@@ -180,21 +180,12 @@ class CpuGraphViewProvider {
                     border-radius: 4px;
                     padding: 8px;
                     position: relative;
-                    height: 120px;
-                }
-
-                .core-title {
-                    color: var(--vscode-descriptionForeground);
-                    font-size: 10px;
-                    font-weight: bold;
-                    text-align: center;
-                    margin-bottom: 4px;
-                    font-family: var(--vscode-editor-font-family);
+                    height: 63px;
                 }
 
                 .chart-container {
                     width: 100%;
-                    height: calc(100% - 18px);
+                    height: 100%;
                     position: relative;
                 }
 
@@ -252,11 +243,6 @@ class CpuGraphViewProvider {
                         let coreDiv = document.createElement('div');
                         coreDiv.className = 'core-chart';
 
-                        // Create core title
-                        let coreTitle = document.createElement('div');
-                        coreTitle.className = 'core-title';
-                        coreTitle.textContent = 'Core ' + (coreIndex + 1);
-
                         // Create chart container
                         let chartContainer = document.createElement('div');
                         chartContainer.className = 'chart-container';
@@ -267,7 +253,6 @@ class CpuGraphViewProvider {
 
                         // Assemble structure
                         chartContainer.appendChild(canvas);
-                        coreDiv.appendChild(coreTitle);
                         coreDiv.appendChild(chartContainer);
                         coresGrid.appendChild(coreDiv);
 
