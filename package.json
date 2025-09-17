@@ -83,6 +83,12 @@
           "name": "Disk Space Live Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "diskIOGraphView",
+          "name": "Disk I/O Mirror Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }

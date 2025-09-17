@@ -17,6 +17,7 @@ let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider
 let { RamGraphViewProvider } = require('./ui/panel-views/ram-graph-view-provider.js');
 let { SwapGraphViewProvider } = require('./ui/panel-views/swap-graph-view-provider.js');
 let { DiskGraphViewProvider } = require('./ui/panel-views/disk-graph-view-provider.js');
+let { DiskIOGraphViewProvider } = require('./ui/panel-views/disk-io-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
 
 //
@@ -235,17 +236,22 @@ function activate(context) {
     let diskGraphProvider = new DiskGraphViewProvider();
 
     //
+    //	Create Disk I/O mirror graph view provider (needed for status bar updates)
+    //
+    let diskIOGraphProvider = new DiskIOGraphViewProvider();
+
+    //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider); // false = don't update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider); // false = don't update tooltip, pass graph providers
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider); // true = update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider); // true = update tooltip, pass graph providers
     }
 
     //
@@ -295,6 +301,11 @@ function activate(context) {
     //	Register the Disk graph view provider
     //
     vscode.window.registerWebviewViewProvider('diskGraphView', diskGraphProvider);
+
+    //
+    //	Register the Disk I/O mirror graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('diskIOGraphView', diskIOGraphProvider);
 
     //
     //	Register panel open command
