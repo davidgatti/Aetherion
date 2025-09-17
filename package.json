@@ -89,6 +89,12 @@
           "name": "Disk I/O Mirror Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "networkIOGraphView",
+          "name": "Network I/O Mirror Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }
