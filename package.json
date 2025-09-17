@@ -65,6 +65,12 @@
           "name": "CPU Live Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "ramGraphView",
+          "name": "RAM Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }

@@ -9,7 +9,7 @@ let os = require('os');
 //
 //	Update status bar display with current system usage
 //
-async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null) {
+async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null, ramGraphProvider = null) {
 
     //
     //	Validate status bar item parameter
@@ -46,6 +46,13 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
     //
     if (cpuGraphProvider) {
         cpuGraphProvider.updateCpuData(cpu_usage_percentages);
+    }
+
+    //
+    //	Share RAM data with graph view (same calculation, same timing)
+    //
+    if (ramGraphProvider) {
+        ramGraphProvider.updateRamData(ram_usage_info.usage_percent);
     }
 
     //

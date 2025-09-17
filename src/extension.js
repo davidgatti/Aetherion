@@ -14,6 +14,7 @@ let { calculate_disk_activity_internal, get_disk_activity_braille_character, get
 let update_status_bar_display = require('./ui/status-bar/status-bar-display.js');
 let { SystemPanelProvider } = require('./ui/panel-views/system-monitor-view-provider.js');
 let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider.js');
+let { RamGraphViewProvider } = require('./ui/panel-views/ram-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
 
 //
@@ -217,17 +218,22 @@ function activate(context) {
     let cpuGraphProvider = new CpuGraphViewProvider();
 
     //
+    //	Create RAM graph view provider (needed for status bar updates)
+    //
+    let ramGraphProvider = new RamGraphViewProvider();
+
+    //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false, cpuGraphProvider); // false = don't update tooltip, pass graph provider
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider); // false = don't update tooltip, pass graph providers
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true, cpuGraphProvider); // true = update tooltip, pass graph provider
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider); // true = update tooltip, pass graph providers
     }
 
     //
@@ -262,6 +268,11 @@ function activate(context) {
     //	Register the CPU graph view provider
     //
     vscode.window.registerWebviewViewProvider('cpuGraphView', cpuGraphProvider);
+
+    //
+    //	Register the RAM graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('ramGraphView', ramGraphProvider);
 
     //
     //	Register panel open command
