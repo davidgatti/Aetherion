@@ -9,7 +9,7 @@ let os = require('os');
 //
 //	Update status bar display with current system usage
 //
-async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null, ramGraphProvider = null, swapGraphProvider = null) {
+async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null, ramGraphProvider = null, swapGraphProvider = null, diskGraphProvider = null) {
 
     //
     //	Validate status bar item parameter
@@ -60,6 +60,13 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
     //
     if (swapGraphProvider) {
         swapGraphProvider.updateSwapData(swap_usage_info.usage_percent, swap_usage_info.swap_enabled);
+    }
+
+    //
+    //	Share Disk data with graph view (same calculation, same timing)
+    //
+    if (diskGraphProvider) {
+        diskGraphProvider.updateDiskData(disk_usage_info.usage_percent);
     }
 
     //

@@ -1,9 +1,9 @@
 let vscode = require('vscode');
 
 //
-//  Swap Graph view provider for live swap usage visualization
+//  Disk Space Graph view provider for live disk usage visualization
 //
-class SwapGraphViewProvider {
+class DiskGraphViewProvider {
 
     constructor() {
         this._view = undefined;
@@ -70,30 +70,29 @@ class SwapGraphViewProvider {
     }
 
     //
-    //  Update swap graph with data from status bar (shared calculation)
+    //  Update disk graph with data from status bar (shared calculation)
     //
-    updateSwapData(swap_usage_percent, swap_enabled) {
+    updateDiskData(disk_usage_percent) {
         if (this._view && this._view.visible) {
             //
-            //  Send swap data to webview
+            //  Send disk data to webview
             //
             this._view.webview.postMessage({
-                command: 'updateSwapData',
+                command: 'updateDiskData',
                 data: {
                     timestamp: Date.now(),
-                    swap_usage: swap_usage_percent,
-                    swap_enabled: swap_enabled
+                    disk_usage: disk_usage_percent
                 }
             });
         }
     }
 
     //
-    //  Start live swap data updates (now just waits for status bar data)
+    //  Start live disk data updates (now just waits for status bar data)
     //
     _startLiveUpdates() {
         this._isActive = true;
-        // Swap data now comes from status bar - no separate calculation needed
+        // Disk data now comes from status bar - no separate calculation needed
     }
 
     //
@@ -113,7 +112,7 @@ class SwapGraphViewProvider {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Swap Live Graph</title>
+            <title>Disk Space Live Graph</title>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <style>
                 body {
@@ -128,7 +127,7 @@ class SwapGraphViewProvider {
                     box-sizing: border-box;
                 }
 
-                .swap-grid {
+                .disk-grid {
                     display: grid;
                     grid-template-columns: 1fr;
                     gap: 20px 10px;
@@ -138,7 +137,7 @@ class SwapGraphViewProvider {
                     box-sizing: border-box;
                 }
 
-                .swap-chart {
+                .disk-chart {
                     background-color: var(--vscode-sideBar-background);
                     border: 1px solid var(--vscode-input-border);
                     border-radius: 4px;
@@ -156,15 +155,6 @@ class SwapGraphViewProvider {
                     box-sizing: border-box;
                 }
 
-                .swap-disabled {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: 100%;
-                    color: var(--vscode-descriptionForeground);
-                    font-style: italic;
-                }
-
                 canvas {
                     background-color: transparent !important;
                     max-width: 100% !important;
@@ -173,8 +163,8 @@ class SwapGraphViewProvider {
             </style>
         </head>
         <body>
-            <div class="swap-grid" id="swapGrid">
-                <!-- Swap chart will be dynamically generated here -->
+            <div class="disk-grid" id="diskGrid">
+                <!-- Disk chart will be dynamically generated here -->
             </div>
 
             <script>
@@ -183,9 +173,8 @@ class SwapGraphViewProvider {
                 //
                 //  Chart.js configuration and setup
                 //
-                let swapChart = null; // Single swap chart
+                let diskChart = null; // Single disk chart
                 let maxDataPoints = 120; // Keep 2 minutes of data at 1-second intervals
-                let isSwapEnabled = false;
                 // Always use VS Code's main chart foreground color
                 function getMainChartColor() {
                     let computedStyles = getComputedStyle(document.body);
@@ -196,25 +185,11 @@ class SwapGraphViewProvider {
                 let timeLabels = [];
 
                 //
-                //  Initialize swap chart
+                //  Initialize disk chart
                 //
                 function initChart() {
-                    let swapGrid = document.getElementById('swapGrid');
-                    swapGrid.innerHTML = ''; // Clear existing chart
-
-                    if (!isSwapEnabled) {
-                        // Show disabled message
-                        let swapDiv = document.createElement('div');
-                        swapDiv.className = 'swap-chart';
-
-                        let disabledDiv = document.createElement('div');
-                        disabledDiv.className = 'swap-disabled';
-                        disabledDiv.textContent = 'Swap not configured or available';
-
-                        swapDiv.appendChild(disabledDiv);
-                        swapGrid.appendChild(swapDiv);
-                        return;
-                    }
+                    let diskGrid = document.getElementById('diskGrid');
+                    diskGrid.innerHTML = ''; // Clear existing chart
 
                     // Get VS Code theme colors
                     let computedStyles = getComputedStyle(document.body);
@@ -224,9 +199,9 @@ class SwapGraphViewProvider {
                     let fontFamily = computedStyles.getPropertyValue('--vscode-editor-font-family') || 'monospace';
                     let mainColor = getMainChartColor();
 
-                    // Create swap container
-                    let swapDiv = document.createElement('div');
-                    swapDiv.className = 'swap-chart';
+                    // Create disk container
+                    let diskDiv = document.createElement('div');
+                    diskDiv.className = 'disk-chart';
 
                     // Create chart container
                     let chartContainer = document.createElement('div');
@@ -234,21 +209,21 @@ class SwapGraphViewProvider {
 
                     // Create canvas
                     let canvas = document.createElement('canvas');
-                    canvas.id = 'swap-chart';
+                    canvas.id = 'disk-chart';
 
                     // Assemble structure
                     chartContainer.appendChild(canvas);
-                    swapDiv.appendChild(chartContainer);
-                    swapGrid.appendChild(swapDiv);
+                    diskDiv.appendChild(chartContainer);
+                    diskGrid.appendChild(diskDiv);
 
-                    // Create Chart.js instance for swap
+                    // Create Chart.js instance for disk
                     let ctx = canvas.getContext('2d');
-                    swapChart = new Chart(ctx, {
+                    diskChart = new Chart(ctx, {
                         type: 'line',
                         data: {
                             labels: timeLabels,
                             datasets: [{
-                                label: 'Swap Usage',
+                                label: 'Disk Usage',
                                 data: [],
                                 borderColor: mainColor,
                                 backgroundColor: mainColor + '20',
@@ -303,36 +278,22 @@ class SwapGraphViewProvider {
                 }
 
                 //
-                //  Clear swap chart
+                //  Clear disk chart
                 //
                 function clearGraph() {
-                    if (swapChart) {
-                        swapChart.data.labels = [];
-                        swapChart.data.datasets[0].data = [];
-                        swapChart.update();
+                    if (diskChart) {
+                        diskChart.data.labels = [];
+                        diskChart.data.datasets[0].data = [];
+                        diskChart.update();
                     }
                     timeLabels = [];
                 }
 
                 //
-                //  Update swap chart with new data
+                //  Update disk chart with new data
                 //
-                function updateChart(swapData) {
-                    // Update swap enabled status
-                    if (isSwapEnabled !== swapData.swap_enabled) {
-                        isSwapEnabled = swapData.swap_enabled;
-                        // Reinitialize chart if swap status changed
-                        initChart();
-                        if (!isSwapEnabled) {
-                            return; // Don't process data if swap is disabled
-                        }
-                    }
-
-                    if (!isSwapEnabled) {
-                        return; // Don't process data if swap is disabled
-                    }
-
-                    if (!swapChart) {
+                function updateChart(diskData) {
+                    if (!diskChart) {
                         // Initialize chart if not done yet
                         initChart();
                     }
@@ -349,12 +310,12 @@ class SwapGraphViewProvider {
                         timeLabels.shift();
                     }
 
-                    // Update swap chart
-                    if (swapChart) {
-                        let dataset = swapChart.data.datasets[0];
+                    // Update disk chart
+                    if (diskChart) {
+                        let dataset = diskChart.data.datasets[0];
 
                         // Add new data point
-                        dataset.data.push(swapData.swap_usage);
+                        dataset.data.push(diskData.disk_usage);
 
                         // Remove old data points
                         if (dataset.data.length > maxDataPoints) {
@@ -362,8 +323,8 @@ class SwapGraphViewProvider {
                         }
 
                         // Update labels and chart
-                        swapChart.data.labels = timeLabels;
-                        swapChart.update();
+                        diskChart.data.labels = timeLabels;
+                        diskChart.update();
                     }
                 }
 
@@ -374,7 +335,7 @@ class SwapGraphViewProvider {
                     let message = event.data;
 
                     switch (message.command) {
-                        case 'updateSwapData':
+                        case 'updateDiskData':
                             updateChart(message.data);
                             break;
                     }
@@ -384,7 +345,7 @@ class SwapGraphViewProvider {
                 //  Initialize chart when DOM is ready (chart created on first data)
                 //
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Chart will be initialized when first swap data arrives
+                    // Chart will be initialized when first disk data arrives
                 });
 
                 //
@@ -408,4 +369,4 @@ class SwapGraphViewProvider {
     }
 }
 
-module.exports = { SwapGraphViewProvider };
+module.exports = { DiskGraphViewProvider };

@@ -77,6 +77,12 @@
           "name": "Swap Live Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "diskGraphView",
+          "name": "Disk Space Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }
