@@ -80,7 +80,7 @@ class SystemPanelProvider {
                     font-family: var(--vscode-font-family);
                     font-size: var(--vscode-font-size);
                     color: var(--vscode-editor-foreground);
-                    background-color: var(--vscode-editor-background);
+                    background-color: var(--vscode-sideBar-background);
                     margin: 0;
                     padding: 20px;
                     display: flex;
@@ -134,7 +134,7 @@ class SystemPanelProvider {
                     font-family: var(--vscode-font-family);
                     font-size: var(--vscode-font-size);
                     color: var(--vscode-errorForeground);
-                    background-color: var(--vscode-editor-background);
+                    background-color: var(--vscode-sideBar-background);
                     margin: 0;
                     padding: 20px;
                 }
@@ -169,7 +169,7 @@ class SystemPanelProvider {
                     font-family: var(--vscode-font-family);
                     font-size: var(--vscode-font-size);
                     color: var(--vscode-editor-foreground);
-                    background-color: var(--vscode-editor-background);
+                    background-color: var(--vscode-sideBar-background);
                     margin: 0;
                     padding: 20px;
                 }

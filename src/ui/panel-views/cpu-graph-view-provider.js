@@ -119,7 +119,7 @@ class CpuGraphViewProvider {
                     font-family: var(--vscode-font-family);
                     font-size: var(--vscode-font-size);
                     color: var(--vscode-editor-foreground);
-                    background-color: var(--vscode-editor-background);
+                    background-color: var(--vscode-sideBar-background);
                     margin: 0;
                     padding: 20px 20px 0 20px;
                     overflow: hidden;
@@ -136,7 +136,7 @@ class CpuGraphViewProvider {
                 }
 
                 .core-chart {
-                    background-color: var(--vscode-editor-background);
+                    background-color: var(--vscode-sideBar-background);
                     border: 1px solid var(--vscode-input-border);
                     border-radius: 4px;
                     padding: 8px;
