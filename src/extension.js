@@ -15,6 +15,7 @@ let update_status_bar_display = require('./ui/status-bar/status-bar-display.js')
 let { SystemPanelProvider } = require('./ui/panel-views/system-monitor-view-provider.js');
 let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider.js');
 let { RamGraphViewProvider } = require('./ui/panel-views/ram-graph-view-provider.js');
+let { SwapGraphViewProvider } = require('./ui/panel-views/swap-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
 
 //
@@ -223,17 +224,22 @@ function activate(context) {
     let ramGraphProvider = new RamGraphViewProvider();
 
     //
+    //	Create Swap graph view provider (needed for status bar updates)
+    //
+    let swapGraphProvider = new SwapGraphViewProvider();
+
+    //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider); // false = don't update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider); // false = don't update tooltip, pass graph providers
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider); // true = update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider); // true = update tooltip, pass graph providers
     }
 
     //
@@ -273,6 +279,11 @@ function activate(context) {
     //	Register the RAM graph view provider
     //
     vscode.window.registerWebviewViewProvider('ramGraphView', ramGraphProvider);
+
+    //
+    //	Register the Swap graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('swapGraphView', swapGraphProvider);
 
     //
     //	Register panel open command

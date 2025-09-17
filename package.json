@@ -71,6 +71,12 @@
           "name": "RAM Live Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "swapGraphView",
+          "name": "Swap Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }
