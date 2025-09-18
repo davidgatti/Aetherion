@@ -19,6 +19,18 @@ When developing on **remote hosts via SSH or cloud environments**, you lose acce
 - **Lightweight** - Minimal performance impact on your system
 - **Cross-platform** - Works on Windows, macOS, and Linux
 
+## 📸 Screenshots
+
+### System Monitor Panel Views
+
+![System Monitor Panel](/.assets/blades.png)
+*The comprehensive system monitoring panel showing live graphs for CPU, RAM, disk, and network usage*
+
+### Status Bar Integration
+
+![Status Bar Display](/.assets/statusbar.png)  
+*Real-time system metrics displayed in VS Code's status bar using animated braille characters*
+
 ## 🎨 User Interface
 
 ### Status Bar Display
