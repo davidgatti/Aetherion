@@ -133,7 +133,7 @@ class DiskGraphViewProvider {
                     gap: 20px 10px;
                     width: 100%;
                     height: calc(100vh - 40px);
-                    align-content: start;
+                    align-content: stretch;
                     box-sizing: border-box;
                 }
 
@@ -143,7 +143,8 @@ class DiskGraphViewProvider {
                     border-radius: 4px;
                     padding: 8px;
                     position: relative;
-                    height: 200px;
+                    height: 100%;
+                    min-height: 200px;
                     box-sizing: border-box;
                     max-width: 100%;
                 }
