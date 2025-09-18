@@ -5,6 +5,38 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-09-18
+
+### 🚀 Major Features
+
+- **Complete Live Graph Suite**: Added 5 new Panel Area views for comprehensive system monitoring
+  - **RAM Live Graph**: Real-time memory usage visualization with historical trends
+  - **Swap Live Graph**: Virtual memory usage monitoring (when swap is available)
+  - **Disk Space Live Graph**: Real-time disk usage visualization across all drives
+  - **Disk I/O Mirror Graph**: Live disk read/write activity monitoring with mirror visualization
+  - **Network I/O Mirror Graph**: Real-time network traffic in/out visualization with mirror charts
+
+### 🎨 UI/UX Improvements
+
+- **Panel Area Architecture**: Complete migration from sidebar to VS Code's Panel Area
+  - **6 Tabbed Views**: System Monitor, CPU Graph, RAM Graph, Swap Graph, Disk Graph, Disk I/O Graph, Network I/O Graph
+  - **Professional Layout**: Stretch alignment and minimum height for consistent visualization
+  - **Improved Visual Consistency**: Updated background colors across all views for better theme integration
+
+### 🔧 Technical Improvements
+
+- **Performance-First Architecture**: All monitoring functions use async exec for non-blocking execution
+  - **RAM Monitor Refactor**: Converted to async exec with improved error handling
+  - **Parallel Data Collection**: All metrics collected simultaneously for optimal performance
+  - **Status Bar Precision**: Fixed update interval documentation (200ms, not 2 seconds)
+
+### 📚 Documentation
+
+- **README Overhaul**: Updated documentation to reflect new Panel Area architecture
+  - **Accurate Feature List**: Updated to describe all 6 live graph views
+  - **Correct Timing Information**: Fixed status bar update frequency (200ms)
+  - **Panel Area Integration**: Updated usage instructions for new tabbed interface
+
 ## [2.0.0] - 2025-09-12
 
 ### 🚀 Major Features

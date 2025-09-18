@@ -273,7 +273,7 @@ class StaticSystemInfo {
             let lines = stdout.split('\n').slice(1); // Skip header
 
             for (let line of lines) {
-                if (line.trim() === '') continue;
+                if (line.trim() === '') {continue;}
 
                 //
                 //  Split by multiple whitespace to handle the df output format properly
@@ -361,9 +361,9 @@ class StaticSystemInfo {
     //  Parse size string to bytes for aggregation (handles Ki, Mi, Gi, Ti suffixes)
     //
     static _parseSize(sizeStr) {
-        if (!sizeStr || sizeStr === 'Unknown') return 0;
+        if (!sizeStr || sizeStr === 'Unknown') {return 0;}
 
-        let multipliers = { 'B': 1, 'K': 1024, 'M': 1024*1024, 'G': 1024*1024*1024, 'T': 1024*1024*1024*1024 };
+        let multipliers = { 'B': 1, 'K': 1024, 'M': 1024 * 1024, 'G': 1024 * 1024 * 1024, 'T': 1024 * 1024 * 1024 * 1024 };
         let match = sizeStr.match(/^([0-9.]+)([KMGT]?)[iB]?$/);
 
         if (match) {
@@ -391,7 +391,7 @@ class StaticSystemInfo {
             let lines = stdout.split('\n').slice(1); // Skip header
 
             for (let line of lines) {
-                if (line.trim() === '') continue;
+                if (line.trim() === '') {continue;}
 
                 let columns = line.trim().split(/\s+/);
                 if (columns.length >= 6) {
@@ -460,7 +460,7 @@ class StaticSystemInfo {
             let lines = stdout.split('\n').slice(2); // Skip header lines
 
             for (let line of lines) {
-                if (line.trim() === '') continue;
+                if (line.trim() === '') {continue;}
 
                 let columns = line.trim().split(',');
                 if (columns.length >= 5) {
