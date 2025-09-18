@@ -2,7 +2,7 @@
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
   "description": "Real-time CPU, RAM, swap, disk space, disk activity, and network traffic monitoring with animated braille characters in VS Code status bar, plus per-core CPU graphs with professional visualization",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "publisher": "gatti",
   "icon": ".assets/logo.png",
   "repository": {

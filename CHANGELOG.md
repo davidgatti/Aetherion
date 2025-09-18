@@ -5,6 +5,15 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2025-09-18
+
+### 📸 Documentation
+
+- **Added Screenshots**: Enhanced README with visual documentation
+  - Added System Monitor Panel Views screenshot showing live graphs interface
+  - Added Status Bar Integration screenshot demonstrating braille character display
+  - Improved user experience with visual previews of extension functionality
+
 ## [2.1.0] - 2025-09-18
 
 ### 🚀 Major Features
