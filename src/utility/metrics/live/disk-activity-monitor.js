@@ -6,6 +6,12 @@ let fs = require('fs').promises;
 let { get_cpu_braille_character } = require('./cpu-monitor.js');
 
 //
+//  Store previous Linux diskstats values for delta calculation
+//
+let previous_diskstats = new Map();
+let previous_timestamp = 0;
+
+//
 //  Activity thresholds based on TPS (Transfers Per Second) - the "90s LED" metric
 //  This measures drive busyness rather than raw throughput
 //
@@ -157,15 +163,24 @@ async function calculate_disk_activity_linux() {
     try {
 
         //
-        //  Try reading /proc/diskstats directly (kernel interface - always available)
+        //  Read /proc/diskstats (kernel interface - always available)
         //
         let diskstats_data = await fs.readFile('/proc/diskstats', 'utf8');
         let lines = diskstats_data.trim().split('\n');
+        let current_timestamp = Date.now();
 
-        let total_read_tps = 0;
-        let total_write_tps = 0;
-        let total_read_kb_s = 0;
-        let total_write_kb_s = 0;
+        //
+        //  Calculate time delta for per-second rates
+        //
+        let time_delta_seconds = previous_timestamp > 0
+            ? (current_timestamp - previous_timestamp) / 1000
+            : 2.0; // Default to 2 seconds for first reading
+
+        let total_read_ops_delta = 0;
+        let total_write_ops_delta = 0;
+        let total_read_sectors_delta = 0;
+        let total_write_sectors_delta = 0;
+        let current_diskstats = new Map();
 
         //
         //  Parse /proc/diskstats format:
@@ -192,33 +207,59 @@ async function calculate_disk_activity_linux() {
                 }
 
                 //
-                //  Get read/write stats (sectors)
+                //  Extract current cumulative values
                 //
-                let read_io_ops = parseInt(parts[3]) || 0;
-                let read_sectors = parseInt(parts[5]) || 0;
-                let write_io_ops = parseInt(parts[7]) || 0;
-                let write_sectors = parseInt(parts[9]) || 0;
+                let current_read_ops = parseInt(parts[3]) || 0;
+                let current_read_sectors = parseInt(parts[5]) || 0;
+                let current_write_ops = parseInt(parts[7]) || 0;
+                let current_write_sectors = parseInt(parts[9]) || 0;
 
                 //
-                //  Calculate simple approximation (this is instantaneous, not per-second)
-                //  For real TPS, we'd need to store previous values and calculate delta
-                //  This gives us relative activity levels which is sufficient for the UI
+                //  Store current values for next calculation
                 //
-                total_read_tps += read_io_ops * 0.001; // Scale down for display
-                total_write_tps += write_io_ops * 0.001;
+                current_diskstats.set(device_name, {
+                    read_ops: current_read_ops,
+                    read_sectors: current_read_sectors,
+                    write_ops: current_write_ops,
+                    write_sectors: current_write_sectors
+                });
 
                 //
-                //  Convert sectors to KB (Linux sectors are 512 bytes)
+                //  Calculate deltas if we have previous data
                 //
-                total_read_kb_s += (read_sectors * 512) / 1024 * 0.001;
-                total_write_kb_s += (write_sectors * 512) / 1024 * 0.001;
+                let previous_stats = previous_diskstats.get(device_name);
+                if (previous_stats) {
+                    let read_ops_delta = Math.max(0, current_read_ops - previous_stats.read_ops);
+                    let write_ops_delta = Math.max(0, current_write_ops - previous_stats.write_ops);
+                    let read_sectors_delta = Math.max(0, current_read_sectors - previous_stats.read_sectors);
+                    let write_sectors_delta = Math.max(0, current_write_sectors - previous_stats.write_sectors);
+
+                    total_read_ops_delta += read_ops_delta;
+                    total_write_ops_delta += write_ops_delta;
+                    total_read_sectors_delta += read_sectors_delta;
+                    total_write_sectors_delta += write_sectors_delta;
+                }
             }
         }
 
         //
-        //  Calculate total metrics
+        //  Store current values for next calculation
         //
+        previous_diskstats = current_diskstats;
+        previous_timestamp = current_timestamp;
+
+        //
+        //  Calculate per-second rates from deltas
+        //
+        let total_read_tps = total_read_ops_delta / time_delta_seconds;
+        let total_write_tps = total_write_ops_delta / time_delta_seconds;
         let total_tps = total_read_tps + total_write_tps;
+
+        //
+        //  Convert sectors to KB/s (Linux sectors are 512 bytes)
+        //
+        let total_read_kb_s = (total_read_sectors_delta * 512) / 1024 / time_delta_seconds;
+        let total_write_kb_s = (total_write_sectors_delta * 512) / 1024 / time_delta_seconds;
         let total_kb_s = total_read_kb_s + total_write_kb_s;
         let mb_per_second = total_kb_s / 1024;
         let kb_per_transfer = total_tps > 0 ? total_kb_s / total_tps : 0;
