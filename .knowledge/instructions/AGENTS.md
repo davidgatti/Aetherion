@@ -16,7 +16,7 @@
 
 ## 📁 File & Folder Structure
 
-- File names use **low dash format**: `03_create_apikey_for_user.js`
+- File names use **low dash format**: `create_apikey_for_user.js`
 - Execution order is defined by the numeric prefix
 - Each file should:
   - Export a single unnamed `async` function
@@ -85,10 +85,10 @@ Split everything into atomic parts:
 
 | Task | File Name |
 | --- | --- |
-| Create user | `02_create_user.js` |
-| Add user to group | `03_add_user_to_group.js` |
-| Create API key | `04_create_apikey.js` |
-| Update user attributes | `05_update_user_attributes.js` |
+| Create user | `create_user.js` |
+| Add user to group | `add_user_to_group.js` |
+| Create API key | `create_apikey.js` |
+| Update user attributes | `update_user_attributes.js` |
 
 No mixing responsibilities.
 

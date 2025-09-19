@@ -5,6 +5,99 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-09-19
+
+### 🌐 Cross-Platform Support
+
+- **Universal Disk I/O Monitoring**: Enhanced disk activity monitor for all platforms
+  - **macOS**: Uses existing iostat-based monitoring with TPS activity calculations
+  - **Linux**: Primary `/proc/diskstats` parsing with intelligent device filtering
+  - **Windows**: Added wmic performance counter integration for disk read/write metrics
+  - **Smart Device Detection**: Filters main storage devices (SATA: sda/sdb, NVMe: nvme0n1) excluding partitions
+  - **Graceful Fallbacks**: Linux iostat fallback for sysstat-enabled distributions
+
+### 🔧 Performance Optimizations
+
+- **200ms Status Bar Updates**: Maintains smooth braille character animations
+- **Async Operations**: All platform monitoring functions use non-blocking execution
+- **Comprehensive Testing**: Added Linux simulation test suite with 64 passing tests
+
+## [2.1.1] - 2025-09-18
+
+### 📸 Documentation
+
+- **Added Screenshots**: Enhanced README with visual documentation
+  - Added System Monitor Panel Views screenshot showing live graphs interface
+  - Added Status Bar Integration screenshot demonstrating braille character display
+  - Improved user experience with visual previews of extension functionality
+
+## [2.1.0] - 2025-09-18
+
+### 🚀 Major Features
+
+- **Complete Live Graph Suite**: Added 5 new Panel Area views for comprehensive system monitoring
+  - **RAM Live Graph**: Real-time memory usage visualization with historical trends
+  - **Swap Live Graph**: Virtual memory usage monitoring (when swap is available)
+  - **Disk Space Live Graph**: Real-time disk usage visualization across all drives
+  - **Disk I/O Mirror Graph**: Live disk read/write activity monitoring with mirror visualization
+  - **Network I/O Mirror Graph**: Real-time network traffic in/out visualization with mirror charts
+
+### 🎨 UI/UX Improvements
+
+- **Panel Area Architecture**: Complete migration from sidebar to VS Code's Panel Area
+  - **6 Tabbed Views**: System Monitor, CPU Graph, RAM Graph, Swap Graph, Disk Graph, Disk I/O Graph, Network I/O Graph
+  - **Professional Layout**: Stretch alignment and minimum height for consistent visualization
+  - **Improved Visual Consistency**: Updated background colors across all views for better theme integration
+
+### 🔧 Technical Improvements
+
+- **Performance-First Architecture**: All monitoring functions use async exec for non-blocking execution
+  - **RAM Monitor Refactor**: Converted to async exec with improved error handling
+  - **Parallel Data Collection**: All metrics collected simultaneously for optimal performance
+  - **Status Bar Precision**: Fixed update interval documentation (200ms, not 2 seconds)
+
+### 📚 Documentation
+
+- **README Overhaul**: Updated documentation to reflect new Panel Area architecture
+  - **Accurate Feature List**: Updated to describe all 6 live graph views
+  - **Correct Timing Information**: Fixed status bar update frequency (200ms)
+  - **Panel Area Integration**: Updated usage instructions for new tabbed interface
+
+## [2.0.0] - 2025-09-12
+
+### 🚀 Major Features
+
+- **Per-Core CPU Graph Visualization**: Professional real-time CPU monitoring with individual core graphs
+  - **Windows Task Manager Style Grid**: Each CPU core displays as a separate compact graph
+  - **Real-Time Performance**: Live updates every 2 seconds, synchronized with status bar data
+  - **Chart.js Integration**: Professional, smooth line graphs with VS Code theme integration
+  - **Scrollable Grid Layout**: Supports any number of CPU cores with automatic scrolling
+  - **Minimal Design**: No legends, labels, or visual clutter - pure data visualization
+  - **Performance Optimized**: Only renders when visible, zero impact when tab is not active
+  - **Theme-Aware Colors**: Automatically matches VS Code theme colors for seamless integration
+
+### 🎨 UI/UX Improvements
+
+- **Clean Interface Design**: Removed headers and buttons from all panel views for minimal, distraction-free interface
+  - **System Info**: Removed header and refresh button - information loads automatically
+  - **CPU Graph**: Removed header and clear button - focus purely on data visualization
+- **Full VS Code Theme Integration**: All UI elements now use VS Code theme variables
+  - **Dynamic Color Adaptation**: Automatically adapts to Light, Dark, and High Contrast themes
+  - **Professional Typography**: Uses VS Code's font family and sizing throughout
+
+### 🔧 Technical Improvements
+
+- **Data Sharing Architecture**: CPU graph reuses status bar calculation for perfect consistency
+- **Visibility-Based Rendering**: Graphs pause updates when not visible, optimizing performance
+- **Memory Management**: Automatic cleanup of old data points prevents memory leaks
+- **Zero Animation Overhead**: Disabled Chart.js animations for maximum performance
+
+### 🧪 Testing Enhancements
+
+- **Performance Test Suite**: New tests ensure UI rendering stays under performance thresholds
+- **High Core Count Validation**: Tested with 16+ cores to ensure scalability
+- **Webview Performance Monitoring**: Validates that panel loading doesn't impact status bar updates
+
 ## [1.9.0] - 2025-09-11
 
 ### 🔧 UX Improvements
@@ -53,7 +146,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📁 Architecture Updates
 
-- **New Disk Activity Monitor**: `01_monitors/06_disk-activity-monitor.js` with TPS-based calculations
+- **New Disk Activity Monitor**: `utility/metrics/live/disk-activity-monitor.js` with TPS-based calculations
 - **Extended Extension API**: Added `getDiskReadActivityBlock()` and `getDiskWriteActivityBlock()` functions
 - **Enhanced Status Bar Logic**: Updated display formatting for dual activity indicators
 - **Improved Module Exports**: Extended API surface for new read/write activity functions
@@ -78,9 +171,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 📁 Code Organization
 
-- New swap monitor module: `01_monitors/05_swap-monitor.js`
+- New swap monitor module: `utility/metrics/live/swap-monitor.js`
 - Updated status bar display logic to conditionally include swap
-- Enhanced file organization with leading zero numbering for framework compatibility
+- Enhanced file organization with logical folder structure
 - Organized codebase into logical subfolders by purpose
 
 ## [1.6.1] - 2025-09-08

@@ -1,8 +1,8 @@
 {
   "name": "aetherion-cpu-monitor",
   "displayName": "Aetherion CPU Monitor",
-  "description": "Real-time CPU, RAM, swap, disk space, disk activity, and network traffic monitoring with animated braille characters in VS Code status bar and dedicated system information sidebar",
-  "version": "1.9.0",
+  "description": "Real-time CPU, RAM, swap, disk space, disk activity, and network traffic monitoring with animated braille characters in VS Code status bar, plus per-core CPU graphs with professional visualization",
+  "version": "2.2.0",
   "publisher": "gatti",
   "icon": ".assets/logo.png",
   "repository": {
@@ -39,54 +39,68 @@
   "contributes": {
     "commands": [
       {
-        "command": "sysmag.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "sysmag.showItemDetails",
-        "title": "Show System Item Details"
-      },
-      {
-        "command": "sysmag.refreshSystemMonitor",
-        "title": "Refresh System Monitor",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "sysmag.focusSystemMonitor",
-        "title": "Focus System Monitor Tree View"
+        "command": "sysmag.openSystemPanel",
+        "title": "Open System Monitor Panel"
       }
     ],
-    "views": {
-      "systemMonitor": [
+    "viewsContainers": {
+      "panel": [
         {
-          "id": "systemMonitorView",
-          "name": "System Performance",
-          "when": "true",
+          "id": "systemMonitorPanel",
+          "title": "System Monitor",
           "icon": "$(pulse)"
         }
       ]
     },
-    "viewsContainers": {
-      "activitybar": [
+    "views": {
+      "systemMonitorPanel": [
         {
-          "id": "systemMonitor",
-          "title": "System Monitor",
+          "id": "systemMonitorView",
+          "name": "System Monitor",
+          "type": "webview",
           "icon": "$(dashboard)"
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
+        },
         {
-          "command": "sysmag.refreshSystemMonitor",
-          "when": "view == systemMonitorView",
-          "group": "navigation"
+          "id": "cpuGraphView",
+          "name": "CPU Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
+        },
+        {
+          "id": "ramGraphView",
+          "name": "RAM Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
+        },
+        {
+          "id": "swapGraphView",
+          "name": "Swap Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
+        },
+        {
+          "id": "diskGraphView",
+          "name": "Disk Space Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
+        },
+        {
+          "id": "diskIOGraphView",
+          "name": "Disk I/O Mirror Graph",
+          "type": "webview",
+          "icon": "$(graph)"
+        },
+        {
+          "id": "networkIOGraphView",
+          "name": "Network I/O Mirror Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run lint",
+    "vscode:prepublish": "npm run lint:js && npm run lint:deps",
     "build": "npm run lint && npm run test",
     "lint": "npm run lint:js && npm run lint:md && npm run lint:deps",
     "lint:js": "eslint src --config .config/eslint.config.mjs",

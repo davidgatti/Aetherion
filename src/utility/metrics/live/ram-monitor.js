@@ -1,6 +1,8 @@
 let os = require('os');
-let { execSync } = require('child_process');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let { exec } = require('child_process');
+let { promisify } = require('util');
+let execAsync = promisify(exec);
+let get_braille_character = require('../../get_braille_character.js');
 
 //
 //	Calculate RAM usage percentage and memory information
@@ -29,7 +31,7 @@ async function calculate_ram_usage_internal() {
         //	macOS: Use memory_pressure for Activity Monitor-like memory usage
         //
         try {
-            let memory_pressure_output = execSync('memory_pressure', { encoding: 'utf8' });
+            let { stdout: memory_pressure_output } = await execAsync('memory_pressure');
 
             //
             //	Parse total memory from memory_pressure (more accurate than os.totalmem)
@@ -42,31 +44,48 @@ async function calculate_ram_usage_internal() {
             //
             //	Parse individual page counts for Activity Monitor-style calculation
             //
-            let pages_active = parseInt(memory_pressure_output.match(/Pages active: (\d+)/)[1]);
-            let pages_wired = parseInt(memory_pressure_output.match(/Pages wired down: (\d+)/)[1]);
+            let pages_active_match = memory_pressure_output.match(/Pages active: (\d+)/);
+            let pages_wired_match = memory_pressure_output.match(/Pages wired down: (\d+)/);
             let pages_compressed_match = memory_pressure_output.match(/Pages used by compressor: (\d+)/);
-            let pages_compressed = parseInt(pages_compressed_match[1]);
-            let pages_free = parseInt(memory_pressure_output.match(/Pages free: (\d+)/)[1]);
+            let pages_free_match = memory_pressure_output.match(/Pages free: (\d+)/);
             let pages_inactive_match = memory_pressure_output.match(/Pages inactive: (\d+)/);
-            let pages_inactive = parseInt(pages_inactive_match[1]);
-            let pages_speculative = parseInt(memory_pressure_output.match(/Pages speculative: (\d+)/)[1]);
-            let page_size = 16384; // bytes
+            let pages_speculative_match = memory_pressure_output.match(/Pages speculative: (\d+)/);
 
-            //
-            //	Calculate memory usage similar to Activity Monitor
-            //	"Memory Used" = Active + Wired + Compressed pages
-            //	Available = Free + Inactive + Speculative (can be reclaimed)
-            //
-            let used_pages = pages_active + pages_wired + pages_compressed;
-            let available_pages = pages_free + pages_inactive + pages_speculative;
+            if (pages_active_match && pages_wired_match && pages_compressed_match &&
+                pages_free_match && pages_inactive_match && pages_speculative_match) {
 
-            let used_memory_gb = (used_pages * page_size) / (1024 * 1024 * 1024);
-            available_memory_gb = (available_pages * page_size) / (1024 * 1024 * 1024);
+                let pages_active = parseInt(pages_active_match[1]);
+                let pages_wired = parseInt(pages_wired_match[1]);
+                let pages_compressed = parseInt(pages_compressed_match[1]);
+                let pages_free = parseInt(pages_free_match[1]);
+                let pages_inactive = parseInt(pages_inactive_match[1]);
+                let pages_speculative = parseInt(pages_speculative_match[1]);
+                let page_size = 16384; // bytes
 
-            //
-            //	Calculate usage percentage based on used memory vs total
-            //
-            usage_percent = (used_memory_gb / total_memory_gb) * 100;
+                //
+                //	Calculate memory usage similar to Activity Monitor
+                //	"Memory Used" = Active + Wired + Compressed pages
+                //	Available = Free + Inactive + Speculative (can be reclaimed)
+                //
+                let used_pages = pages_active + pages_wired + pages_compressed;
+                let available_pages = pages_free + pages_inactive + pages_speculative;
+
+                let used_memory_gb = (used_pages * page_size) / (1024 * 1024 * 1024);
+                available_memory_gb = (available_pages * page_size) / (1024 * 1024 * 1024);
+
+                //
+                //	Calculate usage percentage based on used memory vs total
+                //
+                usage_percent = (used_memory_gb / total_memory_gb) * 100;
+            } else {
+                //
+                //	Fallback if parsing fails
+                //
+                let free_memory_bytes = os.freemem();
+                let free_memory_gb = free_memory_bytes / (1024 * 1024 * 1024);
+                available_memory_gb = free_memory_gb;
+                usage_percent = ((total_memory_gb - free_memory_gb) / total_memory_gb) * 100;
+            }
 
         } catch {
             //
@@ -84,7 +103,7 @@ async function calculate_ram_usage_internal() {
         //	Linux: Use /proc/meminfo for accurate memory calculation
         //
         try {
-            let meminfo_output = execSync('cat /proc/meminfo', { encoding: 'utf8' });
+            let { stdout: meminfo_output } = await execAsync('cat /proc/meminfo');
 
             //
             //	Parse memory information from /proc/meminfo

@@ -1,6 +1,6 @@
 # Aetherion CPU Monitor
 
-A real-time system monitoring extension for VS Code that displays CPU, memory, swap, disk, and network usage directly in your status bar using animated braille characters, with a dedicated sidebar showing detailed system information.
+A comprehensive real-time system monitoring extension for VS Code that displays CPU, memory, swap, disk, and network usage in your status bar using animated braille characters, plus a dedicated Panel Area with live graph visualizations for detailed performance analysis.
 
 ## 🎯 Why Aetherion?
 
@@ -8,15 +8,28 @@ When developing on **remote hosts via SSH or cloud environments**, you lose acce
 
 ## ✨ Features
 
-- **Real-time status bar monitoring** - Animated braille characters update every 200ms for live performance feedback
-- **Dedicated system monitor sidebar** - Standalone activity bar panel with detailed system information
-- **Multi-metric monitoring** - CPU, RAM, swap, disk space, and network traffic visualization
+- **Real-time status bar monitoring** - Animated braille characters update every 200ms for ultra-smooth performance feedback
+- **Live graph visualizations** - 6 dedicated Panel Area views with real-time charts for detailed analysis
+- **Multi-metric monitoring** - CPU, RAM, swap, disk space, disk I/O, and network traffic visualization
+- **Panel Area integration** - Bottom panel with tabbed views alongside Terminal, Problems, etc.
 - **Braille character animation** - Progressive visual indicators for different usage levels
-- **Static system information** - Platform, architecture, CPU details, and uptime in tree view
+- **Static system information** - Platform, architecture, CPU details, and uptime display
 - **Always visible status bar** - Integrated into VS Code's status bar (right side, high priority)
 - **Zero configuration** - Works immediately upon installation
 - **Lightweight** - Minimal performance impact on your system
 - **Cross-platform** - Works on Windows, macOS, and Linux
+
+## 📸 Screenshots
+
+### System Monitor Panel Views
+
+![System Monitor Panel](/.assets/blades.png)
+*The comprehensive system monitoring panel showing live graphs for CPU, RAM, disk, and network usage*
+
+### Status Bar Integration
+
+![Status Bar Display](/.assets/statusbar.png)  
+*Real-time system metrics displayed in VS Code's status bar using animated braille characters*
 
 ## 🎨 User Interface
 
@@ -39,22 +52,19 @@ Aetherion uses progressive braille characters in the status bar to show system u
 - **Disk usage**: `⣀` - low disk usage (0-10%)
 - **Network traffic**: `⣶⣄` - high incoming (40-60%), low outgoing (10-20%)
 
-### System Monitor Sidebar
+### System Monitor Panel Area
 
-Click the status bar to open the dedicated **System Monitor** sidebar panel featuring:
+Click the status bar to open the dedicated **System Monitor** Panel Area (bottom panel) featuring 6 tabbed views:
 
-```text
-System Info
-├── 🖥️ Platform: darwin
-├── ⚙️ Architecture: x64
-├── 🔧 CPU Cores: 8
-├── 💻 CPU Model: Apple M1 Pro...
-└── ⏱️ Uptime: 2d 14h 32m
-```
+1. **System Monitor** - Static system information and overview dashboard
+2. **CPU Live Graph** - Real-time per-core CPU usage visualization  
+3. **RAM Live Graph** - Live memory usage tracking with visual charts
+4. **Swap Live Graph** - Virtual memory usage monitoring (*when swap is available*)
+5. **Disk Space Live Graph** - Real-time disk usage visualization
+6. **Disk I/O Mirror Graph** - Live disk read/write activity monitoring  
+7. **Network I/O Mirror Graph** - Real-time network traffic in/out visualization
 
-**Static System Information:** The sidebar displays detailed system specifications and uptime, refreshed manually via the refresh button to prevent visual noise from constant updates.
-
-**Activity Bar Integration:** Standalone system monitor panel with dashboard icon in VS Code's activity bar.
+**Panel Area Integration:** All views are located in VS Code's bottom Panel Area alongside Terminal, Problems, and Output panels, providing easy access without disrupting your workflow.
 
 ## 🚀 Perfect For
 
@@ -80,16 +90,6 @@ System Info
    ```bash
    code --install-extension gatti.aetherion-cpu-monitor
    ```
-
-## 🔧 Usage
-
-1. **Install the extension** - System monitoring starts automatically
-2. **Look at the status bar** - You'll see braille characters on the right side representing:
-   - Each CPU core usage
-   - Memory usage
-   - Disk space usage  
-   - Network traffic (in/out)
-3. **Monitor in real-time** - Display updates every 200ms
 
 No configuration needed - it just works!
 

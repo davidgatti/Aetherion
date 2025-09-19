@@ -1,7 +1,7 @@
 let os = require('os');
 let { execSync } = require('child_process');
 let fs = require('fs');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let get_braille_character = require('../../get_braille_character.js');
 
 //
 //	Calculate swap usage percentage and swap information

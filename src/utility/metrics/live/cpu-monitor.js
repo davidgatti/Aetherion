@@ -1,5 +1,5 @@
 let os = require('os');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let get_braille_character = require('../../get_braille_character.js');
 
 //
 //	Store previous CPU times for usage calculation

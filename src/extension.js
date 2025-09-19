@@ -5,17 +5,21 @@ let vscode = require('vscode');
 //
 //	Import modular functions
 //
-let { get_cpu_braille_character } = require('./01_monitors/01_cpu-monitor.js');
-let { calculate_ram_usage_internal, get_ram_braille_character } = require('./01_monitors/02_ram-monitor.js');
-let { calculate_disk_usage_internal, get_disk_braille_character } = require('./01_monitors/03_disk-monitor.js');
-let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./01_monitors/04_network-monitor.js');
-let { calculate_swap_usage_internal, get_swap_braille_character } = require('./01_monitors/05_swap-monitor.js');
-let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./01_monitors/06_disk-activity-monitor.js');
-let update_status_bar_display = require('./02_ui/01_status-bar-display.js');
-let show_system_info_command = require('./03_commands/01_show-system-info-command.js');
-let { SystemMonitorTreeProvider } = require('./02_ui/02_system-monitor-tree-provider.js');
-let show_tree_item_details = require('./03_commands/02_show-tree-item-details.js');
-let focus_system_monitor_tree_view = require('./03_commands/04_focus-system-monitor-tree-view.js');
+let { get_cpu_braille_character } = require('./utility/metrics/live/cpu-monitor.js');
+let { calculate_ram_usage_internal, get_ram_braille_character } = require('./utility/metrics/live/ram-monitor.js');
+let { calculate_disk_usage_internal, get_disk_braille_character } = require('./utility/metrics/live/disk-monitor.js');
+let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./utility/metrics/live/network-monitor.js');
+let { calculate_swap_usage_internal, get_swap_braille_character } = require('./utility/metrics/live/swap-monitor.js');
+let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./utility/metrics/live/disk-activity-monitor.js');
+let update_status_bar_display = require('./ui/status-bar/status-bar-display.js');
+let { SystemPanelProvider } = require('./ui/panel-views/system-monitor-view-provider.js');
+let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider.js');
+let { RamGraphViewProvider } = require('./ui/panel-views/ram-graph-view-provider.js');
+let { SwapGraphViewProvider } = require('./ui/panel-views/swap-graph-view-provider.js');
+let { DiskGraphViewProvider } = require('./ui/panel-views/disk-graph-view-provider.js');
+let { DiskIOGraphViewProvider } = require('./ui/panel-views/disk-io-graph-view-provider.js');
+let { NetworkIOGraphViewProvider } = require('./ui/panel-views/network-io-graph-view-provider.js');
+let open_system_panel = require('./commands/open-system-panel.js');
 
 //
 //	Export functions for external access and testing
@@ -206,24 +210,54 @@ function activate(context) {
     let status_bar_item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 1000);
 
     //
-    //	Make status bar item clickable - focus tree view
+    //	Make status bar item clickable - open panel view
     //
-    status_bar_item.command = 'sysmag.focusSystemMonitor';
+    status_bar_item.command = 'sysmag.openSystemPanel';
 
     status_bar_item.show();
+
+    //
+    //	Create CPU graph view provider (needed for status bar updates)
+    //
+    let cpuGraphProvider = new CpuGraphViewProvider();
+
+    //
+    //	Create RAM graph view provider (needed for status bar updates)
+    //
+    let ramGraphProvider = new RamGraphViewProvider();
+
+    //
+    //	Create Swap graph view provider (needed for status bar updates)
+    //
+    let swapGraphProvider = new SwapGraphViewProvider();
+
+    //
+    //	Create Disk graph view provider (needed for status bar updates)
+    //
+    let diskGraphProvider = new DiskGraphViewProvider();
+
+    //
+    //	Create Disk I/O mirror graph view provider (needed for status bar updates)
+    //
+    let diskIOGraphProvider = new DiskIOGraphViewProvider();
+
+    //
+    //	Create Network I/O mirror graph view provider (needed for status bar updates)
+    //
+    let networkIOGraphProvider = new NetworkIOGraphViewProvider();
 
     //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false); // false = don't update tooltip
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider); // false = don't update tooltip, pass graph providers
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true); // true = update tooltip
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider); // true = update tooltip, pass graph providers
     }
 
     //
@@ -249,48 +283,47 @@ function activate(context) {
     context.subscriptions.push({ dispose: function() { clearInterval(tooltip_interval); } });
 
     //
-    //	The command has been defined in the package.json file
-    //	Now provide the implementation of the command with registerCommand
-    //	The commandId parameter must match the command field in package.json
+    //	Create and register the panel view provider
     //
-    let disposable = vscode.commands.registerCommand('sysmag.helloWorld', show_system_info_command);
+    let panelProvider = new SystemPanelProvider();
+    vscode.window.registerWebviewViewProvider('systemMonitorView', panelProvider);
 
     //
-    //	Create and register the tree view providers
+    //	Register the CPU graph view provider
     //
-    let treeProvider = new SystemMonitorTreeProvider();
-    vscode.window.registerTreeDataProvider('systemMonitorView', treeProvider);
+    vscode.window.registerWebviewViewProvider('cpuGraphView', cpuGraphProvider);
 
     //
-    //	Register tree item click command
+    //	Register the RAM graph view provider
     //
-    let treeItemDisposable = vscode.commands.registerCommand('sysmag.showItemDetails', show_tree_item_details);
+    vscode.window.registerWebviewViewProvider('ramGraphView', ramGraphProvider);
 
     //
-    //	Register status bar click command - focus tree view
+    //	Register the Swap graph view provider
     //
-    let statusBarDisposable = vscode.commands.registerCommand('sysmag.focusSystemMonitor', focus_system_monitor_tree_view);
+    vscode.window.registerWebviewViewProvider('swapGraphView', swapGraphProvider);
 
     //
-    //	Register refresh command for tree view
+    //	Register the Disk graph view provider
     //
-    let refreshDisposable = vscode.commands.registerCommand('sysmag.refreshSystemMonitor', () => {
-        treeProvider.refresh();
-        vscode.window.showInformationMessage('System monitor refreshed! 🔄');
-    });
+    vscode.window.registerWebviewViewProvider('diskGraphView', diskGraphProvider);
 
     //
-    //	Set up automatic tree refresh every 5 seconds
+    //	Register the Disk I/O mirror graph view provider
     //
-    let treeRefreshInterval = setInterval(() => {
-        treeProvider.refresh();
-    }, 5000);
+    vscode.window.registerWebviewViewProvider('diskIOGraphView', diskIOGraphProvider);
 
-    context.subscriptions.push(disposable);
-    context.subscriptions.push(treeItemDisposable);
-    context.subscriptions.push(statusBarDisposable);
-    context.subscriptions.push(refreshDisposable);
-    context.subscriptions.push({ dispose: function() { clearInterval(treeRefreshInterval); } });
+    //
+    //	Register the Network I/O mirror graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('networkIOGraphView', networkIOGraphProvider);
+
+    //
+    //	Register panel open command
+    //
+    let panelDisposable = vscode.commands.registerCommand('sysmag.openSystemPanel', () => open_system_panel(panelProvider));
+
+    context.subscriptions.push(panelDisposable);
 }
 
 //

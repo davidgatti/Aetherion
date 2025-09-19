@@ -1,5 +1,5 @@
 let assert = require('assert');
-let get_braille_character = require('../.utility/get_braille_character.js');
+let get_braille_character = require('../utility/get_braille_character.js');
 
 suite('Braille Character Utility Tests', function() {
 
