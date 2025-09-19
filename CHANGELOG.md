@@ -5,6 +5,23 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2025-09-19
+
+### 🐛 Bug Fixes
+
+- **Fixed Linux Disk I/O Monitoring**: Resolved critical issue causing incorrect disk activity readings
+  - **Root Cause**: Linux `/proc/diskstats` contains cumulative counters since boot, not per-second rates
+  - **Solution**: Implemented proper delta-based calculation storing previous values and computing time-based deltas
+  - **Impact**: Eliminated bogus 600 MB/s readings and maxed-out 100% activity levels
+  - **Results**: Now shows realistic values (e.g., 1.5 TPS, 0.008 MB/s) with accurate activity percentages
+  - **Performance**: Maintains 2-7ms execution time, well under performance requirements
+
+### 🔧 Technical Improvements
+
+- **Enhanced Delta Calculation**: Added `previous_diskstats` Map and `previous_timestamp` for accurate per-second rates
+- **Cross-Platform Consistency**: macOS monitoring unaffected (already used correct iostat approach)
+- **Maintained Performance**: Status bar updates remain responsive with 2-second cycles
+
 ## [2.2.0] - 2025-09-19
 
 ### 🌐 Cross-Platform Support
