@@ -184,7 +184,7 @@ async function calculate_disk_activity_linux() {
                     continue;
                 }
                 //
-                //  Skip partitions: sda1, hdb2 (traditional) and nvme0n1p1 (NVMe partitions)  
+                //  Skip partitions: sda1, hdb2 (traditional) and nvme0n1p1 (NVMe partitions)
                 //  But keep main devices: sda, nvme0n1, etc.
                 //
                 if (device_name.match(/^(sd[a-z]|hd[a-z])\d+$/) || device_name.match(/nvme\d+n\d+p\d+/)) {

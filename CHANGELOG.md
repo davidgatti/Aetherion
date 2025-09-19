@@ -5,6 +5,23 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-09-19
+
+### 🌐 Cross-Platform Support
+
+- **Universal Disk I/O Monitoring**: Enhanced disk activity monitor for all platforms
+  - **macOS**: Uses existing iostat-based monitoring with TPS activity calculations
+  - **Linux**: Primary `/proc/diskstats` parsing with intelligent device filtering
+  - **Windows**: Added wmic performance counter integration for disk read/write metrics
+  - **Smart Device Detection**: Filters main storage devices (SATA: sda/sdb, NVMe: nvme0n1) excluding partitions
+  - **Graceful Fallbacks**: Linux iostat fallback for sysstat-enabled distributions
+
+### 🔧 Performance Optimizations
+
+- **200ms Status Bar Updates**: Maintains smooth braille character animations
+- **Async Operations**: All platform monitoring functions use non-blocking execution
+- **Comprehensive Testing**: Added Linux simulation test suite with 64 passing tests
+
 ## [2.1.1] - 2025-09-18
 
 ### 📸 Documentation

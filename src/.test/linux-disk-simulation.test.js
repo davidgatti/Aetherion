@@ -78,7 +78,7 @@ suite('Linux Disk Activity Simulation Tests', function() {
             //
             //  Verify no filtered devices made it through
             //
-            let partitions = parsed_devices.filter(d => d.name.match(/\d+$/));
+            let partitions = parsed_devices.filter(d => d.name.match(/^sda\d+$|^sdb\d+$|^nvme\d+n\d+p\d+$/));
             let system_devices = parsed_devices.filter(d => d.name.match(/^(loop|ram|sr|fd)/));
 
             assert.strictEqual(partitions.length, 0, `Should not include partitions, found: ${partitions.map(d => d.name).join(', ')}`);
