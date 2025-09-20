@@ -95,6 +95,12 @@
           "name": "Network I/O Mirror Graph",
           "type": "webview",
           "icon": "$(graph)"
+        },
+        {
+          "id": "processGraphView",
+          "name": "Process Live Graph",
+          "type": "webview",
+          "icon": "$(graph)"
         }
       ]
     }

@@ -4,12 +4,13 @@ let { calculate_disk_usage_internal, get_disk_braille_character } = require('../
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('../../utility/metrics/live/network-monitor.js');
 let { calculate_swap_usage_internal, get_swap_braille_character } = require('../../utility/metrics/live/swap-monitor.js');
 let { calculate_disk_activity_internal, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('../../utility/metrics/live/disk-activity-monitor.js');
+let { calculate_process_usage_internal, get_process_braille_character } = require('../../utility/metrics/live/process-monitor.js');
 let os = require('os');
 
 //
 //	Update status bar display with current system usage
 //
-async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null, ramGraphProvider = null, swapGraphProvider = null, diskGraphProvider = null, diskIOGraphProvider = null, networkIOGraphProvider = null) {
+async function update_status_bar_display(status_bar_item, update_tooltip = true, cpuGraphProvider = null, ramGraphProvider = null, swapGraphProvider = null, diskGraphProvider = null, diskIOGraphProvider = null, networkIOGraphProvider = null, processGraphProvider = null) {
 
     //
     //	Validate status bar item parameter
@@ -31,14 +32,16 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
         disk_usage_info,
         disk_activity_info,
         network_usage_info,
-        swap_usage_info
+        swap_usage_info,
+        process_usage_info
     ] = await Promise.all([
         calculate_cpu_usage(),
         calculate_ram_usage_internal(),
         calculate_disk_usage_internal(),
         calculate_disk_activity_internal(),
         calculate_network_usage_internal(),
-        calculate_swap_usage_internal()
+        calculate_swap_usage_internal(),
+        calculate_process_usage_internal()
     ]);
 
     //
@@ -81,6 +84,13 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
     //
     if (networkIOGraphProvider) {
         networkIOGraphProvider.updateNetworkIOData(network_usage_info.network_in_percent, network_usage_info.network_out_percent);
+    }
+
+    //
+    //	Share Process data with graph view (same calculation, same timing)
+    //
+    if (processGraphProvider) {
+        processGraphProvider.updateProcessData(process_usage_info.usage_percent);
     }
 
     //

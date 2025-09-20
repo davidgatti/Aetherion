@@ -11,6 +11,7 @@ let { calculate_disk_usage_internal, get_disk_braille_character } = require('./u
 let { calculate_network_usage_internal, get_network_in_braille_character, get_network_out_braille_character } = require('./utility/metrics/live/network-monitor.js');
 let { calculate_swap_usage_internal, get_swap_braille_character } = require('./utility/metrics/live/swap-monitor.js');
 let { calculate_disk_activity_internal, get_disk_activity_braille_character, get_disk_read_activity_braille_character, get_disk_write_activity_braille_character } = require('./utility/metrics/live/disk-activity-monitor.js');
+let { calculate_process_usage_internal, get_process_braille_character } = require('./utility/metrics/live/process-monitor.js');
 let update_status_bar_display = require('./ui/status-bar/status-bar-display.js');
 let { SystemPanelProvider } = require('./ui/panel-views/system-monitor-view-provider.js');
 let { CpuGraphViewProvider } = require('./ui/panel-views/cpu-graph-view-provider.js');
@@ -19,6 +20,7 @@ let { SwapGraphViewProvider } = require('./ui/panel-views/swap-graph-view-provid
 let { DiskGraphViewProvider } = require('./ui/panel-views/disk-graph-view-provider.js');
 let { DiskIOGraphViewProvider } = require('./ui/panel-views/disk-io-graph-view-provider.js');
 let { NetworkIOGraphViewProvider } = require('./ui/panel-views/network-io-graph-view-provider.js');
+let { ProcessGraphViewProvider } = require('./ui/panel-views/process-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
 
 //
@@ -192,6 +194,31 @@ async function getDiskWriteActivityBlock(write_activity_level) {
     return await get_disk_write_activity_braille_character(write_activity_level);
 }
 
+async function calculateProcessUsage() {
+
+    //
+    //	Get process usage information from modular function
+    //
+    let process_info = await calculate_process_usage_internal();
+
+    //
+    //	--> return formatted response for compatibility
+    //
+    return {
+        usagePercent: process_info.usage_percent,
+        currentCount: process_info.current_count,
+        maxCount: process_info.max_count
+    };
+}
+
+async function getProcessBlock(usage) {
+
+    //
+    //	--> delegate to modular process braille function
+    //
+    return await get_process_braille_character(usage);
+}
+
 //
 //	This method is called when your extension is activated
 //	Your extension is activated the very first time the command is executed
@@ -247,17 +274,22 @@ function activate(context) {
     let networkIOGraphProvider = new NetworkIOGraphViewProvider();
 
     //
+    //	Create Process graph view provider (needed for status bar updates)
+    //
+    let processGraphProvider = new ProcessGraphViewProvider();
+
+    //
     //	Function to update CPU display using modular approach
     //
     async function update_display() {
-        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider); // false = don't update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, false, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider, processGraphProvider); // false = don't update tooltip, pass graph providers
     }
 
     //
     //	Function to update both display and tooltip
     //
     async function update_display_and_tooltip() {
-        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider); // true = update tooltip, pass graph providers
+        await update_status_bar_display(status_bar_item, true, cpuGraphProvider, ramGraphProvider, swapGraphProvider, diskGraphProvider, diskIOGraphProvider, networkIOGraphProvider, processGraphProvider); // true = update tooltip, pass graph providers
     }
 
     //
@@ -319,6 +351,11 @@ function activate(context) {
     vscode.window.registerWebviewViewProvider('networkIOGraphView', networkIOGraphProvider);
 
     //
+    //	Register the Process graph view provider
+    //
+    vscode.window.registerWebviewViewProvider('processGraphView', processGraphProvider);
+
+    //
     //	Register panel open command
     //
     let panelDisposable = vscode.commands.registerCommand('sysmag.openSystemPanel', () => open_system_panel(panelProvider));
@@ -350,5 +387,7 @@ module.exports = {
     calculateDiskActivity: calculateDiskActivity,
     getDiskActivityBlock: getDiskActivityBlock,
     getDiskReadActivityBlock: getDiskReadActivityBlock,
-    getDiskWriteActivityBlock: getDiskWriteActivityBlock
+    getDiskWriteActivityBlock: getDiskWriteActivityBlock,
+    calculateProcessUsage: calculateProcessUsage,
+    getProcessBlock: getProcessBlock
 };

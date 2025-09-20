@@ -207,6 +207,7 @@ suite('Extension Performance Tests', function() {
         let { calculate_cpu_usage } = require('../utility/metrics/live/cpu-monitor.js');
         let { calculate_ram_usage_internal } = require('../utility/metrics/live/ram-monitor.js');
         let { calculate_disk_usage_internal } = require('../utility/metrics/live/disk-monitor.js');
+        let { calculate_process_usage_internal } = require('../utility/metrics/live/process-monitor.js');
 
         //
         //  Performance thresholds for individual monitoring functions
@@ -214,6 +215,7 @@ suite('Extension Performance Tests', function() {
         let max_cpu_time = 200;
         let max_ram_time = 100;
         let max_disk_time = 300;
+        let max_process_time = 100;
 
         //
         //  Test CPU monitoring performance
@@ -247,5 +249,16 @@ suite('Extension Performance Tests', function() {
 
         console.log(`Disk monitoring: ${disk_time.toFixed(2)}ms`);
         assert.ok(disk_time <= max_disk_time, `Disk monitoring took ${disk_time.toFixed(2)}ms (max: ${max_disk_time}ms)`);
+
+        //
+        //  Test process monitoring performance
+        //
+        let process_start = process.hrtime();
+        await calculate_process_usage_internal();
+        let [process_seconds, process_nanoseconds] = process.hrtime(process_start);
+        let process_time = process_seconds * 1000 + process_nanoseconds / 1000000;
+
+        console.log(`Process monitoring: ${process_time.toFixed(2)}ms`);
+        assert.ok(process_time <= max_process_time, `Process monitoring took ${process_time.toFixed(2)}ms (max: ${max_process_time}ms)`);
     });
 });

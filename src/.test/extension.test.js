@@ -3,7 +3,7 @@ let vscode = require('vscode');
 let os = require('os');
 
 // Import the functions we want to test
-let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, getSwapBlock, calculateSwapUsage, calculateDiskActivity, getDiskActivityBlock } = require('../extension.js');
+let { getSquareForUsage, getRamBlock, calculateRamUsage, getDiskBlock, calculateDiskUsage, getNetworkInBlock, getNetworkOutBlock, calculateNetworkUsage, getSwapBlock, calculateSwapUsage, calculateDiskActivity, getDiskActivityBlock, calculateProcessUsage, getProcessBlock } = require('../extension.js');
 
 suite('Aetherion CPU Monitor Test Suite', function() {
     vscode.window.showInformationMessage('Start all tests.');
@@ -94,6 +94,60 @@ suite('Aetherion CPU Monitor Test Suite', function() {
 
             // Total RAM should be consistent between calls
             assert.strictEqual(ramInfo1.totalGB, ramInfo2.totalGB, 'Total RAM should be consistent');
+        });
+    });
+
+    suite('Process Braille Character Mapping', function() {
+        test('should use same braille patterns as utility function', async function() {
+            // Test that Process and utility use identical braille progression
+            let get_braille_character = require('../utility/get_braille_character.js');
+
+            let testValues = [5, 15, 30, 50, 70, 90];
+            for (let value of testValues) {
+                let processResult = await getProcessBlock(value);
+                let utilityResult = await get_braille_character(value);
+                assert.strictEqual(processResult, utilityResult,
+                    `Process should use same braille as utility for ${value}%`);
+            }
+        });
+
+        test('should handle edge cases correctly', async function() {
+            assert.strictEqual(await getProcessBlock(0), '⡀');
+            assert.strictEqual(await getProcessBlock(100), '⣿');
+        });
+    });
+
+    suite('Process Usage Calculation', function() {
+        test('should return valid process usage data', async function() {
+            let processInfo = await calculateProcessUsage();
+
+            // Validate structure
+            assert.ok(typeof processInfo.usagePercent === 'number', 'usagePercent should be a number');
+            assert.ok(typeof processInfo.currentCount === 'number', 'currentCount should be a number');
+            assert.ok(typeof processInfo.maxCount === 'number', 'maxCount should be a number');
+
+            // Validate ranges
+            assert.ok(processInfo.usagePercent >= 0 && processInfo.usagePercent <= 100, 'usagePercent should be between 0-100');
+            assert.ok(processInfo.currentCount >= 0, 'currentCount should be non-negative');
+            assert.ok(processInfo.maxCount > 0, 'maxCount should be positive');
+            assert.ok(processInfo.currentCount <= processInfo.maxCount, 'currentCount should not exceed maxCount');
+        });
+
+        test('should handle different OS platforms', async function() {
+            let platform = os.platform();
+            let processInfo = await calculateProcessUsage();
+
+            // Should work on any platform
+            assert.ok(processInfo.maxCount > 0, `Should work on ${platform}`);
+            assert.ok(processInfo.currentCount >= 0, `Should provide valid count on ${platform}`);
+        });
+
+        test('should provide consistent max process limit', async function() {
+            let processInfo1 = await calculateProcessUsage();
+            let processInfo2 = await calculateProcessUsage();
+
+            // Max process limit should be consistent between calls
+            assert.strictEqual(processInfo1.maxCount, processInfo2.maxCount, 'Max process limit should be consistent');
         });
     });
 
