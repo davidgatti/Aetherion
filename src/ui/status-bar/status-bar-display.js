@@ -111,7 +111,8 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
         disk_write_activity_braille_character,
         network_in_braille_character,
         network_out_braille_character,
-        swap_braille_character
+        swap_braille_character,
+        process_braille_character
     ] = await Promise.all([
         Promise.all(cpu_braille_promises),
         get_ram_braille_character(ram_usage_info.usage_percent),
@@ -125,7 +126,8 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
         //
         swap_usage_info.swap_enabled ?
             get_swap_braille_character(swap_usage_info.usage_percent) :
-            Promise.resolve('⣛')
+            Promise.resolve('⣛'),
+        get_process_braille_character(process_usage_info.usage_percent)
     ]);
 
     //
@@ -135,9 +137,9 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
 
     //
     //	Build status bar display text - per-core CPU + space + RAM + space +
-    //  Swap (always shown) + space + Disk + space + DiskRead + DiskWrite + space + Network In + Network Out
+    //  Swap (always shown) + space + Disk + space + DiskRead + DiskWrite + space + Network In + Network Out + space + Process
     //
-    let display_text = `${cpu_display_string} ${ram_braille_character} ${swap_braille_character} ${disk_braille_character} ${disk_read_activity_braille_character}${disk_write_activity_braille_character} ${network_in_braille_character}${network_out_braille_character}`;
+    let display_text = `${cpu_display_string} ${ram_braille_character} ${swap_braille_character} ${disk_braille_character} ${disk_read_activity_braille_character}${disk_write_activity_braille_character} ${network_in_braille_character}${network_out_braille_character} ${process_braille_character}`;
 
     //
     //	Update status bar item with new information
@@ -160,7 +162,8 @@ async function update_status_bar_display(status_bar_item, update_tooltip = true,
         let disk_part = `Disk: ${disk_usage_info.usage_percent.toFixed(1)}% used (${disk_usage_info.available_gb.toFixed(1)}GB / ${disk_usage_info.total_gb.toFixed(1)}GB)`;
         let disk_activity_part = `Disk I/O: ${disk_activity_info.activity_description} (${disk_activity_info.total_tps.toFixed(0)} TPS, ${disk_activity_info.mb_per_second.toFixed(1)}MB/s) - Read: ${disk_activity_info.read_tps.toFixed(0)} TPS, Write: ${disk_activity_info.write_tps.toFixed(0)} TPS`;
         let network_part = `Network: ${network_usage_info.interface_name} (${network_usage_info.capacity_mbps}Mbps) - In: ${network_usage_info.network_in_percent.toFixed(1)}% Out: ${network_usage_info.network_out_percent.toFixed(1)}%`;
-        let tooltip_text = `${cpu_part} | ${ram_part} | ${swap_tooltip} | ${disk_part} | ${disk_activity_part} | ${network_part}`;
+        let process_part = `Processes: ${process_usage_info.usage_percent.toFixed(1)}% used (${process_usage_info.current_count} / ${process_usage_info.max_count})`;
+        let tooltip_text = `${cpu_part} | ${ram_part} | ${swap_tooltip} | ${disk_part} | ${disk_activity_part} | ${network_part} | ${process_part}`;
 
         status_bar_item.tooltip = tooltip_text;
     }
