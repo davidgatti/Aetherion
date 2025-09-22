@@ -1,6 +1,11 @@
 let vscode = require('vscode');
 
 //
+//  Track the current panel to prevent multiple instances
+//
+let currentPanel = undefined;
+
+//
 //  Command to open a new webview tab with Hello World content
 //
 async function open_full_tab() {
@@ -8,9 +13,17 @@ async function open_full_tab() {
     try {
 
         //
+        //  If panel already exists, just reveal/focus it
+        //
+        if (currentPanel) {
+            currentPanel.reveal(vscode.ViewColumn.One);
+            return;
+        }
+
+        //
         //  Create a webview panel (custom app-like tab)
         //
-        let panel = vscode.window.createWebviewPanel(
+        currentPanel = vscode.window.createWebviewPanel(
             'helloWorldView', // View type identifier
             'Hello World App', // Title shown in tab
             vscode.ViewColumn.One, // Open in first column
@@ -23,7 +36,14 @@ async function open_full_tab() {
         //
         //  Set the webview HTML content
         //
-        panel.webview.html = getWebviewContent();
+        currentPanel.webview.html = getWebviewContent();
+
+        //
+        //  Handle panel disposal (when user closes the tab)
+        //
+        currentPanel.onDidDispose(() => {
+            currentPanel = undefined;
+        });
 
     } catch (error) {
 
