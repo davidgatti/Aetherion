@@ -62,6 +62,12 @@ class ProcessGraphViewProvider {
                         //
                         this._startLiveUpdates();
                         return;
+                    case 'openFullTab':
+                        //
+                        //  Open a new tab with Hello World
+                        //
+                        await vscode.commands.executeCommand('systemMonitor.openFullTab');
+                        return;
                 }
             },
             undefined,
@@ -276,8 +282,16 @@ class ProcessGraphViewProvider {
                             }
                         }
                     });
-                }
 
+                    //
+                    //  Add click listener to canvas
+                    //
+                    canvas.addEventListener('click', function() {
+                        vscode.postMessage({
+                            command: 'openFullTab'
+                        });
+                    });
+                }
                 //
                 //  Clear Process chart
                 //

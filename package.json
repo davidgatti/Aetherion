@@ -41,6 +41,10 @@
       {
         "command": "sysmag.openSystemPanel",
         "title": "Open System Monitor Panel"
+      },
+      {
+        "command": "systemMonitor.openFullTab",
+        "title": "Open Full Tab with Hello World"
       }
     ],
     "viewsContainers": {

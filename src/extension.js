@@ -22,6 +22,7 @@ let { DiskIOGraphViewProvider } = require('./ui/panel-views/disk-io-graph-view-p
 let { NetworkIOGraphViewProvider } = require('./ui/panel-views/network-io-graph-view-provider.js');
 let { ProcessGraphViewProvider } = require('./ui/panel-views/process-graph-view-provider.js');
 let open_system_panel = require('./commands/open-system-panel.js');
+let { open_full_tab } = require('./commands/open-full-tab.js');
 
 //
 //	Export functions for external access and testing
@@ -360,7 +361,13 @@ function activate(context) {
     //
     let panelDisposable = vscode.commands.registerCommand('sysmag.openSystemPanel', () => open_system_panel(panelProvider));
 
+    //
+    //	Register full tab open command
+    //
+    let fullTabDisposable = vscode.commands.registerCommand('systemMonitor.openFullTab', open_full_tab);
+
     context.subscriptions.push(panelDisposable);
+    context.subscriptions.push(fullTabDisposable);
 }
 
 //
