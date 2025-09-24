@@ -143,7 +143,7 @@ This VS Code extension provides real-time system monitoring through multiple UI 
 - Updates every 2 seconds with real-time data
 - Clickable to open the Panel Area interface
 
-### **Panel Area Interface** 
+### **Panel Area Interface**
 
 - **View Container**: "System Monitor" panel in VS Code's bottom panel area (alongside Terminal, Problems, etc.)
 - **Multiple Views**: 4 tabbed views within the panel container:
@@ -233,10 +233,10 @@ This VS Code extension provides real-time system monitoring through multiple UI 
 
 ### Coding Standards
 
-* Do not use `const` or `var`, just use `let`. `var` is outdated and dangerous, `const` does not do what most people think it does.
-* Do not use arrow functions unless working with classes or it’s strictly necessary to solve a specific problem. Typing less code does not make code better or more efficient, despite common developer beliefs. Arrow functions were designed to solve a specific problem and should be treated as such.
-* Do not use `else` or `else if`; it makes the code harder to read and reason about. Instead, initialize variables with default values and overwrite them later, or use multiple single `if` statements with clear comments explaining what they check. In edge cases, use `&&` or `||`.
-* Write small functions that do one task clearly. Then chain these functions together to form the execution flow of the code. This allows for a clear understanding of what's happening and enables simple diffs showing only one function changed to improve behavior.
+- Do not use `const` or `var`, just use `let`. `var` is outdated and dangerous, `const` does not do what most people think it does.
+- Do not use arrow functions unless working with classes or it’s strictly necessary to solve a specific problem. Typing less code does not make code better or more efficient, despite common developer beliefs. Arrow functions were designed to solve a specific problem and should be treated as such.
+- Do not use `else` or `else if`; it makes the code harder to read and reason about. Instead, initialize variables with default values and overwrite them later, or use multiple single `if` statements with clear comments explaining what they check. In edge cases, use `&&` or `||`.
+- Write small functions that do one task clearly. Then chain these functions together to form the execution flow of the code. This allows for a clear understanding of what's happening and enables simple diffs showing only one function changed to improve behavior.
 
 ## Commenting
 
@@ -260,10 +260,10 @@ Only when both are clean and pass should you consider the job finished.
 
 ## Key Guidelines
 
-* Maintain existing code structure and organization.
-* chagnes has to be small and narrow to allow a clean git diff to see waht actaully changed.
-* Write unit tests for any new functionality.
-* Do not wrtie on your own e2e tests since the team has to decide if it is worth it.
+- Maintain existing code structure and organization.
+- chagnes has to be small and narrow to allow a clean git diff to see waht actaully changed.
+- Write unit tests for any new functionality.
+- Do not wrtie on your own e2e tests since the team has to decide if it is worth it.
 
 ## Performance-First Guidelines for New Metrics
 
@@ -275,6 +275,7 @@ This extension must maintain responsive 2-second status bar updates WITHOUT bloc
 
 - **NEVER use `execSync`** - Always use `exec` with `promisify()` as `execAsync`
 - **Example Pattern**:
+
   ```js
   let { exec } = require('child_process');
   let { promisify } = require('util');
@@ -293,6 +294,7 @@ This extension must maintain responsive 2-second status bar updates WITHOUT bloc
 - **Never use sequential `await` calls** for monitoring functions
 - **Status bar updates must complete under 100ms** (performance test enforced)
 - **Example Integration Pattern**:
+
   ```js
   // ✅ CORRECT - Parallel execution in status-bar-display.js
   let [cpu_data, ram_data, new_metric_data] = await Promise.all([
@@ -318,12 +320,13 @@ This extension must maintain responsive 2-second status bar updates WITHOUT bloc
 - **Verify no blocking behavior** (critical threshold: 100ms max per update)
 
 ### **5. Braille Character Integration**
+
 - **Use existing utility**: Import `get_braille_character` from `src/.utility/`
 - **8-level progression**: Map metric percentages to braille character intensity
 - **Include in parallel braille generation** within status bar display
 - **Maintain display format**: Preserve existing spacing and arrangement
 
-### **6. Panel Integration Guidelines** 
+### **6. Panel Integration Guidelines**
 
 - **Static information only**: Panel should display configuration/details, not real-time metrics
 - **Use StaticSystemInfo utility**: For expensive one-time data collection
@@ -359,61 +362,62 @@ This extension uses VS Code's native webview API with HTML/CSS/JavaScript. NEVER
 
 ### Design Language Requirements
 
-* Use VS Code CSS variables for ALL styling to ensure automatic theme adaptation
-* Follow VS Code's design patterns: card layouts, progress bars, button styles
-* Maintain consistency with VS Code's visual hierarchy and spacing
-* Test against Light, Dark, and High Contrast themes
+- Use VS Code CSS variables for ALL styling to ensure automatic theme adaptation
+- Follow VS Code's design patterns: card layouts, progress bars, button styles
+- Maintain consistency with VS Code's visual hierarchy and spacing
+- Test against Light, Dark, and High Contrast themes
 
 ### Webview Architecture Standards
 
-* Use panel webviews (not sidebar) for dashboard-style interfaces
-* Implement real-time data updates via postMessage communication
-* Structure HTML with semantic markup and accessibility in mind
-* Use CSS Grid for responsive layouts that adapt to panel resizing
+- Use panel webviews (not sidebar) for dashboard-style interfaces
+- Implement real-time data updates via postMessage communication
+- Structure HTML with semantic markup and accessibility in mind
+- Use CSS Grid for responsive layouts that adapt to panel resizing
 
 ### Required VS Code Theming
 
-* Background colors: `var(--vscode-editor-background)`, `var(--vscode-input-background)`
-* Foreground colors: `var(--vscode-editor-foreground)`, `var(--vscode-descriptionForeground)`
-* Interactive elements: `var(--vscode-button-background)`, `var(--vscode-textLink-foreground)`
-* Progress indicators: `var(--vscode-progressBar-background)`, `var(--vscode-progressBar-foreground)`
-* Typography: `var(--vscode-font-family)`, `var(--vscode-font-size)`
+- Background colors: `var(--vscode-editor-background)`, `var(--vscode-input-background)`
+- Foreground colors: `var(--vscode-editor-foreground)`, `var(--vscode-descriptionForeground)`
+- Interactive elements: `var(--vscode-button-background)`, `var(--vscode-textLink-foreground)`
+- Progress indicators: `var(--vscode-progressBar-background)`, `var(--vscode-progressBar-foreground)`
+- Typography: `var(--vscode-font-family)`, `var(--vscode-font-size)`
 
 ### Enhancement Options
 
-* Chart libraries (Chart.js) for historical data visualization
-* CSS animations and transitions for smooth user experience
-* Codicons for VS Code-native iconography
-* Custom CSS components (gauges, sparklines) that follow VS Code design patterns
+- Chart libraries (Chart.js) for historical data visualization
+- CSS animations and transitions for smooth user experience
+- Codicons for VS Code-native iconography
+- Custom CSS components (gauges, sparklines) that follow VS Code design patterns
 
 ### Webview Content Security
 
-* Use proper CSP headers: `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'`
-* Never load external resources without proper security considerations
-* Implement message passing for all extension-webview communication
+- Use proper CSP headers: `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'`
+- Never load external resources without proper security considerations
+- Implement message passing for all extension-webview communication
 
 ## Repository Folder Structure
 
-* **.config**: Centralized configuration files to keep the repository root clean.
-* **.git**: Repository history.
-* **.github**: Configuration for GitHub platform and tools.
-* **.knowledge**: Collection of Markdown files with in-depth explanations about the project and work style.
-* **releases**: Where all the builds go.
-* **src**: All source code organized by function:
-  * **utility**: Shared utility functions and system monitoring modules
-  * **ui**: User interface components (status bar, webview providers)
-  * **commands**: VS Code command implementations
-  * **.test**: Test files and utilities
-  * **test**: Additional test configurations
-  * **utility**: Shared utility functions
+- **.config**: Centralized configuration files to keep the repository root clean.
+- **.git**: Repository history.
+- **.github**: Configuration for GitHub platform and tools.
+- **.knowledge**: Collection of Markdown files with in-depth explanations about the project and work style.
+- **releases**: Where all the builds go.
+- **src**: All source code organized by function:
+  - **utility**: Shared utility functions and system monitoring modules
+  - **ui**: User interface components (status bar, webview providers)
+  - **commands**: VS Code command implementations
+  - **.test**: Test files and utilities
+  - **test**: Additional test configurations
+  - **utility**: Shared utility functions
 
 ## Extension Development Patterns
 
 ### **File Naming Convention**
 
 Uses Hierarchical Prefix Naming for logical grouping:
+
 - **Pattern**: `{category}-{subcategory}-{specific-function}`
-- **Examples**: 
+- **Examples**:
   - `cpu-monitor.js` (utility category, metrics subcategory)
   - `system-monitor-view-provider.js` (UI category, panel-views subcategory)
   - `open-system-panel.js` (commands category, panel subcategory)
@@ -467,13 +471,13 @@ When discussing the extension architecture, use these precise VS Code API terms:
 
 ## What to do when
 
-* you find problems with the code not related to the task at hand? You do nothing about them, you just update the TODO.md file where you mention the problem, and the team will decide if this finding is worth doing.
+- you find problems with the code not related to the task at hand? You do nothing about them, you just update the TODO.md file where you mention the problem, and the team will decide if this finding is worth doing.
 
 ## How to write tests
 
-* Write the code
-* Then write the test
-* Then break the code
-* Re-Run the test, and see if the test detect the problem
+- Write the code
+- Then write the test
+- Then break the code
+- Re-Run the test, and see if the test detect the problem
 
 Iterate until all the breakage cases are detected. Only then you can truly know that the tests are useful.

@@ -15,7 +15,7 @@ let currentPanel = undefined;
 async function analyzeSystemLoad() {
     let samples = [];
     let processAverages = new Map();
-    
+
     //
     //  Take 3 samples over 6 seconds (every 2 seconds) to reduce CPU impact
     //
@@ -23,7 +23,7 @@ async function analyzeSystemLoad() {
         try {
             let { stdout } = await execAsync('ps -eo pid,user,%cpu,%mem,comm,cmd --no-headers');
             let lines = stdout.trim().split('\n');
-            
+
             for (let line of lines) {
                 let trimmed = line.trim();
                 if (trimmed) {
@@ -35,14 +35,14 @@ async function analyzeSystemLoad() {
                         let mem = parseFloat(parts[3]);
                         let comm = parts[4];
                         let cmd = parts.slice(5).join(' ');
-                        
+
                         //
                         //  Skip our own ps processes to avoid the observer effect
                         //
                         if (cmd.includes('ps -eo') || comm === 'ps') {
                             continue;
                         }
-                        
+
                         //
                         //  Track average CPU usage per process
                         //
@@ -56,35 +56,35 @@ async function analyzeSystemLoad() {
                                 memSamples: []
                             });
                         }
-                        
+
                         processAverages.get(pid).cpuSamples.push(cpu);
                         processAverages.get(pid).memSamples.push(mem);
                     }
                 }
             }
-            
+
             //
             //  Wait 2 seconds between samples (except for last sample)
             //
             if (i < 2) {
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
-            
+
         } catch (error) {
             console.error('Error sampling processes:', error);
         }
     }
-    
+
     //
     //  Calculate averages and prepare results
     //
     let analyzedProcesses = [];
-    
+
     for (let [pid, data] of processAverages) {
         if (data.cpuSamples.length > 0) {
             let avgCpu = data.cpuSamples.reduce((a, b) => a + b, 0) / data.cpuSamples.length;
             let avgMem = data.memSamples.reduce((a, b) => a + b, 0) / data.memSamples.length;
-            
+
             //
             //  Only include processes with meaningful CPU usage (> 0.1%)
             //
@@ -100,12 +100,12 @@ async function analyzeSystemLoad() {
             }
         }
     }
-    
+
     //
     //  Sort by CPU usage (highest first)
     //
     analyzedProcesses.sort((a, b) => parseFloat(b.cpu) - parseFloat(a.cpu));
-    
+
     return analyzedProcesses;
 }
 async function fetchProcessList() {
@@ -114,13 +114,13 @@ async function fetchProcessList() {
         //  Execute ps command to get comprehensive process info including CPU and memory
         //
         let { stdout } = await execAsync('ps -eo pid,ppid,user,%cpu,%mem,comm,lstart,cmd --no-headers');
-        
+
         //
         //  Parse the output into array of objects
         //
         let processes = [];
         let lines = stdout.trim().split('\n');
-        
+
         for (let line of lines) {
             let trimmed = line.trim();
             if (trimmed) {
@@ -136,17 +136,17 @@ async function fetchProcessList() {
                     let cpu = parts[3];
                     let mem = parts[4];
                     let comm = parts[5];
-                    
+
                     //
                     //  LSTART is the next 5 parts: Day Mon DD HH:MM:SS YYYY
                     //
                     let lstart = parts.slice(6, 11).join(' ');
-                    
+
                     //
                     //  CMD is everything after LSTART
                     //
                     let cmd = parts.slice(11).join(' ');
-                    
+
                     //
                     //  Generate context without expensive working directory lookup for now
                     //  (we can add working directory later if needed for better context)
@@ -165,9 +165,9 @@ async function fetchProcessList() {
                 }
             }
         }
-        
+
         return processes;
-        
+
     } catch (error) {
         console.error('Error fetching process list:', error);
         return [];
@@ -193,8 +193,8 @@ async function open_full_tab() {
         //  Create a webview panel (custom app-like tab)
         //
         currentPanel = vscode.window.createWebviewPanel(
-            'helloWorldView', // View type identifier
-            'Hello World App', // Title shown in tab
+            'processMonitorView', // View type identifier
+            'Process Monitor', // Title shown in tab
             vscode.ViewColumn.One, // Open in first column
             {
                 enableScripts: true, // Allow JavaScript

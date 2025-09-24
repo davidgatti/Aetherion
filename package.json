@@ -29,6 +29,10 @@
   "engines": {
     "vscode": "^1.103.0"
   },
+  "os": [
+    "linux",
+    "darwin"
+  ],
   "categories": [
     "Other"
   ],
