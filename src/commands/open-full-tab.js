@@ -323,6 +323,11 @@ function getWebviewContent() {
                 border-bottom: 1px solid var(--vscode-input-border);
             }
             
+            /* Remove border from main process rows */
+            tr.process-main td {
+                border-bottom: none;
+            }
+            
             th {
                 background-color: var(--vscode-sideBar-background);
                 color: var(--vscode-textLink-foreground);
@@ -333,6 +338,41 @@ function getWebviewContent() {
             
             tr:hover {
                 background-color: var(--vscode-list-hoverBackground);
+            }
+            
+            tr.process-main {
+                border-bottom: none; /* Remove border between main and command row */
+            }
+            
+            tr.process-main.even {
+                background-color: var(--vscode-editor-background);
+            }
+            
+            tr.process-main.odd {
+                background-color: var(--vscode-sideBar-background);
+            }
+            
+            tr.command-row {
+                font-size: 0.9em;
+            }
+            
+            tr.command-row.even {
+                background-color: var(--vscode-editor-background);
+            }
+            
+            tr.command-row.odd {
+                background-color: var(--vscode-sideBar-background);
+            }
+            
+            tr.command-row td {
+                padding: 4px 12px 8px 20px; /* Extra left padding for indentation */
+                border-bottom: 2px solid var(--vscode-input-border);
+            }
+            
+            /* Grouped hover effect */
+            tr.process-main.hover-group,
+            tr.command-row.hover-group {
+                background-color: var(--vscode-list-hoverBackground) !important;
             }
             
             .nr-column {
@@ -399,7 +439,7 @@ function getWebviewContent() {
                     <th class="user-column">User</th>
                     <th class="cpu-column">CPU%</th>
                     <th class="memory-column">MEM%</th>
-                    <th class="context-column">Command</th>
+                    <th class="context-column">Process</th>
                 </tr>
             </thead>
             <tbody id="processTableBody">
@@ -461,26 +501,76 @@ function getWebviewContent() {
                 tableBody.innerHTML = '';
                 
                 //
-                //  Add rows for each process with sequential numbering
+                //  Add rows for each process - two rows per process with grouping
                 //
                 processes.forEach((process, index) => {
-                    let row = document.createElement('tr');
-                    row.innerHTML = \`
+                    let groupClass = index % 2 === 0 ? 'even' : 'odd';
+                    let processId = \`process-\${index}\`;
+                    
+                    //
+                    //  First row: Basic process info
+                    //
+                    let mainRow = document.createElement('tr');
+                    mainRow.className = \`process-main \${groupClass}\`;
+                    mainRow.setAttribute('data-process-group', processId);
+                    mainRow.innerHTML = \`
                         <td class="nr-column">\${index + 1}</td>
                         <td class="pid-column">\${process.pid}</td>
                         <td class="user-column">\${process.user}</td>
                         <td class="cpu-column">\${process.cpu}</td>
                         <td class="memory-column">\${process.memory}</td>
-                        <td class="context-column">\${process.fullCommand}</td>
+                        <td class="context-column">\${process.name}</td>
                     \`;
-                    tableBody.appendChild(row);
+                    tableBody.appendChild(mainRow);
+                    
+                    //
+                    //  Second row: Full command (spans most columns)
+                    //
+                    let commandRow = document.createElement('tr');
+                    commandRow.className = \`command-row \${groupClass}\`;
+                    commandRow.setAttribute('data-process-group', processId);
+                    commandRow.innerHTML = \`
+                        <td></td>
+                        <td colspan="5" style="font-family: monospace; color: var(--vscode-textPreformat-foreground); word-break: break-all;">↳ \${process.fullCommand}</td>
+                    \`;
+                    tableBody.appendChild(commandRow);
                 });
+                
+                //
+                //  Add grouped hover effects
+                //
+                addGroupedHoverEffects();
                 
                 //
                 //  Hide loading, show table
                 //
                 loading.style.display = 'none';
                 table.style.display = 'table';
+            }
+            
+            //
+            //  Add grouped hover effects to link process rows
+            //
+            function addGroupedHoverEffects() {
+                let allRows = document.querySelectorAll('tr[data-process-group]');
+                
+                allRows.forEach(row => {
+                    row.addEventListener('mouseenter', function() {
+                        let groupId = this.getAttribute('data-process-group');
+                        let groupRows = document.querySelectorAll(\`tr[data-process-group="\${groupId}"]\`);
+                        groupRows.forEach(groupRow => {
+                            groupRow.classList.add('hover-group');
+                        });
+                    });
+                    
+                    row.addEventListener('mouseleave', function() {
+                        let groupId = this.getAttribute('data-process-group');
+                        let groupRows = document.querySelectorAll(\`tr[data-process-group="\${groupId}"]\`);
+                        groupRows.forEach(groupRow => {
+                            groupRow.classList.remove('hover-group');
+                        });
+                    });
+                });
             }
         </script>
     </body>
