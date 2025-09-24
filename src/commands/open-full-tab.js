@@ -220,23 +220,8 @@ function getWebviewContent() {
                 color: var(--vscode-editor-foreground);
                 background-color: var(--vscode-editor-background);
                 margin: 0;
-                padding: 20px;
+                padding: 0;
                 box-sizing: border-box;
-            }
-            
-            .container {
-                max-width: 100%;
-                background-color: var(--vscode-sideBar-background);
-                border: 1px solid var(--vscode-input-border);
-                border-radius: 4px;
-                padding: 20px;
-            }
-            
-            h1 {
-                color: var(--vscode-textLink-foreground);
-                font-size: 1.5em;
-                margin-bottom: 20px;
-                margin-top: 0;
             }
             
             .loading {
@@ -308,23 +293,20 @@ function getWebviewContent() {
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1>System Processes</h1>
-            <div id="loading" class="loading">Loading processes...</div>
-            <table id="processTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th class="nr-column">NR</th>
-                        <th class="pid-column">PID</th>
-                        <th class="user-column">User</th>
-                        <th class="runtime-column">Runtime</th>
-                        <th class="context-column">Context</th>
-                    </tr>
-                </thead>
-                <tbody id="processTableBody">
-                </tbody>
-            </table>
-        </div>
+        <div id="loading" class="loading">Loading processes...</div>
+        <table id="processTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th class="nr-column">NR</th>
+                    <th class="pid-column">PID</th>
+                    <th class="user-column">User</th>
+                    <th class="runtime-column">Runtime</th>
+                    <th class="context-column">Context</th>
+                </tr>
+            </thead>
+            <tbody id="processTableBody">
+            </tbody>
+        </table>
         
         <script>
             const vscode = acquireVsCodeApi();
@@ -358,17 +340,11 @@ function getWebviewContent() {
                 let tableBody = document.getElementById('processTableBody');
                 let loading = document.getElementById('loading');
                 let table = document.getElementById('processTable');
-                let title = document.querySelector('h1');
                 
                 //
                 //  Clear existing content
                 //
                 tableBody.innerHTML = '';
-                
-                //
-                //  Update title to show process count
-                //
-                title.textContent = \`System Processes (\${processes.length} active)\`;
                 
                 //
                 //  Add rows for each process with sequential numbering
