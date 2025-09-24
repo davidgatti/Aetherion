@@ -89,7 +89,7 @@ async function fetchProcessList() {
         //
         //  Execute ps command to get comprehensive process info
         //
-        let { stdout } = await execAsync('ps -eo pid,ppid,user,comm,etime,cmd --no-headers');
+        let { stdout } = await execAsync('ps -eo pid,ppid,user,comm,lstart,cmd --no-headers');
         
         //
         //  Parse the output into array of objects
@@ -101,11 +101,25 @@ async function fetchProcessList() {
             let trimmed = line.trim();
             if (trimmed) {
                 //
-                //  Parse ps output: PID PPID USER COMM ETIME CMD...
+                //  Parse ps output: PID PPID USER COMM LSTART CMD...
+                //  LSTART format: "Day Mon DD HH:MM:SS YYYY" (24 chars + space before CMD)
                 //
-                let match = trimmed.match(/^(\d+)\s+(\d+)\s+(\S+)\s+(\S+)\s+([^\s]+)\s+(.*)$/);
-                if (match) {
-                    let [, pid, ppid, user, comm, etime, cmd] = match;
+                let parts = trimmed.split(/\s+/);
+                if (parts.length >= 9) {
+                    let pid = parts[0];
+                    let ppid = parts[1];
+                    let user = parts[2];
+                    let comm = parts[3];
+                    
+                    //
+                    //  LSTART is the next 5 parts: Day Mon DD HH:MM:SS YYYY
+                    //
+                    let lstart = parts.slice(4, 9).join(' ');
+                    
+                    //
+                    //  CMD is everything after LSTART
+                    //
+                    let cmd = parts.slice(9).join(' ');
                     
                     //
                     //  Generate context without expensive working directory lookup for now
@@ -116,7 +130,7 @@ async function fetchProcessList() {
                         ppid: ppid,
                         user: user,
                         name: comm,
-                        runtime: etime,
+                        runtime: lstart.trim(),
                         fullCommand: cmd,
                         workingDir: 'unknown', // Skip expensive lookup for now
                         context: detectProcessContext(cmd, comm, 'unknown')
@@ -275,10 +289,10 @@ function getWebviewContent() {
             }
             
             .runtime-column {
-                width: 90px;
+                width: 200px;
                 font-family: monospace;
                 color: var(--vscode-textPreformat-foreground);
-                text-align: right;
+                text-align: left;
             }
             
             .context-column {
@@ -300,7 +314,7 @@ function getWebviewContent() {
                     <th class="nr-column">NR</th>
                     <th class="pid-column">PID</th>
                     <th class="user-column">User</th>
-                    <th class="runtime-column">Runtime</th>
+                    <th class="runtime-column">Started</th>
                     <th class="context-column">Context</th>
                 </tr>
             </thead>
