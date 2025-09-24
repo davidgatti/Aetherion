@@ -10,78 +10,6 @@ let execAsync = promisify(exec);
 let currentPanel = undefined;
 
 //
-//  Generic heuristic-based context detection for processes
-//
-function detectProcessContext(fullCommand, processName, workingDir) {
-    
-    //
-    //  Extract script filename from command (any language)
-    //
-    let scriptMatch = fullCommand.match(/([^\/\s]*\.(js|py|sh|jar|exe|rb|php|go|cpp|java))(\s|$)/i);
-    if (scriptMatch) {
-        let scriptName = scriptMatch[1];
-        let projectMatch = workingDir.match(/\/([^\/]+)$/);
-        if (projectMatch && projectMatch[1] !== 'home' && projectMatch[1] !== processName) {
-            return `${processName}: ${scriptName} (${projectMatch[1]})`;
-        }
-        return `${processName}: ${scriptName}`;
-    }
-    
-    //
-    //  Extract project context from working directory
-    //
-    if (workingDir && workingDir !== 'unknown') {
-        let projectMatch = workingDir.match(/\/([^\/]+)$/);
-        if (projectMatch && projectMatch[1] !== 'home' && projectMatch[1] !== processName) {
-            return `${processName} (${projectMatch[1]})`;
-        }
-    }
-    
-    //
-    //  Detect server processes by port or server keywords
-    //
-    if (fullCommand.includes('--port=') || fullCommand.includes('-p ')) {
-        let portMatch = fullCommand.match(/(?:--port=|-p\s+)(\d+)/);
-        if (portMatch) {
-            return `${processName} Server :${portMatch[1]}`;
-        }
-        return `${processName} Server`;
-    }
-    
-    //
-    //  Detect common process types by arguments
-    //
-    if (fullCommand.toLowerCase().includes('server')) return `${processName} Server`;
-    if (fullCommand.toLowerCase().includes('build')) return `${processName} Build Tool`;
-    if (fullCommand.toLowerCase().includes('test')) return `${processName} Test Runner`;
-    if (fullCommand.toLowerCase().includes('webpack')) return `${processName} (Webpack)`;
-    if (fullCommand.toLowerCase().includes('jest')) return `${processName} (Jest)`;
-    
-    //
-    //  Extract meaningful directory path context
-    //
-    let pathMatches = fullCommand.match(/\/([^\/\s]{3,15})\//g);
-    if (pathMatches && pathMatches.length > 0) {
-        let meaningfulPath = pathMatches[pathMatches.length - 1].replace(/\//g, '');
-        if (meaningfulPath !== processName && meaningfulPath !== 'bin' && meaningfulPath !== 'usr') {
-            return `${processName} (${meaningfulPath})`;
-        }
-    }
-    
-    //
-    //  Detect system processes
-    //
-    if (fullCommand.startsWith('/usr/lib/systemd/')) return 'System Service';
-    if (fullCommand.includes('gnome-')) return 'GNOME Desktop';
-    if (fullCommand.includes('/sbin/')) return 'System Binary';
-    
-    //
-    //  Fallback to original process name
-    //
-    return processName;
-}
-
-//
 //  Fetch process list from system
 //
 async function fetchProcessList() {
@@ -132,8 +60,7 @@ async function fetchProcessList() {
                         name: comm,
                         runtime: lstart.trim(),
                         fullCommand: cmd,
-                        workingDir: 'unknown', // Skip expensive lookup for now
-                        context: detectProcessContext(cmd, comm, 'unknown')
+                        workingDir: 'unknown' // Skip expensive lookup for now
                     });
                 }
             }
@@ -315,7 +242,7 @@ function getWebviewContent() {
                     <th class="pid-column">PID</th>
                     <th class="user-column">User</th>
                     <th class="runtime-column">Started</th>
-                    <th class="context-column">Context</th>
+                    <th class="context-column">Command</th>
                 </tr>
             </thead>
             <tbody id="processTableBody">
@@ -370,7 +297,7 @@ function getWebviewContent() {
                         <td class="pid-column">\${process.pid}</td>
                         <td class="user-column">\${process.user}</td>
                         <td class="runtime-column">\${process.runtime}</td>
-                        <td class="context-column">\${process.context}</td>
+                        <td class="context-column">\${process.fullCommand}</td>
                     \`;
                     tableBody.appendChild(row);
                 });
