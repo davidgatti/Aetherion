@@ -10,8 +10,104 @@ let execAsync = promisify(exec);
 let currentPanel = undefined;
 
 //
-//  Fetch process list from system
+//  Analyze system load by sampling processes over time
 //
+async function analyzeSystemLoad() {
+    let samples = [];
+    let processAverages = new Map();
+    
+    //
+    //  Take 3 samples over 6 seconds (every 2 seconds) to reduce CPU impact
+    //
+    for (let i = 0; i < 3; i++) {
+        try {
+            let { stdout } = await execAsync('ps -eo pid,user,%cpu,%mem,comm,cmd --no-headers');
+            let lines = stdout.trim().split('\n');
+            
+            for (let line of lines) {
+                let trimmed = line.trim();
+                if (trimmed) {
+                    let parts = trimmed.split(/\s+/);
+                    if (parts.length >= 6) {
+                        let pid = parts[0];
+                        let user = parts[1];
+                        let cpu = parseFloat(parts[2]);
+                        let mem = parseFloat(parts[3]);
+                        let comm = parts[4];
+                        let cmd = parts.slice(5).join(' ');
+                        
+                        //
+                        //  Skip our own ps processes to avoid the observer effect
+                        //
+                        if (cmd.includes('ps -eo') || comm === 'ps') {
+                            continue;
+                        }
+                        
+                        //
+                        //  Track average CPU usage per process
+                        //
+                        if (!processAverages.has(pid)) {
+                            processAverages.set(pid, {
+                                pid: pid,
+                                user: user,
+                                comm: comm,
+                                cmd: cmd,
+                                cpuSamples: [],
+                                memSamples: []
+                            });
+                        }
+                        
+                        processAverages.get(pid).cpuSamples.push(cpu);
+                        processAverages.get(pid).memSamples.push(mem);
+                    }
+                }
+            }
+            
+            //
+            //  Wait 2 seconds between samples (except for last sample)
+            //
+            if (i < 2) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+        } catch (error) {
+            console.error('Error sampling processes:', error);
+        }
+    }
+    
+    //
+    //  Calculate averages and prepare results
+    //
+    let analyzedProcesses = [];
+    
+    for (let [pid, data] of processAverages) {
+        if (data.cpuSamples.length > 0) {
+            let avgCpu = data.cpuSamples.reduce((a, b) => a + b, 0) / data.cpuSamples.length;
+            let avgMem = data.memSamples.reduce((a, b) => a + b, 0) / data.memSamples.length;
+            
+            //
+            //  Only include processes with meaningful CPU usage (> 0.1%)
+            //
+            if (avgCpu > 0.1) {
+                analyzedProcesses.push({
+                    pid: data.pid,
+                    user: data.user,
+                    cpu: avgCpu.toFixed(1),
+                    memory: avgMem.toFixed(1),
+                    name: data.comm,
+                    fullCommand: data.cmd
+                });
+            }
+        }
+    }
+    
+    //
+    //  Sort by CPU usage (highest first)
+    //
+    analyzedProcesses.sort((a, b) => parseFloat(b.cpu) - parseFloat(a.cpu));
+    
+    return analyzedProcesses;
+}
 async function fetchProcessList() {
     try {
         //
@@ -127,6 +223,19 @@ async function open_full_tab() {
                             processes: processes
                         });
                         break;
+                    case 'analyzeLoad':
+                        //
+                        //  Analyze system load over 5 seconds
+                        //
+                        currentPanel.webview.postMessage({
+                            command: 'analysisStarted'
+                        });
+                        let analyzedProcesses = await analyzeSystemLoad();
+                        currentPanel.webview.postMessage({
+                            command: 'analysisComplete',
+                            processes: analyzedProcesses
+                        });
+                        break;
                 }
             }
         );
@@ -173,6 +282,32 @@ function getWebviewContent() {
                 text-align: center;
                 padding: 40px;
                 color: var(--vscode-descriptionForeground);
+            }
+            
+            .controls {
+                padding: 20px 0;
+                text-align: center;
+            }
+            
+            .analyze-button {
+                background-color: var(--vscode-button-background);
+                color: var(--vscode-button-foreground);
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: var(--vscode-font-family);
+                font-size: var(--vscode-font-size);
+            }
+            
+            .analyze-button:hover {
+                background-color: var(--vscode-button-hoverBackground);
+            }
+            
+            .analyze-button:disabled {
+                background-color: var(--vscode-button-secondaryBackground);
+                color: var(--vscode-button-secondaryForeground);
+                cursor: not-allowed;
             }
             
             table {
@@ -252,7 +387,10 @@ function getWebviewContent() {
         </style>
     </head>
     <body>
-        <div id="loading" class="loading">Loading processes...</div>
+        <div class="controls">
+            <button id="analyzeButton" class="analyze-button">Analyze Load (6 sec sample)</button>
+        </div>
+        <div id="loading" class="loading">Click "Analyze Load" to sample system processes...</div>
         <table id="processTable" style="display: none;">
             <thead>
                 <tr>
@@ -261,7 +399,6 @@ function getWebviewContent() {
                     <th class="user-column">User</th>
                     <th class="cpu-column">CPU%</th>
                     <th class="memory-column">MEM%</th>
-                    <th class="runtime-column">Started</th>
                     <th class="context-column">Command</th>
                 </tr>
             </thead>
@@ -273,11 +410,13 @@ function getWebviewContent() {
             const vscode = acquireVsCodeApi();
             
             //
-            //  Request process data when page loads
+            //  Set up button click handler
             //
             window.addEventListener('DOMContentLoaded', function() {
-                vscode.postMessage({
-                    command: 'loadProcesses'
+                document.getElementById('analyzeButton').addEventListener('click', function() {
+                    vscode.postMessage({
+                        command: 'analyzeLoad'
+                    });
                 });
             });
             
@@ -289,7 +428,21 @@ function getWebviewContent() {
                 
                 switch (message.command) {
                     case 'processData':
-                        populateProcessTable(message.processes);
+                        populateProcessTable(message.processes, 'Instant Snapshot');
+                        break;
+                    case 'analysisStarted':
+                        let loading = document.getElementById('loading');
+                        let button = document.getElementById('analyzeButton');
+                        loading.textContent = 'Analyzing system load... (sampling for 6 seconds)';
+                        loading.style.display = 'block';
+                        button.disabled = true;
+                        button.textContent = 'Analyzing...';
+                        document.getElementById('processTable').style.display = 'none';
+                        break;
+                    case 'analysisComplete':
+                        populateProcessTable(message.processes, 'Load Analysis Results (6s avg, sorted by CPU)');
+                        document.getElementById('analyzeButton').disabled = false;
+                        document.getElementById('analyzeButton').textContent = 'Analyze Load (6 sec sample)';
                         break;
                 }
             });
@@ -297,7 +450,7 @@ function getWebviewContent() {
             //
             //  Populate the process table with data
             //
-            function populateProcessTable(processes) {
+            function populateProcessTable(processes, title) {
                 let tableBody = document.getElementById('processTableBody');
                 let loading = document.getElementById('loading');
                 let table = document.getElementById('processTable');
@@ -318,7 +471,6 @@ function getWebviewContent() {
                         <td class="user-column">\${process.user}</td>
                         <td class="cpu-column">\${process.cpu}</td>
                         <td class="memory-column">\${process.memory}</td>
-                        <td class="runtime-column">\${process.runtime}</td>
                         <td class="context-column">\${process.fullCommand}</td>
                     \`;
                     tableBody.appendChild(row);
