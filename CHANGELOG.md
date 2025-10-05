@@ -5,6 +5,36 @@ All notable changes to the "Aetherion CPU Monitor" extension will be documented 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-10-05
+
+### ✨ New Features
+
+- **Process Monitoring & Analysis**: Complete new process/task monitoring system
+  - **Full Tab View**: New dedicated webview tab displaying detailed process information
+  - **Process Table**: Shows PID, name, CPU%, memory usage, runtime, and full command path
+  - **Grouped Display**: Parent/child process relationships with hover effects
+  - **System Load Analysis**: Intelligent process sampling and analysis
+  - **Live Graph**: Real-time process visualization in panel area
+  - **Status Bar Integration**: Process count and top CPU consumer tooltip
+
+### 🎨 UI Improvements
+
+- **Cleaner Process Display**: Removed arrow character prefix from full command paths for improved readability
+- **Enhanced Table Layout**: Grouped rows with visual hierarchy for process relationships
+- **Improved Webview Structure**: Streamlined content layout
+
+### 🧪 Testing
+
+- Comprehensive test coverage for process monitoring functionality
+- Process webview interaction tests
+- Cross-platform process fetching validation
+
+### 🔧 Technical Improvements
+
+- New `process-monitor.js` utility for cross-platform process data collection
+- New `open-full-tab.js` command for dedicated process analysis view
+- Enhanced status bar with process information display
+
 ## [2.2.1] - 2025-09-19
 
 ### 🐛 Bug Fixes

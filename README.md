@@ -9,8 +9,9 @@ When developing on **remote hosts via SSH or cloud environments**, you lose acce
 ## ✨ Features
 
 - **Real-time status bar monitoring** - Animated braille characters update every 200ms for ultra-smooth performance feedback
-- **Live graph visualizations** - 6 dedicated Panel Area views with real-time charts for detailed analysis
-- **Multi-metric monitoring** - CPU, RAM, swap, disk space, disk I/O, and network traffic visualization
+- **Process monitoring & analysis** - Dedicated tab showing detailed process/task information with CPU, memory, and runtime metrics
+- **Live graph visualizations** - 7 dedicated Panel Area views with real-time charts for detailed analysis
+- **Multi-metric monitoring** - CPU, RAM, swap, disk space, disk I/O, network traffic, and process visualization
 - **Panel Area integration** - Bottom panel with tabbed views alongside Terminal, Problems, etc.
 - **Braille character animation** - Progressive visual indicators for different usage levels
 - **Static system information** - Platform, architecture, CPU details, and uptime display
@@ -54,7 +55,7 @@ Aetherion uses progressive braille characters in the status bar to show system u
 
 ### System Monitor Panel Area
 
-Click the status bar to open the dedicated **System Monitor** Panel Area (bottom panel) featuring 6 tabbed views:
+Click the status bar to open the dedicated **System Monitor** Panel Area (bottom panel) featuring 8 tabbed views:
 
 1. **System Monitor** - Static system information and overview dashboard
 2. **CPU Live Graph** - Real-time per-core CPU usage visualization  
@@ -63,8 +64,19 @@ Click the status bar to open the dedicated **System Monitor** Panel Area (bottom
 5. **Disk Space Live Graph** - Real-time disk usage visualization
 6. **Disk I/O Mirror Graph** - Live disk read/write activity monitoring  
 7. **Network I/O Mirror Graph** - Real-time network traffic in/out visualization
+8. **Process Monitor** - Detailed process/task analysis with CPU, memory, runtime, and full command information
 
 **Panel Area Integration:** All views are located in VS Code's bottom Panel Area alongside Terminal, Problems, and Output panels, providing easy access without disrupting your workflow.
+
+### Process Monitoring
+
+The new **Process Monitor** tab provides comprehensive process analysis:
+
+- **Process Table**: Displays PID, process name, CPU percentage, memory usage, runtime, and full command path
+- **Grouped Display**: Shows parent/child process relationships with visual hierarchy
+- **System Load Analysis**: Intelligent sampling to identify resource-intensive processes
+- **Live Updates**: Real-time process information and resource consumption
+- **Status Bar Tooltip**: Hover over status bar to see process count and top CPU consumer
 
 ## 🚀 Perfect For
 
