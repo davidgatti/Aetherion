@@ -13,7 +13,6 @@ let currentPanel = undefined;
 //  Analyze system load by sampling processes over time
 //
 async function analyzeSystemLoad() {
-    let samples = [];
     let processAverages = new Map();
 
     //
@@ -80,7 +79,7 @@ async function analyzeSystemLoad() {
     //
     let analyzedProcesses = [];
 
-    for (let [pid, data] of processAverages) {
+    for (let [, data] of processAverages) {
         if (data.cpuSamples.length > 0) {
             let avgCpu = data.cpuSamples.reduce((a, b) => a + b, 0) / data.cpuSamples.length;
             let avgMem = data.memSamples.reduce((a, b) => a + b, 0) / data.memSamples.length;
@@ -531,7 +530,7 @@ function getWebviewContent() {
                     commandRow.setAttribute('data-process-group', processId);
                     commandRow.innerHTML = \`
                         <td></td>
-                        <td colspan="5" style="font-family: monospace; color: var(--vscode-textPreformat-foreground); word-break: break-all;">↳ \${process.fullCommand}</td>
+                        <td colspan="5" style="font-family: monospace; color: var(--vscode-textPreformat-foreground); word-break: break-all;">\${process.fullCommand}</td>
                     \`;
                     tableBody.appendChild(commandRow);
                 });

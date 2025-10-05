@@ -6,9 +6,9 @@ let { promisify } = require('util');
 let execAsync = promisify(exec);
 
 //
-//  Import the functions we want to test
+//  Import the functions we want to test (for future use)
 //
-let { open_full_tab } = require('../commands/open-full-tab.js');
+// let { open_full_tab } = require('../commands/open-full-tab.js');
 
 suite('Process Monitor View Tests', function() {
 
@@ -134,7 +134,7 @@ suite('Process Monitor View Tests', function() {
             let processAverages = new Map();
             let analyzedProcesses = [];
 
-            for (let [pid, data] of processAverages) {
+            for (let [,] of processAverages) {
                 //
                 //  This loop should not execute for empty map
                 //

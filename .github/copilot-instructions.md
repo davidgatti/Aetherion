@@ -124,9 +124,9 @@ Use Hierarchical Prefix Naming, a file naming convention that uses category-subc
 
 ### Tools
 
-**Quikc check the changes**
+## Quick check the changes
 
-See the chagnes withouth the need for rbuilding
+See the changes without the need for rebuilding
 
 ```shell
 code --extensionDevelopmentPath=. --new-window

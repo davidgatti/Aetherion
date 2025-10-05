@@ -9,9 +9,9 @@ suite('Process Monitor Webview Tests', function() {
 
         test('should generate valid HTML structure', function() {
             //
-            //  Import the HTML generation function
+            //  Import the HTML generation function (for future use)
             //
-            let { open_full_tab } = require('../commands/open-full-tab.js');
+            // let { open_full_tab } = require('../commands/open-full-tab.js');
 
             //
             //  Get the webview content (we can't easily extract getWebviewContent,
@@ -150,6 +150,7 @@ suite('Process Monitor Webview Tests', function() {
                 analyzing: 'Analyzing...',
                 complete: 'Analyze Load (6 sec sample)'
             };
+            console.log('Button states defined:', buttonStates);
 
             //
             //  Simulate button state transitions
@@ -399,7 +400,8 @@ suite('Process Monitor Webview Tests', function() {
             let startTime = Date.now();
             let renderedRows = 0;
 
-            for (let process of largeProcessList) {
+            for (let item of largeProcessList) {
+                console.log('Processing item:', item.name);
                 renderedRows += 2; // Two rows per process
             }
 
